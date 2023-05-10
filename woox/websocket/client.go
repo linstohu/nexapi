@@ -53,11 +53,8 @@ type WooXStreamCfg struct {
 	Logger *log.Logger
 }
 
-func NewWooXClient(cfg *WooXStreamCfg) (*WooXStreamClient, error) {
-	validator := validator.New()
-
-	err := validator.Struct(cfg)
-	if err != nil {
+func NewWooXClient(ctx context.Context, cfg *WooXStreamCfg) (*WooXStreamClient, error) {
+	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +66,7 @@ func NewWooXClient(cfg *WooXStreamCfg) (*WooXStreamClient, error) {
 		debug:         cfg.Debug,
 		logger:        cfg.Logger,
 
-		ctx:           context.Background(),
+		ctx:           ctx,
 		autoReconnect: true,
 
 		subscriptions: make([]string, 0),
@@ -80,7 +77,7 @@ func NewWooXClient(cfg *WooXStreamCfg) (*WooXStreamClient, error) {
 		cli.logger = log.Default()
 	}
 
-	err = cli.start()
+	err := cli.start()
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +145,13 @@ func (w *WooXStreamClient) reconnect() {
 
 	time.Sleep(1 * time.Second)
 
-	w.start()
+	select {
+	case <-w.ctx.Done():
+		w.logger.Printf("woox never reconnect, %s", w.ctx.Err())
+		return
+	default:
+		w.start()
+	}
 }
 
 // close closes the websocket connection
@@ -160,7 +163,7 @@ func (w *WooXStreamClient) close(cause error) error {
 		return err
 	}
 
-	w.logger.Printf("woox websocket connection closed, reason: %s", cause.Error())
+	w.logger.Printf("woox websocket connection closed, %s", cause.Error())
 
 	return nil
 }
@@ -197,23 +200,26 @@ func (w *WooXStreamClient) heartbeat() {
 }
 
 func (w *WooXStreamClient) readMessages() {
-	var err error
+	for {
+		select {
+		case <-w.ctx.Done():
+			w.close(w.ctx.Err())
+			return
+		default:
+			var m AnyMessage
+			err := w.readObject(&m)
+			if err != nil {
+				w.close(fmt.Errorf("woox read object error, %s", err))
+				return
+			}
 
-	for err == nil {
-		var m AnyMessage
-		err = w.readObject(&m)
-		if err != nil {
-			break
-		}
-
-		switch {
-		case m.Response != nil:
-		case m.SubscribedMessage != nil:
-			w.subscriptionsProcess(m.SubscribedMessage)
+			switch {
+			case m.Response != nil:
+			case m.SubscribedMessage != nil:
+				w.subscriptionsProcess(m.SubscribedMessage)
+			}
 		}
 	}
-
-	w.close(err)
 }
 
 func (w *WooXStreamClient) readObject(v interface{}) error {
@@ -239,7 +245,6 @@ func (w *WooXStreamClient) resubscribe() error {
 	}
 
 	// do subscription
-
 	for _, v := range publicChannels {
 		err := w.send(&Request{
 			ID:    genClientID(),
@@ -269,7 +274,6 @@ func (w *WooXStreamClient) subscribe(channels []string) error {
 	}
 
 	// do subscription
-
 	for _, v := range publicChannels {
 		err := w.send(&Request{
 			ID:    genClientID(),

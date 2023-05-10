@@ -46,7 +46,7 @@ func (m AnyMessage) MarshalJSON() ([]byte, error) {
 		return json.Marshal(v)
 	}
 
-	return nil, errors.New("woox websocket: message must have exactly one of the request or response fields set")
+	return nil, errors.New("woox websocket: message must have exactly one of the Response or SubscribedMessage fields set")
 }
 
 func (m *AnyMessage) UnmarshalJSON(data []byte) error {

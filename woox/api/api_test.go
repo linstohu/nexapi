@@ -7,14 +7,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetPublicMarketTrades(t *testing.T) {
-	woox, err := NewWooXClient(&WooXCfg{
+func testNewWooXClient(t *testing.T) *WooXClient {
+	cli, err := NewWooXClient(&WooXCfg{
 		BasePath: "https://api.woo.org",
 		Debug:    false,
 	})
-	assert.Nil(t, err)
 
-	_, err = woox.GetPublicMarketTrades(&types.GetMarketTradesParam{})
+	if err != nil {
+		t.Fatalf("Could not create woox client, %s", err)
+	}
+
+	return cli
+}
+
+func TestGetPublicMarketTrades(t *testing.T) {
+	woox := testNewWooXClient(t)
+
+	_, err := woox.GetPublicMarketTrades(&types.GetMarketTradesParam{})
 	assert.NotNil(t, err)
 
 	_, err = woox.GetPublicMarketTrades(&types.GetMarketTradesParam{
