@@ -2,10 +2,11 @@ package types
 
 type HTTPRequest struct {
 	URL     string
+	Path    string
 	Method  string
 	Headers map[string]string
 	Query   interface{}
-	Body    []byte
+	Body    interface{}
 	Debug   bool
 }
 

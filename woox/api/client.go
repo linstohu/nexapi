@@ -3,12 +3,18 @@ package api
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
+	"time"
 
 	validator "github.com/go-playground/validator/v10"
 	"github.com/google/go-querystring/query"
@@ -62,9 +68,14 @@ func NewWooXClient(cfg *WooXCfg) (*WooXClient, error) {
 
 func (w *WooXClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequest) ([]byte, error) {
 	client := http.Client{}
+
 	var body io.Reader
-	if len(req.Body) > 0 {
-		body = bytes.NewReader(req.Body)
+	if req.Body != nil {
+		jsonBody, err := json.Marshal(req.Body)
+		if err != nil {
+			return nil, err
+		}
+		body = bytes.NewReader(jsonBody)
 	}
 
 	url, err := url.Parse(req.URL)
@@ -118,4 +129,85 @@ func (w *WooXClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequest)
 	}
 
 	return buf.Bytes(), nil
+}
+
+func (w *WooXClient) GenV1APIAuthHeaders(req types.HTTPRequest) (map[string]string, error) {
+	if w.key == "" || w.secret == "" {
+		return nil, fmt.Errorf("key and secret needed when init client")
+	}
+
+	headers := DefaultContentType
+	signString, err := NormalizeV1RequestContent(req)
+	if err != nil {
+		return nil, err
+	}
+	timestamp := time.Now().UnixMilli()
+	signString = fmt.Sprintf("%s|%d", signString, timestamp)
+
+	h := hmac.New(sha256.New, []byte(w.secret))
+	h.Write([]byte(signString))
+	signature := hex.EncodeToString(h.Sum(nil))
+
+	headers["x-api-key"] = w.key
+	headers["x-api-signature"] = signature
+	headers["x-api-timestamp"] = strconv.FormatInt(timestamp, 10)
+
+	return headers, nil
+}
+
+func NormalizeV1RequestContent(req types.HTTPRequest) (string, error) {
+	// Get query parameters or body parameters based on HTTP method
+	params := make(url.Values)
+	switch req.Method {
+	case http.MethodGet:
+		if req.Query != nil {
+			// attention: do not forget url tag after struct's fields
+			q, err := query.Values(req.Query)
+			if err != nil {
+				return "", err
+			}
+			params = q
+		}
+	case http.MethodPost, http.MethodDelete:
+		if req.Body != nil {
+			// attention: do not forget url tag after struct's fields
+			q, err := query.Values(req.Body)
+			if err != nil {
+				return "", err
+			}
+			params = q
+		}
+	}
+
+	return params.Encode(), nil
+}
+
+func (w *WooXClient) GenV3APIAuthHeaders(req types.HTTPRequest) (map[string]string, error) {
+	if w.key == "" || w.secret == "" {
+		return nil, fmt.Errorf("key and secret needed when init client")
+	}
+
+	headers := DefaultContentType
+
+	var signString string
+	timestamp := time.Now().UnixMilli()
+
+	if req.Body != nil {
+		jsonBody, err := json.Marshal(req.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		signString = fmt.Sprintf("%d%s%s%s", timestamp, req.Method, req.Path, string(jsonBody))
+	}
+
+	h := hmac.New(sha256.New, []byte(w.secret))
+	h.Write([]byte(signString))
+	signature := hex.EncodeToString(h.Sum(nil))
+
+	headers["x-api-key"] = w.key
+	headers["x-api-signature"] = signature
+	headers["x-api-timestamp"] = strconv.FormatInt(timestamp, 10)
+
+	return headers, nil
 }
