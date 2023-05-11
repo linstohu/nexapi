@@ -137,7 +137,7 @@ func (w *WooXClient) GenV1APIAuthHeaders(req types.HTTPRequest) (map[string]stri
 	}
 
 	headers := DefaultContentType
-	signString, err := NormalizeV1RequestContent(req)
+	signString, err := normalizeV1RequestContent(req)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (w *WooXClient) GenV1APIAuthHeaders(req types.HTTPRequest) (map[string]stri
 	return headers, nil
 }
 
-func NormalizeV1RequestContent(req types.HTTPRequest) (string, error) {
+func normalizeV1RequestContent(req types.HTTPRequest) (string, error) {
 	// Get query parameters or body parameters based on HTTP method
 	params := make(url.Values)
 	switch req.Method {
@@ -189,17 +189,17 @@ func (w *WooXClient) GenV3APIAuthHeaders(req types.HTTPRequest) (map[string]stri
 
 	headers := DefaultContentType
 
-	var signString string
-	timestamp := time.Now().UnixMilli()
-
+	strBody := ""
 	if req.Body != nil {
 		jsonBody, err := json.Marshal(req.Body)
 		if err != nil {
 			return nil, err
 		}
-
-		signString = fmt.Sprintf("%d%s%s%s", timestamp, req.Method, req.Path, string(jsonBody))
+		strBody = string(jsonBody)
 	}
+
+	timestamp := time.Now().UnixMilli()
+	signString := fmt.Sprintf("%d%s%s%s", timestamp, req.Method, req.Path, strBody)
 
 	h := hmac.New(sha256.New, []byte(w.secret))
 	h.Write([]byte(signString))

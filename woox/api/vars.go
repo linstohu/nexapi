@@ -5,6 +5,16 @@ var DefaultContentType = map[string]string{
 }
 
 const (
-	V1 string = "v1"
-	V3 string = "v3"
+	LimitOrderType    = "LIMIT"
+	MarketOrderType   = "MARKET"
+	IocOrderType      = "IOC"
+	FokOrderType      = "FOK"
+	PostOnlyOrderType = "POST_ONLY"
+	AskOrderType      = "ASK"
+	BidOrderType      = "BID"
+)
+
+const (
+	SELL = "SELL"
+	BUY  = "BUY"
 )

@@ -1,9 +1,5 @@
 package types
 
-type GetSymbolInfoParam struct {
-	Symbol string `url:"symbol" validate:"required"`
-}
-
 type SymbolInfo struct {
 	Response
 	Info struct {
