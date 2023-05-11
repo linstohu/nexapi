@@ -1,13 +1,21 @@
 package websocket
 
-func (w *WooXStreamClient) Subscribe(channels []string) error {
-	w.subscriptions = append(w.subscriptions, channels...)
-	return w.subscribe(channels)
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"github.com/linstohu/nexapi/woox/websocket/types"
+)
+
+func (w *WooXStreamClient) Subscribe(topics []string) error {
+	w.subscriptions = append(w.subscriptions, topics...)
+	return w.subscribe(topics)
 }
 
-func (w *WooXStreamClient) UnSubscribe(channels []string) error {
+func (w *WooXStreamClient) UnSubscribe(topics []string) error {
 	channelMap := make(map[string]struct{})
-	for _, v := range channels {
+	for _, v := range topics {
 		channelMap[v] = struct{}{}
 	}
 
@@ -21,12 +29,103 @@ func (w *WooXStreamClient) UnSubscribe(channels []string) error {
 
 	w.subscriptions = subscriptions
 
-	return w.unsubscribe(channels)
+	return w.unsubscribe(topics)
 }
 
-func (w *WooXStreamClient) subscriptionsProcess(event *SubscribedMessage) {
+func (w *WooXStreamClient) handle(msg *types.SubscribedMessage) error {
 	if w.debug {
-		w.logger.Printf("woox subscribed message, topic: %s, timestamp: %v, data: %s",
-			event.Topic, event.Timestamp, event.Data)
+		w.logger.Printf("woox subscribed message, topic: %s, timestamp: %v", msg.Topic, msg.Timestamp)
 	}
+
+	switch {
+	case strings.HasSuffix(msg.Topic, "@orderbook100") ||
+		strings.HasSuffix(msg.Topic, "@orderbook"):
+		var data types.Orderbook
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case strings.HasSuffix(msg.Topic, "@trade"):
+		var data types.Trade
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case strings.HasSuffix(msg.Topic, "@ticker"):
+		var data types.Ticker24H
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case msg.Topic == "tickers":
+		var data types.Tickers
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case strings.HasSuffix(msg.Topic, "@bbo"):
+		var data types.BBO
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case msg.Topic == "bbos":
+		var data types.AllBBO
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case strings.Contains(msg.Topic, "@kline_"):
+		var data types.Kline
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case strings.HasSuffix(msg.Topic, "@indexprice"):
+		var data types.IndexPrice
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case strings.HasSuffix(msg.Topic, "@markprice"):
+		var data types.MarkPrice
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case msg.Topic == "markprices":
+		var data types.MarkPrices
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case strings.HasSuffix(msg.Topic, "@openinterest"):
+		var data types.OpenInterest
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	case strings.HasSuffix(msg.Topic, "@estfundingrate"):
+		var data types.EstFundingRate
+		err := json.Unmarshal(msg.OriginData, &data)
+		if err != nil {
+			return err
+		}
+		w.GetListeners(msg.Topic, &data)
+	default:
+		return fmt.Errorf("woox unknown message, topic: %s, timestamp: %v", msg.Topic, msg.Timestamp)
+	}
+
+	return nil
 }

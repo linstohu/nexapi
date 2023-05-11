@@ -1,4 +1,4 @@
-package websocket
+package types
 
 import (
 	"encoding/json"
@@ -27,9 +27,10 @@ type Response struct {
 }
 
 type SubscribedMessage struct {
-	Topic     string          `json:"topic"`
-	Timestamp int64           `json:"ts"`
-	Data      json.RawMessage `json:"data"`
+	OriginData []byte
+	Topic      string          `json:"topic"`
+	Timestamp  int64           `json:"ts"`
+	Data       json.RawMessage `json:"data"`
 }
 
 func (m AnyMessage) MarshalJSON() ([]byte, error) {
@@ -69,10 +70,14 @@ func (m *AnyMessage) UnmarshalJSON(data []byte) error {
 	}
 
 	if v.Exists("topic") {
+		des := make([]byte, len(data))
+		copy(des, data)
+
 		var msg = &SubscribedMessage{
-			Topic:     string(v.GetStringBytes("topic")),
-			Timestamp: v.GetInt64("ts"),
-			Data:      v.GetObject("data").MarshalTo(nil),
+			OriginData: des,
+			Topic:      string(v.GetStringBytes("topic")),
+			Timestamp:  v.GetInt64("ts"),
+			Data:       v.GetObject("data").MarshalTo(nil),
 		}
 
 		m.SubscribedMessage = msg

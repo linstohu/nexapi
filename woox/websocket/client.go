@@ -13,6 +13,7 @@ import (
 
 	"github.com/chuckpreslar/emission"
 	"github.com/go-playground/validator"
+	"github.com/linstohu/nexapi/woox/websocket/types"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
@@ -190,7 +191,7 @@ func (w *WooXStreamClient) heartbeat() {
 	for {
 		select {
 		case <-t.C:
-			w.send(&Request{
+			w.send(&types.Request{
 				Event: "ping",
 			})
 		case <-w.heartCancel:
@@ -206,7 +207,7 @@ func (w *WooXStreamClient) readMessages() {
 			w.close(w.ctx.Err())
 			return
 		default:
-			var m AnyMessage
+			var m types.AnyMessage
 			err := w.readObject(&m)
 			if err != nil {
 				w.close(fmt.Errorf("woox read object error, %s", err))
@@ -215,8 +216,12 @@ func (w *WooXStreamClient) readMessages() {
 
 			switch {
 			case m.Response != nil:
+				// todo
 			case m.SubscribedMessage != nil:
-				w.subscriptionsProcess(m.SubscribedMessage)
+				err := w.handle(m.SubscribedMessage)
+				if err != nil {
+					w.logger.Printf("woox read messages error: %s", err.Error())
+				}
 			}
 		}
 	}
@@ -246,7 +251,7 @@ func (w *WooXStreamClient) resubscribe() error {
 
 	// do subscription
 	for _, v := range publicChannels {
-		err := w.send(&Request{
+		err := w.send(&types.Request{
 			ID:    genClientID(),
 			Topic: v,
 			Event: "subscribe",
@@ -275,7 +280,7 @@ func (w *WooXStreamClient) subscribe(channels []string) error {
 
 	// do subscription
 	for _, v := range publicChannels {
-		err := w.send(&Request{
+		err := w.send(&types.Request{
 			ID:    genClientID(),
 			Topic: v,
 			Event: SUBSCRIBE,
@@ -293,7 +298,7 @@ func (w *WooXStreamClient) subscribe(channels []string) error {
 
 func (w *WooXStreamClient) unsubscribe(channels []string) error {
 	for _, v := range channels {
-		err := w.send(&Request{
+		err := w.send(&types.Request{
 			ID:    genClientID(),
 			Topic: v,
 			Event: UNSUBSCRIBE,
@@ -309,7 +314,7 @@ func (w *WooXStreamClient) unsubscribe(channels []string) error {
 	return nil
 }
 
-func (w *WooXStreamClient) send(req *Request) error {
+func (w *WooXStreamClient) send(req *types.Request) error {
 	w.sending.Lock()
 	defer w.sending.Unlock()
 
