@@ -95,7 +95,7 @@ func (w *WooXStreamClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := w.connect()
 		if err != nil {
-			log.Printf("woox connect error, times(%v), error: %s", i, err.Error())
+			w.logger.Printf("woox connect error, times(%v), error: %s", i, err.Error())
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
