@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewWooXStreamClient(ctx context.Context, t *testing.T) *WooXStreamClient {
-	cli, err := NewWooXClient(ctx, &WooXStreamCfg{
+func testNewWooXWebsocketClient(ctx context.Context, t *testing.T) *WooXWebsocketClient {
+	cli, err := NewWooXWebsocketClient(ctx, &WooXWebsocketCfg{
 		BasePath:      PublicTestnetBaseEndpoint,
 		ApplicationID: os.Getenv("WOOX_APP_ID"), // required
 		Debug:         false,
@@ -25,11 +25,11 @@ func testNewWooXStreamClient(ctx context.Context, t *testing.T) *WooXStreamClien
 	return cli
 }
 
-func TestWooXStreamClientConnection(t *testing.T) {
+func TestWooXWebsocketClientConnection(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
-	cli := testNewWooXStreamClient(ctx, t)
+	cli := testNewWooXWebsocketClient(ctx, t)
 
 	err := cli.Subscribe([]string{"SPOT_WOO_USDT@orderbook"})
 	assert.Nil(t, err)
@@ -41,7 +41,7 @@ func TestSubscribeOrderbook(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
-	cli := testNewWooXStreamClient(ctx, t)
+	cli := testNewWooXWebsocketClient(ctx, t)
 
 	topic, err := cli.GetOrderbookTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)

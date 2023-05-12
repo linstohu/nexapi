@@ -8,12 +8,12 @@ import (
 	"github.com/linstohu/nexapi/woox/websocket/types"
 )
 
-func (w *WooXStreamClient) Subscribe(topics []string) error {
+func (w *WooXWebsocketClient) Subscribe(topics []string) error {
 	w.subscriptions = append(w.subscriptions, topics...)
 	return w.subscribe(topics)
 }
 
-func (w *WooXStreamClient) UnSubscribe(topics []string) error {
+func (w *WooXWebsocketClient) UnSubscribe(topics []string) error {
 	channelMap := make(map[string]struct{})
 	for _, v := range topics {
 		channelMap[v] = struct{}{}
@@ -32,7 +32,7 @@ func (w *WooXStreamClient) UnSubscribe(topics []string) error {
 	return w.unsubscribe(topics)
 }
 
-func (w *WooXStreamClient) handle(msg *types.SubscribedMessage) error {
+func (w *WooXWebsocketClient) handle(msg *types.SubscribedMessage) error {
 	if w.debug {
 		w.logger.Printf("woox subscribed message, topic: %s, timestamp: %v", msg.Topic, msg.Timestamp)
 	}

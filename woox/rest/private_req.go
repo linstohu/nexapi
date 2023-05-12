@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/linstohu/nexapi/woox/api/types"
+	"github.com/linstohu/nexapi/woox/rest/types"
 )
 
-func (w *WooXClient) SendOrder(ctx context.Context, params types.SendOrderReq) (*types.SendOrderResp, error) {
+func (w *WooXRestClient) SendOrder(ctx context.Context, params types.SendOrderReq) (*types.SendOrderResp, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (w *WooXClient) SendOrder(ctx context.Context, params types.SendOrderReq) (
 	return &ret, nil
 }
 
-func (w *WooXClient) CancelOrder(ctx context.Context, params types.CancelOrderParam) (*types.CancelOrderResp, error) {
+func (w *WooXRestClient) CancelOrder(ctx context.Context, params types.CancelOrderParam) (*types.CancelOrderResp, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (w *WooXClient) CancelOrder(ctx context.Context, params types.CancelOrderPa
 	return &ret, nil
 }
 
-func (w *WooXClient) CancelOrderByClientOrderID(ctx context.Context, params types.CancelOrderByClientOrderIDParam) (*types.CancelOrderResp, error) {
+func (w *WooXRestClient) CancelOrderByClientOrderID(ctx context.Context, params types.CancelOrderByClientOrderIDParam) (*types.CancelOrderResp, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func (w *WooXClient) CancelOrderByClientOrderID(ctx context.Context, params type
 	return &ret, nil
 }
 
-func (w *WooXClient) CancelOrders(ctx context.Context, params types.CancelOrdersParam) (*types.CancelOrderResp, error) {
+func (w *WooXRestClient) CancelOrders(ctx context.Context, params types.CancelOrdersParam) (*types.CancelOrderResp, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (w *WooXClient) CancelOrders(ctx context.Context, params types.CancelOrders
 	return &ret, nil
 }
 
-func (w *WooXClient) GetOrder(ctx context.Context, orderID string) (*types.CancelOrderResp, error) {
+func (w *WooXRestClient) GetOrder(ctx context.Context, orderID string) (*types.CancelOrderResp, error) {
 	if orderID == "" {
 		return nil, fmt.Errorf("oid must be given by api [/v1/order/:oid]")
 	}
@@ -182,7 +182,7 @@ func (w *WooXClient) GetOrder(ctx context.Context, orderID string) (*types.Cance
 	return &ret, nil
 }
 
-func (w *WooXClient) GetOrderByClientOrderID(ctx context.Context, clientOrderID string) (*types.CancelOrderResp, error) {
+func (w *WooXRestClient) GetOrderByClientOrderID(ctx context.Context, clientOrderID string) (*types.CancelOrderResp, error) {
 	if clientOrderID == "" {
 		return nil, fmt.Errorf("client_order_id must be given by api [/v1/client/order/:client_order_id]")
 	}
@@ -215,7 +215,7 @@ func (w *WooXClient) GetOrderByClientOrderID(ctx context.Context, clientOrderID 
 	return &ret, nil
 }
 
-func (w *WooXClient) GetOrders(ctx context.Context, params types.GetOrdersParam) (*types.GetOrders, error) {
+func (w *WooXRestClient) GetOrders(ctx context.Context, params types.GetOrdersParam) (*types.GetOrders, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -249,7 +249,7 @@ func (w *WooXClient) GetOrders(ctx context.Context, params types.GetOrdersParam)
 	return &ret, nil
 }
 
-func (w *WooXClient) GetTrade(ctx context.Context, tradeID string) (*types.GetTrade, error) {
+func (w *WooXRestClient) GetTrade(ctx context.Context, tradeID string) (*types.GetTrade, error) {
 	if tradeID == "" {
 		return nil, fmt.Errorf("tid must be given by api [/v1/client/trade/:tid]")
 	}
@@ -282,7 +282,7 @@ func (w *WooXClient) GetTrade(ctx context.Context, tradeID string) (*types.GetTr
 	return &ret, nil
 }
 
-func (w *WooXClient) GetTradeHistory(ctx context.Context, params types.GetTradeHistoryParam) (*types.GetTradeHistory, error) {
+func (w *WooXRestClient) GetTradeHistory(ctx context.Context, params types.GetTradeHistoryParam) (*types.GetTradeHistory, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -316,7 +316,7 @@ func (w *WooXClient) GetTradeHistory(ctx context.Context, params types.GetTradeH
 	return &ret, nil
 }
 
-func (w *WooXClient) GetBalances(ctx context.Context) (*types.Balance, error) {
+func (w *WooXRestClient) GetBalances(ctx context.Context) (*types.Balance, error) {
 	path := "/v3/balances"
 
 	req := types.HTTPRequest{
@@ -345,7 +345,7 @@ func (w *WooXClient) GetBalances(ctx context.Context) (*types.Balance, error) {
 	return &ret, nil
 }
 
-func (w *WooXClient) GetAccountInfo(ctx context.Context) (*types.GetAccountInfo, error) {
+func (w *WooXRestClient) GetAccountInfo(ctx context.Context) (*types.GetAccountInfo, error) {
 	path := "/v3/accountinfo"
 
 	req := types.HTTPRequest{
@@ -374,7 +374,7 @@ func (w *WooXClient) GetAccountInfo(ctx context.Context) (*types.GetAccountInfo,
 	return &ret, nil
 }
 
-func (w *WooXClient) GetAssetHisotry(ctx context.Context, params types.GetAssetHisotryParam) (*types.AssetHisotryResp, error) {
+func (w *WooXRestClient) GetAssetHisotry(ctx context.Context, params types.GetAssetHisotryParam) (*types.AssetHisotryResp, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -409,7 +409,7 @@ func (w *WooXClient) GetAssetHisotry(ctx context.Context, params types.GetAssetH
 	return &ret, nil
 }
 
-func (w *WooXClient) GetSubAccounts(ctx context.Context) (*types.SubAccounts, error) {
+func (w *WooXRestClient) GetSubAccounts(ctx context.Context) (*types.SubAccounts, error) {
 	path := "/v1/sub_account/all"
 
 	req := types.HTTPRequest{
@@ -438,7 +438,7 @@ func (w *WooXClient) GetSubAccounts(ctx context.Context) (*types.SubAccounts, er
 	return &ret, nil
 }
 
-func (w *WooXClient) TransferAsset(ctx context.Context, params types.TransferAssetParam) (*types.TransferAssetResp, error) {
+func (w *WooXRestClient) TransferAsset(ctx context.Context, params types.TransferAssetParam) (*types.TransferAssetResp, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -473,7 +473,7 @@ func (w *WooXClient) TransferAsset(ctx context.Context, params types.TransferAss
 	return &ret, nil
 }
 
-func (w *WooXClient) UpdateLeverageSetting(ctx context.Context, params types.UpdateLeverageSettingParam) (*types.Response, error) {
+func (w *WooXRestClient) UpdateLeverageSetting(ctx context.Context, params types.UpdateLeverageSettingParam) (*types.Response, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -508,7 +508,7 @@ func (w *WooXClient) UpdateLeverageSetting(ctx context.Context, params types.Upd
 	return &ret, nil
 }
 
-func (w *WooXClient) GetIPRestriction(ctx context.Context) (*types.IPRestriction, error) {
+func (w *WooXRestClient) GetIPRestriction(ctx context.Context) (*types.IPRestriction, error) {
 	path := "/v1/sub_account/ip_restriction"
 
 	req := types.HTTPRequest{
@@ -537,7 +537,7 @@ func (w *WooXClient) GetIPRestriction(ctx context.Context) (*types.IPRestriction
 	return &ret, nil
 }
 
-func (w *WooXClient) GetOnePositionInfo(ctx context.Context, symbol string) (*types.GetOnePositionInfo, error) {
+func (w *WooXRestClient) GetOnePositionInfo(ctx context.Context, symbol string) (*types.GetOnePositionInfo, error) {
 	if symbol == "" {
 		return nil, fmt.Errorf("symbol must be given by api [/v1/position/:symbol]")
 	}
@@ -570,7 +570,7 @@ func (w *WooXClient) GetOnePositionInfo(ctx context.Context, symbol string) (*ty
 	return &ret, nil
 }
 
-func (w *WooXClient) GetAllPositionInfo(ctx context.Context) (*types.GetAllPositionInfo, error) {
+func (w *WooXRestClient) GetAllPositionInfo(ctx context.Context) (*types.GetAllPositionInfo, error) {
 	path := "/v3/positions"
 
 	req := types.HTTPRequest{

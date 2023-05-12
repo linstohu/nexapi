@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/linstohu/nexapi/woox/api/types"
+	"github.com/linstohu/nexapi/woox/rest/types"
 )
 
-func (w *WooXClient) GetPublicInfo(ctx context.Context) (*types.AvailableSymbols, error) {
+func (w *WooXRestClient) GetPublicInfo(ctx context.Context) (*types.AvailableSymbols, error) {
 	req := types.HTTPRequest{
 		URL:     w.basePath + "/v1/public/info",
 		Method:  http.MethodGet,
@@ -30,7 +30,7 @@ func (w *WooXClient) GetPublicInfo(ctx context.Context) (*types.AvailableSymbols
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicInfoForSymbol(ctx context.Context, symbol string) (*types.SymbolInfo, error) {
+func (w *WooXRestClient) GetPublicInfoForSymbol(ctx context.Context, symbol string) (*types.SymbolInfo, error) {
 	if symbol == "" {
 		return nil, fmt.Errorf("symbol must be given by api [/v1/public/info/:symbol]")
 	}
@@ -55,7 +55,7 @@ func (w *WooXClient) GetPublicInfoForSymbol(ctx context.Context, symbol string) 
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicMarketTrades(ctx context.Context, params *types.GetMarketTradesParam) (*types.MarketTrade, error) {
+func (w *WooXRestClient) GetPublicMarketTrades(ctx context.Context, params *types.GetMarketTradesParam) (*types.MarketTrade, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (w *WooXClient) GetPublicMarketTrades(ctx context.Context, params *types.Ge
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicOrderbook(ctx context.Context, symbol string, params *types.GetOrderbookParam) (*types.Orderbook, error) {
+func (w *WooXRestClient) GetPublicOrderbook(ctx context.Context, symbol string, params *types.GetOrderbookParam) (*types.Orderbook, error) {
 	if symbol == "" {
 		return nil, fmt.Errorf("symbol must be given by api [/v1/public/orderbook/:symbol]")
 	}
@@ -113,7 +113,7 @@ func (w *WooXClient) GetPublicOrderbook(ctx context.Context, symbol string, para
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicKline(ctx context.Context, params *types.GetKlineParam) (*types.Kline, error) {
+func (w *WooXRestClient) GetPublicKline(ctx context.Context, params *types.GetKlineParam) (*types.Kline, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func (w *WooXClient) GetPublicKline(ctx context.Context, params *types.GetKlineP
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicTokens(ctx context.Context) (*types.Tokens, error) {
+func (w *WooXRestClient) GetPublicTokens(ctx context.Context) (*types.Tokens, error) {
 	req := types.HTTPRequest{
 		URL:     w.basePath + "/v1/public/token",
 		Method:  http.MethodGet,
@@ -161,7 +161,7 @@ func (w *WooXClient) GetPublicTokens(ctx context.Context) (*types.Tokens, error)
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicFundingRates(ctx context.Context) (*types.FundingRates, error) {
+func (w *WooXRestClient) GetPublicFundingRates(ctx context.Context) (*types.FundingRates, error) {
 	req := types.HTTPRequest{
 		URL:     w.basePath + "/v1/public/funding_rates",
 		Method:  http.MethodGet,
@@ -182,7 +182,7 @@ func (w *WooXClient) GetPublicFundingRates(ctx context.Context) (*types.FundingR
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicFundingRateForSymbol(ctx context.Context, symbol string) (*types.FundingRate, error) {
+func (w *WooXRestClient) GetPublicFundingRateForSymbol(ctx context.Context, symbol string) (*types.FundingRate, error) {
 	if symbol == "" {
 		return nil, fmt.Errorf("symbol must be given by api [/v1/public/funding_rate/:symbol]")
 	}
@@ -207,7 +207,7 @@ func (w *WooXClient) GetPublicFundingRateForSymbol(ctx context.Context, symbol s
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicAllFuturesInfo(ctx context.Context) (*types.AllFuturesInfo, error) {
+func (w *WooXRestClient) GetPublicAllFuturesInfo(ctx context.Context) (*types.AllFuturesInfo, error) {
 	req := types.HTTPRequest{
 		URL:     w.basePath + "/v1/public/futures",
 		Method:  http.MethodGet,
@@ -228,7 +228,7 @@ func (w *WooXClient) GetPublicAllFuturesInfo(ctx context.Context) (*types.AllFut
 	return &ret, nil
 }
 
-func (w *WooXClient) GetPublicFuturesInfoForSymbol(ctx context.Context, symbol string) (*types.OneFuturesInfo, error) {
+func (w *WooXRestClient) GetPublicFuturesInfoForSymbol(ctx context.Context, symbol string) (*types.OneFuturesInfo, error) {
 	if symbol == "" {
 		return nil, fmt.Errorf("symbol must be given by api [/v1/public/futures/:symbol]")
 	}

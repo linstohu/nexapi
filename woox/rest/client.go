@@ -18,10 +18,10 @@ import (
 
 	validator "github.com/go-playground/validator/v10"
 	"github.com/google/go-querystring/query"
-	"github.com/linstohu/nexapi/woox/api/types"
+	"github.com/linstohu/nexapi/woox/rest/types"
 )
 
-type WooXClient struct {
+type WooXRestClient struct {
 	basePath    string
 	key, secret string
 	// debug mode
@@ -32,7 +32,7 @@ type WooXClient struct {
 	validate *validator.Validate
 }
 
-type WooXCfg struct {
+type WooXRestClientCfg struct {
 	BasePath string `validate:"required"`
 	Key      string
 	Secret   string
@@ -41,7 +41,7 @@ type WooXCfg struct {
 	Logger *log.Logger
 }
 
-func NewWooXClient(cfg *WooXCfg) (*WooXClient, error) {
+func NewWooXRestClient(cfg *WooXRestClientCfg) (*WooXRestClient, error) {
 	validator := validator.New()
 
 	err := validator.Struct(cfg)
@@ -49,7 +49,7 @@ func NewWooXClient(cfg *WooXCfg) (*WooXClient, error) {
 		return nil, err
 	}
 
-	cli := WooXClient{
+	cli := WooXRestClient{
 		basePath: cfg.BasePath,
 		key:      cfg.Key,
 		secret:   cfg.Secret,
@@ -66,7 +66,7 @@ func NewWooXClient(cfg *WooXCfg) (*WooXClient, error) {
 	return &cli, nil
 }
 
-func (w *WooXClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequest) ([]byte, error) {
+func (w *WooXRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequest) ([]byte, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -131,7 +131,7 @@ func (w *WooXClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequest)
 	return buf.Bytes(), nil
 }
 
-func (w *WooXClient) GenV1APIAuthHeaders(req types.HTTPRequest) (map[string]string, error) {
+func (w *WooXRestClient) GenV1APIAuthHeaders(req types.HTTPRequest) (map[string]string, error) {
 	if w.key == "" || w.secret == "" {
 		return nil, fmt.Errorf("key and secret needed when init client")
 	}
@@ -182,7 +182,7 @@ func normalizeV1RequestContent(req types.HTTPRequest) (string, error) {
 	return params.Encode(), nil
 }
 
-func (w *WooXClient) GenV3APIAuthHeaders(req types.HTTPRequest) (map[string]string, error) {
+func (w *WooXRestClient) GenV3APIAuthHeaders(req types.HTTPRequest) (map[string]string, error) {
 	if w.key == "" || w.secret == "" {
 		return nil, fmt.Errorf("key and secret needed when init client")
 	}

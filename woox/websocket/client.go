@@ -19,7 +19,7 @@ import (
 	"nhooyr.io/websocket/wsjson"
 )
 
-type WooXStreamClient struct {
+type WooXWebsocketClient struct {
 	addr                       string
 	key, secret, applicationID string
 	// debug mode
@@ -44,7 +44,7 @@ type WooXStreamClient struct {
 	emitter *emission.Emitter
 }
 
-type WooXStreamCfg struct {
+type WooXWebsocketCfg struct {
 	BasePath      string `validate:"required"`
 	Key           string
 	Secret        string
@@ -54,12 +54,12 @@ type WooXStreamCfg struct {
 	Logger *log.Logger
 }
 
-func NewWooXClient(ctx context.Context, cfg *WooXStreamCfg) (*WooXStreamClient, error) {
+func NewWooXWebsocketClient(ctx context.Context, cfg *WooXWebsocketCfg) (*WooXWebsocketClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
 
-	cli := &WooXStreamClient{
+	cli := &WooXWebsocketClient{
 		addr:          cfg.BasePath,
 		key:           cfg.Key,
 		secret:        cfg.Secret,
@@ -86,7 +86,7 @@ func NewWooXClient(ctx context.Context, cfg *WooXStreamCfg) (*WooXStreamClient, 
 	return cli, nil
 }
 
-func (w *WooXStreamClient) start() error {
+func (w *WooXWebsocketClient) start() error {
 	w.conn = nil
 	w.setIsConnected(false)
 	w.heartCancel = make(chan struct{})
@@ -123,7 +123,7 @@ func (w *WooXStreamClient) start() error {
 	return nil
 }
 
-func (w *WooXStreamClient) connect() (*websocket.Conn, *http.Response, error) {
+func (w *WooXWebsocketClient) connect() (*websocket.Conn, *http.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -135,7 +135,7 @@ func (w *WooXStreamClient) connect() (*websocket.Conn, *http.Response, error) {
 	return conn, resp, err
 }
 
-func (w *WooXStreamClient) reconnect() {
+func (w *WooXWebsocketClient) reconnect() {
 	<-w.disconnect
 
 	w.setIsConnected(false)
@@ -156,7 +156,7 @@ func (w *WooXStreamClient) reconnect() {
 }
 
 // close closes the websocket connection
-func (w *WooXStreamClient) close(cause error) error {
+func (w *WooXWebsocketClient) close(cause error) error {
 	close(w.disconnect)
 
 	err := w.conn.Close(websocket.StatusNormalClosure, cause.Error())
@@ -170,7 +170,7 @@ func (w *WooXStreamClient) close(cause error) error {
 }
 
 // setIsConnected sets state for isConnected
-func (w *WooXStreamClient) setIsConnected(state bool) {
+func (w *WooXWebsocketClient) setIsConnected(state bool) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
@@ -178,7 +178,7 @@ func (w *WooXStreamClient) setIsConnected(state bool) {
 }
 
 // IsConnected returns the WebSocket connection state
-func (w *WooXStreamClient) IsConnected() bool {
+func (w *WooXWebsocketClient) IsConnected() bool {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 
@@ -186,7 +186,7 @@ func (w *WooXStreamClient) IsConnected() bool {
 }
 
 // heartbeat sends ping every 5s to keep alive
-func (w *WooXStreamClient) heartbeat() {
+func (w *WooXWebsocketClient) heartbeat() {
 	t := time.NewTicker(5 * time.Second)
 	for {
 		select {
@@ -200,7 +200,7 @@ func (w *WooXStreamClient) heartbeat() {
 	}
 }
 
-func (w *WooXStreamClient) readMessages() {
+func (w *WooXWebsocketClient) readMessages() {
 	for {
 		select {
 		case <-w.ctx.Done():
@@ -227,7 +227,7 @@ func (w *WooXStreamClient) readMessages() {
 	}
 }
 
-func (w *WooXStreamClient) readObject(v interface{}) error {
+func (w *WooXWebsocketClient) readObject(v interface{}) error {
 	err := wsjson.Read(context.Background(), w.conn, v)
 	if e, ok := err.(*websocket.CloseError); ok {
 		if e.Code == websocket.StatusNormalClosure && e.Error() == io.ErrUnexpectedEOF.Error() {
@@ -238,7 +238,7 @@ func (w *WooXStreamClient) readObject(v interface{}) error {
 	return err
 }
 
-func (w *WooXStreamClient) resubscribe() error {
+func (w *WooXWebsocketClient) resubscribe() error {
 	var publicChannels []string
 
 	for _, v := range w.subscriptions {
@@ -267,7 +267,7 @@ func (w *WooXStreamClient) resubscribe() error {
 	return nil
 }
 
-func (w *WooXStreamClient) subscribe(channels []string) error {
+func (w *WooXWebsocketClient) subscribe(channels []string) error {
 	var publicChannels []string
 
 	for _, v := range channels {
@@ -296,7 +296,7 @@ func (w *WooXStreamClient) subscribe(channels []string) error {
 	return nil
 }
 
-func (w *WooXStreamClient) unsubscribe(channels []string) error {
+func (w *WooXWebsocketClient) unsubscribe(channels []string) error {
 	for _, v := range channels {
 		err := w.send(&types.Request{
 			ID:    genClientID(),
@@ -314,7 +314,7 @@ func (w *WooXStreamClient) unsubscribe(channels []string) error {
 	return nil
 }
 
-func (w *WooXStreamClient) send(req *types.Request) error {
+func (w *WooXWebsocketClient) send(req *types.Request) error {
 	w.sending.Lock()
 	defer w.sending.Unlock()
 

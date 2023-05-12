@@ -6,12 +6,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/linstohu/nexapi/woox/api/types"
+	"github.com/linstohu/nexapi/woox/rest/types"
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewWooXPrivateClient(t *testing.T) *WooXClient {
-	cli, err := NewWooXClient(&WooXCfg{
+func testNewWooXRestPrivateClient(t *testing.T) *WooXRestClient {
+	cli, err := NewWooXRestClient(&WooXRestClientCfg{
 		BasePath: "https://api.staging.woo.org",
 		Key:      os.Getenv("WOOX_KEY"),    // required
 		Secret:   os.Getenv("WOOX_SECRET"), // required
@@ -44,7 +44,7 @@ func TestNormalizeV1RequestContent(t *testing.T) {
 }
 
 func TestSendOrder(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.SendOrder(context.TODO(), types.SendOrderReq{
 		Symbol:        "SPOT_BTC_USDT",
@@ -56,49 +56,49 @@ func TestSendOrder(t *testing.T) {
 }
 
 func TestGetOrders(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetOrders(context.TODO(), types.GetOrdersParam{})
 	assert.Nil(t, err)
 }
 
 func TestGetTradeHistory(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetTradeHistory(context.TODO(), types.GetTradeHistoryParam{})
 	assert.Nil(t, err)
 }
 
 func TestGetBalances(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetBalances(context.TODO())
 	assert.Nil(t, err)
 }
 
 func TestGetAccountInfo(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetAccountInfo(context.TODO())
 	assert.Nil(t, err)
 }
 
 func TestGetAssetHisotry(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetAssetHisotry(context.TODO(), types.GetAssetHisotryParam{})
 	assert.Nil(t, err)
 }
 
 func TestGetSubAccounts(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetSubAccounts(context.TODO())
 	assert.Nil(t, err)
 }
 
 func TestTransferAsset(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.TransferAsset(context.TODO(), types.TransferAssetParam{
 		Token:     "USDT",
@@ -110,21 +110,21 @@ func TestTransferAsset(t *testing.T) {
 }
 
 func TestGetIPRestriction(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetIPRestriction(context.TODO())
 	assert.Nil(t, err)
 }
 
 func TestGetOnePositionInfo(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetOnePositionInfo(context.TODO(), "PERP_BTC_USDT")
 	assert.Nil(t, err)
 }
 
 func TestGetAllPositionInfo(t *testing.T) {
-	woox := testNewWooXPrivateClient(t)
+	woox := testNewWooXRestPrivateClient(t)
 
 	_, err := woox.GetAllPositionInfo(context.TODO())
 	assert.Nil(t, err)
