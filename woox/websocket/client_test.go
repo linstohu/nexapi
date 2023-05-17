@@ -13,9 +13,11 @@ import (
 
 func testNewWooXWebsocketClient(ctx context.Context, t *testing.T) *WooXWebsocketClient {
 	cli, err := NewWooXWebsocketClient(ctx, &WooXWebsocketCfg{
-		BasePath:      PublicTestnetBaseEndpoint,
+		BaseURL:       TestNetPublicBaseURL,
+		Key:           os.Getenv("WOOX_KEY"),
+		Secret:        os.Getenv("WOOX_SECRET"),
 		ApplicationID: os.Getenv("WOOX_APP_ID"), // required
-		Debug:         false,
+		Debug:         true,
 	})
 
 	if err != nil {
@@ -56,8 +58,276 @@ func TestSubscribeOrderbook(t *testing.T) {
 			return
 		}
 
-		fmt.Printf("获取到新的Orderbook, 币对: %v, 时间戳: %v,  买单数量: %v, 卖单数量: %v\n",
+		fmt.Printf("获取到新的Orderbook, 币对: %v, 时间戳: %v, 买单数量: %v, 卖单数量: %v\n",
 			book.Data.Symbol, book.Ts, len(book.Data.Bids), len(book.Data.Asks))
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeTrade(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetTradeTopic("PERP_BTC_USDT")
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		trade, ok := e.(*types.Trade)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Topic: %s, Ts: %v, Symbol: %v, Price: %v, Size: %v, Side: %v\n",
+			trade.Topic, trade.Ts, trade.Data.Symbol, trade.Data.Price, trade.Data.Size, trade.Data.Side)
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeTickerForSymbol(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetTickerTopic("PERP_BTC_USDT")
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		ticker, ok := e.(*types.Ticker24H)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Topic: %s, Open: %v, Close: %v, High: %v, Low: %v\n",
+			ticker.Topic, ticker.Data.Open, ticker.Data.Close, ticker.Data.High, ticker.Data.Low)
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeTickers(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetAllTickersTopic()
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		tickers, ok := e.(*types.Tickers)
+		if !ok {
+			return
+		}
+
+		for _, ticker := range tickers.Data {
+			fmt.Printf("Symbol: %s, Open: %v, Close: %v, High: %v, Low: %v\n",
+				ticker.Symbol, ticker.Open, ticker.Close, ticker.High, ticker.Low)
+		}
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeBBOForSymbol(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetBboTopic("PERP_BTC_USDT")
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		bbo, ok := e.(*types.BBO)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Symbol: %s, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v\n",
+			bbo.Data.Symbol, bbo.Data.Ask, bbo.Data.AskSize, bbo.Data.Bid, bbo.Data.BidSize)
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeBBOs(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetAllBbosTopic()
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		bbos, ok := e.(*types.AllBBO)
+		if !ok {
+			return
+		}
+
+		for _, bbo := range bbos.Data {
+			fmt.Printf("Symbol: %s, Ask: %v, AskSize: %v, Bid: %v, BidSize: %v\n",
+				bbo.Symbol, bbo.Ask, bbo.AskSize, bbo.Bid, bbo.BidSize)
+		}
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeKline(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetKlineTopic(&KlineTopicParam{
+		Symbol: "PERP_BTC_USDT",
+		Time:   "1m",
+	})
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		kline, ok := e.(*types.Kline)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Symbol: %s, Type: %v, Open: %v, Close: %v\n",
+			kline.Data.Symbol, kline.Data.Type, kline.Data.Open, kline.Data.Close)
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeIndexPrice(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetIndexPriceTopic("SPOT_ETH_USDT")
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		indexPrice, ok := e.(*types.IndexPrice)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Symbol: %s, Price: %v\n", indexPrice.Data.Symbol, indexPrice.Data.Price)
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeMarkPrice(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetMarkPriceTopic("PERP_BTC_USDT")
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		mp, ok := e.(*types.MarkPrice)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Symbol: %s, Price: %v\n", mp.Data.Symbol, mp.Data.Price)
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeAllMarkPrice(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetMarkPricesTopic()
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		s, ok := e.(*types.MarkPrices)
+		if !ok {
+			return
+		}
+
+		for _, mp := range s.Data {
+			fmt.Printf("Symbol: %s, Price: %v\n", mp.Symbol, mp.Price)
+		}
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeOpenInterest(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetOpenInterestTopic("PERP_BTC_USDT")
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		oi, ok := e.(*types.OpenInterest)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Symbol: %s, OpenInterest: %v\n", oi.Data.Symbol, oi.Data.OpenInterest)
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+func TestSubscribeEstFundingRate(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewWooXWebsocketClient(ctx, t)
+
+	topic, err := cli.GetEstFundingRateTopic("PERP_BTC_USDT")
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e interface{}) {
+		rate, ok := e.(*types.EstFundingRate)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Symbol: %s, FundingRate: %v, TS: %v\n", rate.Data.Symbol, rate.Data.FundingRate, rate.Data.FundingTs)
 	})
 
 	cli.Subscribe([]string{topic})

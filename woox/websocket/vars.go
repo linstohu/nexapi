@@ -1,11 +1,11 @@
 package websocket
 
 var (
-	PublicProdBaseEndpoint  = "wss://wss.woo.org/ws/stream/"
-	PrivateProdBaseEndpoint = "wss://wss.woo.org/v2/ws/private/stream/"
+	TestNetPublicBaseURL = "wss://wss.staging.woo.org/ws/stream/"
+	PublicBaseURL        = "wss://wss.woo.org/ws/stream/"
 
-	PublicTestnetBaseEndpoint  = "wss://wss.staging.woo.org/ws/stream/"
-	PrivateTestnetBaseEndpoint = "wss://wss.staging.woo.org/v2/ws/private/stream/"
+	TestNetPrivateBaseURL = "wss://wss.staging.woo.org/v2/ws/private/stream/"
+	PrivateBaseURL        = "wss://wss.woo.org/v2/ws/private/stream/"
 )
 
 const (

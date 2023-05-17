@@ -25,12 +25,12 @@ type GetTrades struct {
 }
 
 type GetTradeHistoryParam struct {
-	Symbol    string `url:"symbol,omitempty" json:"symbol,omitempty"`
-	OrderTag  string `url:"order_tag,omitempty" json:"order_tag,omitempty" validate:"omitempty"`
-	StartTime int64  `url:"start_t,omitempty" json:"start_t,omitempty" validate:"omitempty,gt=999999999999"`
-	EndTime   int64  `url:"end_t,omitempty" json:"end_t,omitempty" validate:"omitempty,gt=999999999999"`
-	Page      int64  `url:"page,omitempty" json:"page,omitempty" validate:"omitempty"`
-	Size      int64  `url:"size,omitempty" json:"size,omitempty" validate:"omitempty"`
+	Symbol    string `url:"symbol,omitempty"`
+	OrderTag  string `url:"order_tag,omitempty" validate:"omitempty"`
+	StartTime int64  `url:"start_t,omitempty" validate:"omitempty,gt=999999999999"`
+	EndTime   int64  `url:"end_t,omitempty" validate:"omitempty,gt=999999999999"`
+	Page      int64  `url:"page,omitempty" validate:"omitempty"`
+	Size      int64  `url:"size,omitempty" validate:"omitempty"`
 }
 
 type GetTradeHistory struct {

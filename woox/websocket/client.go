@@ -20,7 +20,7 @@ import (
 )
 
 type WooXWebsocketClient struct {
-	addr                       string
+	baseURL                    string
 	key, secret, applicationID string
 	// debug mode
 	debug bool
@@ -45,7 +45,7 @@ type WooXWebsocketClient struct {
 }
 
 type WooXWebsocketCfg struct {
-	BasePath      string `validate:"required"`
+	BaseURL       string `validate:"required"`
 	Key           string
 	Secret        string
 	ApplicationID string `validate:"required"`
@@ -60,7 +60,7 @@ func NewWooXWebsocketClient(ctx context.Context, cfg *WooXWebsocketCfg) (*WooXWe
 	}
 
 	cli := &WooXWebsocketClient{
-		addr:          cfg.BasePath,
+		baseURL:       cfg.BaseURL,
 		key:           cfg.Key,
 		secret:        cfg.Secret,
 		applicationID: cfg.ApplicationID,
@@ -127,7 +127,7 @@ func (w *WooXWebsocketClient) connect() (*websocket.Conn, *http.Response, error)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	conn, resp, err := websocket.Dial(ctx, w.addr+w.applicationID, &websocket.DialOptions{})
+	conn, resp, err := websocket.Dial(ctx, w.baseURL+w.applicationID, &websocket.DialOptions{})
 	if err == nil {
 		conn.SetReadLimit(32768 * 64)
 	}

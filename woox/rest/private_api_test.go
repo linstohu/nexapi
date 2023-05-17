@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"context"
@@ -12,10 +12,10 @@ import (
 
 func testNewWooXRestPrivateClient(t *testing.T) *WooXRestClient {
 	cli, err := NewWooXRestClient(&WooXRestClientCfg{
-		BasePath: "https://api.staging.woo.org",
-		Key:      os.Getenv("WOOX_KEY"),    // required
-		Secret:   os.Getenv("WOOX_SECRET"), // required
-		Debug:    true,
+		BaseURL: TestNetBaseURL,
+		Key:     os.Getenv("WOOX_KEY"),    // required
+		Secret:  os.Getenv("WOOX_SECRET"), // required
+		Debug:   true,
 	})
 
 	if err != nil {

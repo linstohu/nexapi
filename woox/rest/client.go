@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"bytes"
@@ -14,6 +14,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	validator "github.com/go-playground/validator/v10"
@@ -22,7 +23,7 @@ import (
 )
 
 type WooXRestClient struct {
-	basePath    string
+	baseURL     string
 	key, secret string
 	// debug mode
 	debug bool
@@ -33,10 +34,10 @@ type WooXRestClient struct {
 }
 
 type WooXRestClientCfg struct {
-	BasePath string `validate:"required"`
-	Key      string
-	Secret   string
-	Debug    bool
+	BaseURL string `validate:"required"`
+	Key     string
+	Secret  string
+	Debug   bool
 	// Logger
 	Logger *log.Logger
 }
@@ -50,11 +51,11 @@ func NewWooXRestClient(cfg *WooXRestClientCfg) (*WooXRestClient, error) {
 	}
 
 	cli := WooXRestClient{
-		basePath: cfg.BasePath,
-		key:      cfg.Key,
-		secret:   cfg.Secret,
-		debug:    cfg.Debug,
-		logger:   cfg.Logger,
+		baseURL: cfg.BaseURL,
+		key:     cfg.Key,
+		secret:  cfg.Secret,
+		debug:   cfg.Debug,
+		logger:  cfg.Logger,
 
 		validate: validator,
 	}
@@ -71,11 +72,19 @@ func (w *WooXRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequ
 
 	var body io.Reader
 	if req.Body != nil {
-		jsonBody, err := json.Marshal(req.Body)
-		if err != nil {
-			return nil, err
+		if req.Headers["Content-Type"] == V1DefaultContentType["Content-Type"] {
+			formData, err := query.Values(req.Body)
+			if err != nil {
+				return nil, err
+			}
+			body = strings.NewReader(formData.Encode())
+		} else {
+			jsonBody, err := json.Marshal(req.Body)
+			if err != nil {
+				return nil, err
+			}
+			body = bytes.NewReader(jsonBody)
 		}
-		body = bytes.NewReader(jsonBody)
 	}
 
 	url, err := url.Parse(req.URL)
@@ -136,7 +145,7 @@ func (w *WooXRestClient) GenV1APIAuthHeaders(req types.HTTPRequest) (map[string]
 		return nil, fmt.Errorf("key and secret needed when init client")
 	}
 
-	headers := DefaultContentType
+	headers := V1DefaultContentType
 	signString, err := normalizeV1RequestContent(req)
 	if err != nil {
 		return nil, err
@@ -187,7 +196,7 @@ func (w *WooXRestClient) GenV3APIAuthHeaders(req types.HTTPRequest) (map[string]
 		return nil, fmt.Errorf("key and secret needed when init client")
 	}
 
-	headers := DefaultContentType
+	headers := V3DefaultContentType
 
 	strBody := ""
 	if req.Body != nil {

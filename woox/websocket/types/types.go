@@ -77,7 +77,7 @@ func (m *AnyMessage) UnmarshalJSON(data []byte) error {
 			OriginData: des,
 			Topic:      string(v.GetStringBytes("topic")),
 			Timestamp:  v.GetInt64("ts"),
-			Data:       v.GetObject("data").MarshalTo(nil),
+			Data:       v.GetStringBytes("data"),
 		}
 
 		m.SubscribedMessage = msg

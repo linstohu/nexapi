@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"context"
@@ -11,9 +11,9 @@ import (
 
 func (w *WooXRestClient) GetPublicInfo(ctx context.Context) (*types.AvailableSymbols, error) {
 	req := types.HTTPRequest{
-		URL:     w.basePath + "/v1/public/info",
+		URL:     w.baseURL + "/v1/public/info",
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Debug:   w.debug,
 	}
 
@@ -36,9 +36,9 @@ func (w *WooXRestClient) GetPublicInfoForSymbol(ctx context.Context, symbol stri
 	}
 
 	req := types.HTTPRequest{
-		URL:     fmt.Sprintf("%s%s%s", w.basePath, "/v1/public/info/", symbol),
+		URL:     fmt.Sprintf("%s%s%s", w.baseURL, "/v1/public/info/", symbol),
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Debug:   w.debug,
 	}
 
@@ -62,9 +62,9 @@ func (w *WooXRestClient) GetPublicMarketTrades(ctx context.Context, params *type
 	}
 
 	req := types.HTTPRequest{
-		URL:     w.basePath + "/v1/public/market_trades",
+		URL:     w.baseURL + "/v1/public/market_trades",
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Query:   params,
 		Debug:   w.debug,
 	}
@@ -93,9 +93,9 @@ func (w *WooXRestClient) GetPublicOrderbook(ctx context.Context, symbol string, 
 	}
 
 	req := types.HTTPRequest{
-		URL:     fmt.Sprintf("%s%s%s", w.basePath, "/v1/public/orderbook/", symbol),
+		URL:     fmt.Sprintf("%s%s%s", w.baseURL, "/v1/public/orderbook/", symbol),
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Query:   params,
 		Debug:   w.debug,
 	}
@@ -120,9 +120,9 @@ func (w *WooXRestClient) GetPublicKline(ctx context.Context, params *types.GetKl
 	}
 
 	req := types.HTTPRequest{
-		URL:     w.basePath + "/v1/public/kline",
+		URL:     w.baseURL + "/v1/public/kline",
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Query:   params,
 		Debug:   w.debug,
 	}
@@ -142,9 +142,9 @@ func (w *WooXRestClient) GetPublicKline(ctx context.Context, params *types.GetKl
 
 func (w *WooXRestClient) GetPublicTokens(ctx context.Context) (*types.Tokens, error) {
 	req := types.HTTPRequest{
-		URL:     w.basePath + "/v1/public/token",
+		URL:     w.baseURL + "/v1/public/token",
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Debug:   w.debug,
 	}
 
@@ -163,9 +163,9 @@ func (w *WooXRestClient) GetPublicTokens(ctx context.Context) (*types.Tokens, er
 
 func (w *WooXRestClient) GetPublicFundingRates(ctx context.Context) (*types.FundingRates, error) {
 	req := types.HTTPRequest{
-		URL:     w.basePath + "/v1/public/funding_rates",
+		URL:     w.baseURL + "/v1/public/funding_rates",
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Debug:   w.debug,
 	}
 
@@ -188,9 +188,9 @@ func (w *WooXRestClient) GetPublicFundingRateForSymbol(ctx context.Context, symb
 	}
 
 	req := types.HTTPRequest{
-		URL:     fmt.Sprintf("%s%s%s", w.basePath, "/v1/public/funding_rate/", symbol),
+		URL:     fmt.Sprintf("%s%s%s", w.baseURL, "/v1/public/funding_rate/", symbol),
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Debug:   w.debug,
 	}
 
@@ -209,9 +209,9 @@ func (w *WooXRestClient) GetPublicFundingRateForSymbol(ctx context.Context, symb
 
 func (w *WooXRestClient) GetPublicAllFuturesInfo(ctx context.Context) (*types.AllFuturesInfo, error) {
 	req := types.HTTPRequest{
-		URL:     w.basePath + "/v1/public/futures",
+		URL:     w.baseURL + "/v1/public/futures",
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Debug:   w.debug,
 	}
 
@@ -234,9 +234,9 @@ func (w *WooXRestClient) GetPublicFuturesInfoForSymbol(ctx context.Context, symb
 	}
 
 	req := types.HTTPRequest{
-		URL:     fmt.Sprintf("%s%s%s", w.basePath, "/v1/public/futures/", symbol),
+		URL:     fmt.Sprintf("%s%s%s", w.baseURL, "/v1/public/futures/", symbol),
 		Method:  http.MethodGet,
-		Headers: DefaultContentType,
+		Headers: V1DefaultContentType,
 		Debug:   w.debug,
 	}
 

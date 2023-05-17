@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 
 func testNewWooXRestPublicClient(t *testing.T) *WooXRestClient {
 	cli, err := NewWooXRestClient(&WooXRestClientCfg{
-		BasePath: "https://api.woo.org",
-		Debug:    false,
+		BaseURL: TestNetBaseURL,
+		Debug:   false,
 	})
 
 	if err != nil {

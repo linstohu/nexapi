@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"context"
@@ -18,7 +18,7 @@ func (w *WooXRestClient) SendOrder(ctx context.Context, params types.SendOrderRe
 	path := "/v1/order"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodPost,
 		Body:   params,
@@ -53,7 +53,7 @@ func (w *WooXRestClient) CancelOrder(ctx context.Context, params types.CancelOrd
 	path := "/v1/order"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodDelete,
 		Body:   params,
@@ -88,7 +88,7 @@ func (w *WooXRestClient) CancelOrderByClientOrderID(ctx context.Context, params 
 	path := "/v1/client/order"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodDelete,
 		Body:   params,
@@ -123,7 +123,7 @@ func (w *WooXRestClient) CancelOrders(ctx context.Context, params types.CancelOr
 	path := "/v1/orders"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodDelete,
 		Body:   params,
@@ -157,7 +157,7 @@ func (w *WooXRestClient) GetOrder(ctx context.Context, orderID string) (*types.C
 	path := fmt.Sprintf("%s%s", "/v1/order/", orderID)
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -190,7 +190,7 @@ func (w *WooXRestClient) GetOrderByClientOrderID(ctx context.Context, clientOrde
 	path := fmt.Sprintf("%s%s", "/v1/client/order/", clientOrderID)
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -224,7 +224,7 @@ func (w *WooXRestClient) GetOrders(ctx context.Context, params types.GetOrdersPa
 	path := "/v1/orders"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -257,7 +257,7 @@ func (w *WooXRestClient) GetTrade(ctx context.Context, tradeID string) (*types.G
 	path := fmt.Sprintf("%s%s", "/v1/client/trade/", tradeID)
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -291,7 +291,7 @@ func (w *WooXRestClient) GetTradeHistory(ctx context.Context, params types.GetTr
 	path := "/v1/client/trades"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -320,7 +320,7 @@ func (w *WooXRestClient) GetBalances(ctx context.Context) (*types.Balance, error
 	path := "/v3/balances"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -349,7 +349,7 @@ func (w *WooXRestClient) GetAccountInfo(ctx context.Context) (*types.GetAccountI
 	path := "/v3/accountinfo"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -383,7 +383,7 @@ func (w *WooXRestClient) GetAssetHisotry(ctx context.Context, params types.GetAs
 	path := "/v1/asset/history"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Query:  params,
@@ -413,7 +413,7 @@ func (w *WooXRestClient) GetSubAccounts(ctx context.Context) (*types.SubAccounts
 	path := "/v1/sub_account/all"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -447,7 +447,7 @@ func (w *WooXRestClient) TransferAsset(ctx context.Context, params types.Transfe
 	path := "/v1/asset/main_sub_transfer"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodPost,
 		Body:   params,
@@ -482,7 +482,7 @@ func (w *WooXRestClient) UpdateLeverageSetting(ctx context.Context, params types
 	path := "/v1/client/leverage"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodPost,
 		Body:   params,
@@ -512,7 +512,7 @@ func (w *WooXRestClient) GetIPRestriction(ctx context.Context) (*types.IPRestric
 	path := "/v1/sub_account/ip_restriction"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -545,7 +545,7 @@ func (w *WooXRestClient) GetOnePositionInfo(ctx context.Context, symbol string) 
 	path := fmt.Sprintf("%s%s", "/v1/position/", symbol)
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,
@@ -574,7 +574,7 @@ func (w *WooXRestClient) GetAllPositionInfo(ctx context.Context) (*types.GetAllP
 	path := "/v3/positions"
 
 	req := types.HTTPRequest{
-		URL:    w.basePath + path,
+		URL:    w.baseURL + path,
 		Path:   path,
 		Method: http.MethodGet,
 		Debug:  w.debug,

@@ -17,7 +17,7 @@ func (w *WooXWebsocketClient) GetTradeTopic(symbol string) (string, error) {
 	if symbol == "" {
 		return "", fmt.Errorf("the symbol field must be provided")
 	}
-	return fmt.Sprintf("%s@trade100", symbol), nil
+	return fmt.Sprintf("%s@trade", symbol), nil
 }
 
 func (w *WooXWebsocketClient) GetTickerTopic(symbol string) (string, error) {

@@ -1,16 +1,16 @@
 package types
 
 type SendOrderReq struct {
-	Symbol          string  `url:"symbol" json:"symbol" validate:"required"`
-	ClientOrderID   int64   `url:"client_order_id,omitempty" json:"client_order_id,omitempty"`
-	OrderTag        string  `url:"order_tag,omitempty" json:"order_tag,omitempty"`
-	OrderType       string  `url:"order_type" json:"order_type" validate:"required,oneof=LIMIT MARKET IOC FOK POST_ONLY ASK BID"`
-	OrderPrice      float64 `url:"order_price,omitempty" json:"order_price,omitempty"`
-	OrderQuantity   float64 `url:"order_quantity,omitempty" json:"order_quantity,omitempty"`
-	OrderAmount     float64 `url:"order_amount,omitempty" json:"order_amount,omitempty"`
-	ReduceOnly      bool    `url:"reduce_only,omitempty" json:"reduce_only,omitempty"`
-	VisibleQuantity float64 `url:"visible_quantity,omitempty" json:"visible_quantity,omitempty"`
-	Side            string  `url:"side" json:"side" validate:"required,oneof=SELL BUY"`
+	Symbol          string  `url:"symbol" validate:"required"`
+	ClientOrderID   int64   `url:"client_order_id,omitempty"`
+	OrderTag        string  `url:"order_tag,omitempty"`
+	OrderType       string  `url:"order_type" validate:"required,oneof=LIMIT MARKET IOC FOK POST_ONLY ASK BID"`
+	OrderPrice      float64 `url:"order_price,omitempty"`
+	OrderQuantity   float64 `url:"order_quantity,omitempty"`
+	OrderAmount     float64 `url:"order_amount,omitempty"`
+	ReduceOnly      bool    `url:"reduce_only,omitempty"`
+	VisibleQuantity float64 `url:"visible_quantity,omitempty"`
+	Side            string  `url:"side" validate:"required,oneof=SELL BUY"`
 }
 
 type SendOrderResp struct {

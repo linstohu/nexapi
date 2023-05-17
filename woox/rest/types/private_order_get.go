@@ -28,15 +28,15 @@ type GetOrder struct {
 }
 
 type GetOrdersParam struct {
-	Symbol    string `url:"symbol,omitempty" json:"symbol,omitempty"`
-	Side      string `url:"side,omitempty" json:"side,omitempty" validate:"omitempty,oneof=SELL BUY"`
-	Size      int64  `url:"size,omitempty" json:"size,omitempty" validate:"omitempty,max=500"`
-	OrderType string `url:"order_type,omitempty" json:"order_type,omitempty" validate:"omitempty,oneof=LIMIT MARKET IOC FOK POST_ONLY LIQUIDATE"`
-	OrderTag  string `url:"order_tag,omitempty" json:"order_tag,omitempty" validate:"omitempty"`
-	Status    string `url:"status,omitempty" json:"status,omitempty" validate:"omitempty,oneof=NEW CANCELLED PARTIAL_FILLED FILLED REJECTED INCOMPLETE COMPLETED"`
-	StartTime int64  `url:"start_t,omitempty" json:"start_t,omitempty" validate:"omitempty,gt=999999999999"`
-	EndTime   int64  `url:"end_t,omitempty" json:"end_t,omitempty" validate:"omitempty,gt=999999999999"`
-	Page      int64  `url:"page,omitempty" json:"page,omitempty" validate:"omitempty"`
+	Symbol    string `url:"symbol,omitempty"`
+	Side      string `url:"side,omitempty" validate:"omitempty,oneof=SELL BUY"`
+	Size      int64  `url:"size,omitempty" validate:"omitempty,max=500"`
+	OrderType string `url:"order_type,omitempty" validate:"omitempty,oneof=LIMIT MARKET IOC FOK POST_ONLY LIQUIDATE"`
+	OrderTag  string `url:"order_tag,omitempty" validate:"omitempty"`
+	Status    string `url:"status,omitempty" validate:"omitempty,oneof=NEW CANCELLED PARTIAL_FILLED FILLED REJECTED INCOMPLETE COMPLETED"`
+	StartTime int64  `url:"start_t,omitempty" validate:"omitempty,gt=999999999999"`
+	EndTime   int64  `url:"end_t,omitempty" validate:"omitempty,gt=999999999999"`
+	Page      int64  `url:"page,omitempty" validate:"omitempty"`
 }
 
 type GetOrders struct {
