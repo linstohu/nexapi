@@ -1,6 +1,6 @@
 # NexAPI Roadmap
 
-NexAPI plans to integrate APIs from well-known cryptocurrency exchanges all around the world.Typically, we use [CoinMarketCap](https://coinmarketcap.com/rankings/exchanges/) to choose the exchanges to integrate with NexAPI.
+NexAPI plans to integrate APIs from well-known cryptocurrency exchanges all around the world. Typically, we use [CoinMarketCap](https://coinmarketcap.com/rankings/exchanges/) to choose the exchanges to integrate with NexAPI.
 
 - [NexAPI Roadmap](#nexapi-roadmap)
     - [Product Principles](#product-principles)

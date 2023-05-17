@@ -17,11 +17,11 @@ NexAPI is a GO library that integrates official APIs from many well-known crypto
 
 ## 🤷‍ What is NexAPI?
 
-The NexAPI library is used to connect and trade with cryptocurrency exchanges and payment processing services worldwide. It provides quick access to market data for storage, analysis, visualization, indicator development, algorithmic trading, strategy backtesting, bot programming, and related software engineering.
+The NexAPI library is a collection of APIs from many well-known cryptocurrency exchanges. It provides quick access to market data for storage, analysis, visualization, indicator development, algorithmic trading, strategy backtesting, bot programming, and related software engineering.
 
 It is intended to be used by coders, developers, technically-skilled traders, data-scientists and financial analysts for building trading algorithms.
 
-## Usage
+## 🔎 Usage
 
 ### Intro
 
