@@ -16,21 +16,25 @@ import (
 )
 
 type SpotClient struct {
-	baseURL     string
-	key, secret string
 	// debug mode
 	debug bool
 	// logger
 	logger *log.Logger
+
+	baseURL     string
+	key, secret string
+	recvWindow  int
 }
 
 type SpotClientCfg struct {
-	BaseURL string `validate:"required"`
-	Key     string
-	Secret  string
-	Debug   bool
+	Debug bool
 	// Logger
 	Logger *log.Logger
+
+	BaseURL    string `validate:"required"`
+	Key        string
+	Secret     string
+	RecvWindow int
 }
 
 func NewSpotClient(cfg *SpotClientCfg) (*SpotClient, error) {
@@ -40,11 +44,16 @@ func NewSpotClient(cfg *SpotClientCfg) (*SpotClient, error) {
 	}
 
 	cli := SpotClient{
-		baseURL: cfg.BaseURL,
-		key:     cfg.Key,
-		secret:  cfg.Secret,
-		debug:   cfg.Debug,
-		logger:  cfg.Logger,
+		debug:      cfg.Debug,
+		logger:     cfg.Logger,
+		baseURL:    cfg.BaseURL,
+		key:        cfg.Key,
+		secret:     cfg.Secret,
+		recvWindow: cfg.RecvWindow,
+	}
+
+	if cfg.RecvWindow == 0 {
+		cli.recvWindow = 5000
 	}
 
 	if cli.logger == nil {
@@ -52,6 +61,10 @@ func NewSpotClient(cfg *SpotClientCfg) (*SpotClient, error) {
 	}
 
 	return &cli, nil
+}
+
+func (s *SpotClient) GetDebug() bool {
+	return s.debug
 }
 
 func (s *SpotClient) GetBaseURL() string {
@@ -66,8 +79,8 @@ func (s *SpotClient) GetSecret() string {
 	return s.secret
 }
 
-func (s *SpotClient) GetDebug() bool {
-	return s.debug
+func (s *SpotClient) GetRecvWindow() int {
+	return s.recvWindow
 }
 
 func (s *SpotClient) GenHeaders(t SecurityType) (map[string]string, error) {
@@ -77,10 +90,24 @@ func (s *SpotClient) GenHeaders(t SecurityType) (map[string]string, error) {
 	// docs: https://binance-docs.github.io/apidocs/spot/en/#endpoint-security-type
 	switch t {
 	case TRADE, MARGIN, USER_DATA, USER_STREAM, MARKET_DATA:
+		key := s.GetKey()
+		if key == "" {
+			return nil, fmt.Errorf("a valid API-Key required")
+		}
+
 		headers["X-MBX-APIKEY"] = s.GetKey()
 	}
 
 	return headers, nil
+}
+
+func (s *SpotClient) NeedSignature(t SecurityType) bool {
+	switch t {
+	case TRADE, MARGIN, USER_DATA:
+		return true
+	default:
+		return false
+	}
 }
 
 func NormalizeRequestContent(req HTTPRequest) (string, error) {
