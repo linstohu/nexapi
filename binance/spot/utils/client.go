@@ -110,30 +110,6 @@ func (s *SpotClient) NeedSignature(t SecurityType) bool {
 	}
 }
 
-func NormalizeRequestContent(req HTTPRequest) (string, error) {
-	var ret string
-
-	if req.Query != nil {
-		// attention: do not forget url tag after struct's fields
-		q, err := query.Values(req.Query)
-		if err != nil {
-			return "", err
-		}
-		ret += q.Encode()
-	}
-
-	if req.Body != nil {
-		// attention: do not forget url tag after struct's fields
-		q, err := query.Values(req.Body)
-		if err != nil {
-			return "", err
-		}
-		ret += q.Encode()
-	}
-
-	return ret, nil
-}
-
 func (s *SpotClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
 	client := http.Client{}
 

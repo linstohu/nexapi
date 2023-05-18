@@ -79,7 +79,7 @@ func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinIn
 	}
 
 	{
-		query := &bnutils.DefaultParam{
+		query := bnutils.DefaultParam{
 			RecvWindow: s.GetRecvWindow(),
 			Timestamp:  time.Now().UnixMilli(),
 		}
@@ -89,10 +89,8 @@ func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinIn
 			return nil, err
 		}
 
-		req.Query = query
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -103,6 +101,8 @@ func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinIn
 
 			query.Signature = signature
 		}
+
+		req.Query = query
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)
@@ -135,7 +135,7 @@ func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAs
 	}
 
 	{
-		query := &types.AssetDetailParams{
+		query := types.AssetDetailParams{
 			GetAssetDetailParam: param,
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
@@ -148,10 +148,8 @@ func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAs
 			return nil, err
 		}
 
-		req.Query = query
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -162,6 +160,8 @@ func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAs
 
 			query.Signature = signature
 		}
+
+		req.Query = query
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)
@@ -194,7 +194,7 @@ func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTrade
 	}
 
 	{
-		query := &types.TradeFeeParams{
+		query := types.TradeFeeParams{
 			GetTradeFeeParam: param,
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
@@ -207,10 +207,8 @@ func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTrade
 			return nil, err
 		}
 
-		req.Query = query
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -221,6 +219,8 @@ func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTrade
 
 			query.Signature = signature
 		}
+
+		req.Query = query
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)
@@ -253,7 +253,7 @@ func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.Un
 	}
 
 	{
-		body := &types.UniversalTransferParams{
+		body := types.UniversalTransferParams{
 			UniversalTransferParam: param,
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
@@ -266,10 +266,8 @@ func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.Un
 			return nil, err
 		}
 
-		req.Body = body
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
 			}
@@ -280,6 +278,8 @@ func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.Un
 
 			body.Signature = signature
 		}
+
+		req.Body = body
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)
@@ -312,7 +312,7 @@ func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, para
 	}
 
 	{
-		query := &types.GetUniversalTransferHistoryParams{
+		query := types.GetUniversalTransferHistoryParams{
 			GetUniversalTransferHistoryParam: param,
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
@@ -325,10 +325,8 @@ func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, para
 			return nil, err
 		}
 
-		req.Query = query
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -339,6 +337,8 @@ func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, para
 
 			query.Signature = signature
 		}
+
+		req.Query = query
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)
@@ -371,7 +371,7 @@ func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetF
 	}
 
 	{
-		body := &types.GetFundingAssetParams{
+		body := types.GetFundingAssetParams{
 			GetFundingAssetParam: param,
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
@@ -384,10 +384,8 @@ func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetF
 			return nil, err
 		}
 
-		req.Body = body
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
 			}
@@ -398,6 +396,8 @@ func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetF
 
 			body.Signature = signature
 		}
+
+		req.Body = body
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)
@@ -430,7 +430,7 @@ func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUser
 	}
 
 	{
-		body := &types.GetUserAssetParams{
+		body := types.GetUserAssetParams{
 			GetUserAssetParam: param,
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
@@ -443,10 +443,8 @@ func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUser
 			return nil, err
 		}
 
-		req.Body = body
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
 			}
@@ -457,6 +455,8 @@ func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUser
 
 			body.Signature = signature
 		}
+
+		req.Body = body
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)
@@ -489,7 +489,7 @@ func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRe
 	}
 
 	{
-		query := &bnutils.DefaultParam{
+		query := bnutils.DefaultParam{
 			RecvWindow: s.GetRecvWindow(),
 			Timestamp:  time.Now().UnixMilli(),
 		}
@@ -499,10 +499,8 @@ func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRe
 			return nil, err
 		}
 
-		req.Query = query
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -513,6 +511,8 @@ func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRe
 
 			query.Signature = signature
 		}
+
+		req.Query = query
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)

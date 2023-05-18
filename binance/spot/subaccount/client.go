@@ -53,7 +53,7 @@ func (s *SpotSubAccountClient) GetSubAccountTransferHistory(ctx context.Context,
 	}
 
 	{
-		query := &types.GetSubAccountTransferHistoryParams{
+		query := types.GetSubAccountTransferHistoryParams{
 			GetSubAccountTransferHistoryParam: param,
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
@@ -66,10 +66,8 @@ func (s *SpotSubAccountClient) GetSubAccountTransferHistory(ctx context.Context,
 			return nil, err
 		}
 
-		req.Query = query
-
 		if need := s.NeedSignature(req.SecurityType); need {
-			signString, err := utils.NormalizeRequestContent(req)
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -80,6 +78,8 @@ func (s *SpotSubAccountClient) GetSubAccountTransferHistory(ctx context.Context,
 
 			query.Signature = signature
 		}
+
+		req.Query = query
 	}
 
 	resp, err := s.SendHTTPRequest(ctx, req)
