@@ -1,5 +1,7 @@
 package types
 
+import "github.com/linstohu/nexapi/binance/utils"
+
 type GetUserAssetParam struct {
 	Asset            string `url:"asset,omitempty" validate:"omitempty"`
 	NeedBtcValuation string `url:"needBtcValuation,omitempty" validate:"omitempty"`
@@ -7,7 +9,7 @@ type GetUserAssetParam struct {
 
 type GetUserAssetParams struct {
 	GetUserAssetParam
-	DefaultParam
+	utils.DefaultParam
 }
 
 type UserAsset struct {

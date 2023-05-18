@@ -12,6 +12,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/spot/utils"
 	"github.com/linstohu/nexapi/binance/spot/wallet/types"
+	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
 type SpotWalletClient struct {
@@ -78,7 +79,7 @@ func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinIn
 	}
 
 	{
-		query := &types.DefaultParam{
+		query := &bnutils.DefaultParam{
 			RecvWindow: s.GetRecvWindow(),
 			Timestamp:  time.Now().UnixMilli(),
 		}
@@ -136,7 +137,7 @@ func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAs
 	{
 		query := &types.AssetDetailParams{
 			GetAssetDetailParam: param,
-			DefaultParam: types.DefaultParam{
+			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
@@ -195,7 +196,7 @@ func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTrade
 	{
 		query := &types.TradeFeeParams{
 			GetTradeFeeParam: param,
-			DefaultParam: types.DefaultParam{
+			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
@@ -254,7 +255,7 @@ func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.Un
 	{
 		body := &types.UniversalTransferParams{
 			UniversalTransferParam: param,
-			DefaultParam: types.DefaultParam{
+			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
@@ -313,7 +314,7 @@ func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, para
 	{
 		query := &types.GetUniversalTransferHistoryParams{
 			GetUniversalTransferHistoryParam: param,
-			DefaultParam: types.DefaultParam{
+			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
@@ -372,7 +373,7 @@ func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetF
 	{
 		body := &types.GetFundingAssetParams{
 			GetFundingAssetParam: param,
-			DefaultParam: types.DefaultParam{
+			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
@@ -431,7 +432,7 @@ func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUser
 	{
 		body := &types.GetUserAssetParams{
 			GetUserAssetParam: param,
-			DefaultParam: types.DefaultParam{
+			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: s.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
@@ -488,7 +489,7 @@ func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRe
 	}
 
 	{
-		query := &types.DefaultParam{
+		query := &bnutils.DefaultParam{
 			RecvWindow: s.GetRecvWindow(),
 			Timestamp:  time.Now().UnixMilli(),
 		}

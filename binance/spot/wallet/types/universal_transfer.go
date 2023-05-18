@@ -1,5 +1,7 @@
 package types
 
+import "github.com/linstohu/nexapi/binance/utils"
+
 type UniversalTransferParam struct {
 	Type       TransferType `url:"type" validate:"required"`
 	Asset      string       `url:"asset" validate:"required"`
@@ -46,7 +48,7 @@ const (
 
 type UniversalTransferParams struct {
 	UniversalTransferParam
-	DefaultParam
+	utils.DefaultParam
 }
 
 type UniversalTransferResp struct {
@@ -65,7 +67,7 @@ type GetUniversalTransferHistoryParam struct {
 
 type GetUniversalTransferHistoryParams struct {
 	GetUniversalTransferHistoryParam
-	DefaultParam
+	utils.DefaultParam
 }
 
 type GetUniversalTransferHistory struct {

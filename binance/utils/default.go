@@ -1,4 +1,4 @@
-package types
+package utils
 
 type DefaultParam struct {
 	RecvWindow int    `url:"recvWindow,omitempty" validate:"omitempty"`

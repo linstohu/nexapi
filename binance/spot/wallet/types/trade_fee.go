@@ -1,12 +1,14 @@
 package types
 
+import "github.com/linstohu/nexapi/binance/utils"
+
 type GetTradeFeeParam struct {
 	Symbol string `url:"symbol,omitempty" validate:"omitempty"`
 }
 
 type TradeFeeParams struct {
 	GetTradeFeeParam
-	DefaultParam
+	utils.DefaultParam
 }
 
 type TradeFee struct {
