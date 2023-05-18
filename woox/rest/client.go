@@ -207,8 +207,22 @@ func (w *WooXRestClient) GenV3APIAuthHeaders(req types.HTTPRequest) (map[string]
 		strBody = string(jsonBody)
 	}
 
+	path := req.Path
+	if req.Query != nil {
+		// attention: do not forget url tag after struct's fields
+		q, err := query.Values(req.Query)
+		if err != nil {
+			return nil, err
+		}
+
+		encode := q.Encode()
+		if encode != "" {
+			path = fmt.Sprintf("%s?%s", req.Path, encode)
+		}
+	}
+
 	timestamp := time.Now().UnixMilli()
-	signString := fmt.Sprintf("%d%s%s%s", timestamp, req.Method, req.Path, strBody)
+	signString := fmt.Sprintf("%d%s%s%s", timestamp, req.Method, path, strBody)
 
 	h := hmac.New(sha256.New, []byte(w.secret))
 	h.Write([]byte(signString))
