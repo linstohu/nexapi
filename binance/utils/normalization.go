@@ -4,7 +4,7 @@ import (
 	goquery "github.com/google/go-querystring/query"
 )
 
-func NormalizeRequestContent(query interface{}, body interface{}) (string, error) {
+func NormalizeRequestContent(query any, body any) (string, error) {
 	var ret string
 
 	if query != nil {

@@ -48,7 +48,7 @@ func TestSubscribeOrderbook(t *testing.T) {
 	topic, err := cli.GetOrderbookTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		book, ok := e.(*types.Orderbook)
 		if !ok {
 			return
@@ -76,7 +76,7 @@ func TestSubscribeTrade(t *testing.T) {
 	topic, err := cli.GetTradeTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		trade, ok := e.(*types.Trade)
 		if !ok {
 			return
@@ -100,7 +100,7 @@ func TestSubscribeTickerForSymbol(t *testing.T) {
 	topic, err := cli.GetTickerTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		ticker, ok := e.(*types.Ticker24H)
 		if !ok {
 			return
@@ -124,7 +124,7 @@ func TestSubscribeTickers(t *testing.T) {
 	topic, err := cli.GetAllTickersTopic()
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		tickers, ok := e.(*types.Tickers)
 		if !ok {
 			return
@@ -150,7 +150,7 @@ func TestSubscribeBBOForSymbol(t *testing.T) {
 	topic, err := cli.GetBboTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		bbo, ok := e.(*types.BBO)
 		if !ok {
 			return
@@ -174,7 +174,7 @@ func TestSubscribeBBOs(t *testing.T) {
 	topic, err := cli.GetAllBbosTopic()
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		bbos, ok := e.(*types.AllBBO)
 		if !ok {
 			return
@@ -203,7 +203,7 @@ func TestSubscribeKline(t *testing.T) {
 	})
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		kline, ok := e.(*types.Kline)
 		if !ok {
 			return
@@ -227,7 +227,7 @@ func TestSubscribeIndexPrice(t *testing.T) {
 	topic, err := cli.GetIndexPriceTopic("SPOT_ETH_USDT")
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		indexPrice, ok := e.(*types.IndexPrice)
 		if !ok {
 			return
@@ -250,7 +250,7 @@ func TestSubscribeMarkPrice(t *testing.T) {
 	topic, err := cli.GetMarkPriceTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		mp, ok := e.(*types.MarkPrice)
 		if !ok {
 			return
@@ -273,7 +273,7 @@ func TestSubscribeAllMarkPrice(t *testing.T) {
 	topic, err := cli.GetMarkPricesTopic()
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		s, ok := e.(*types.MarkPrices)
 		if !ok {
 			return
@@ -298,7 +298,7 @@ func TestSubscribeOpenInterest(t *testing.T) {
 	topic, err := cli.GetOpenInterestTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		oi, ok := e.(*types.OpenInterest)
 		if !ok {
 			return
@@ -321,7 +321,7 @@ func TestSubscribeEstFundingRate(t *testing.T) {
 	topic, err := cli.GetEstFundingRateTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
 
-	cli.AddListener(topic, func(e interface{}) {
+	cli.AddListener(topic, func(e any) {
 		rate, ok := e.(*types.EstFundingRate)
 		if !ok {
 			return

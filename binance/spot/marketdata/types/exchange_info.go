@@ -19,7 +19,6 @@ type ExchangeInfo struct {
 		IntervalNum   int    `json:"intervalNum"`
 		Limit         int    `json:"limit"`
 	} `json:"rateLimits"`
-	ExchangeFilters []interface{} `json:"exchangeFilters"`
 	Symbols         []struct {
 		Symbol                     string   `json:"symbol"`
 		Status                     string   `json:"status"`

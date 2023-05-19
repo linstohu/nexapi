@@ -105,7 +105,7 @@ func TestGetKlines(t *testing.T) {
 
 	_, err := cli.GetKlines(context.TODO(), types.GetKlineParam{
 		Symbol:   "BTCUSDT",
-		Interval: types.Minute1,
+		Interval: utils.Minute1,
 		Limit:    1,
 	})
 	assert.Nil(t, err)

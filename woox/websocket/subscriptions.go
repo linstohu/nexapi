@@ -34,7 +34,7 @@ func (w *WooXWebsocketClient) UnSubscribe(topics []string) error {
 
 func (w *WooXWebsocketClient) handle(msg *types.SubscribedMessage) error {
 	if w.debug {
-		w.logger.Printf("woox subscribed message, topic: %s, timestamp: %v", msg.Topic, msg.Timestamp)
+		w.logger.Printf("subscribed message, topic: %s, timestamp: %v", msg.Topic, msg.Timestamp)
 	}
 
 	switch {

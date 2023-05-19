@@ -8,9 +8,9 @@ import (
 )
 
 type Request struct {
-	ID    string `json:"id,omitempty"`
-	Topic string `json:"topic,omitempty"`
-	Event string `json:"event,omitempty"`
+	ID     uint32   `json:"id,omitempty"`
+	Method string   `json:"method,omitempty"`
+	Params []string `json:"params,omitempty"`
 }
 
 // AnyMessage represents either a JSON Response or SubscribedMessage.
@@ -20,17 +20,13 @@ type AnyMessage struct {
 }
 
 type Response struct {
-	ID        string `json:"id"`
-	Event     string `json:"event"`
-	Success   bool   `json:"success"`
-	Timestamp int64  `json:"ts"`
+	ID     uint `json:"id"`
+	Result any  `json:"result"`
 }
 
 type SubscribedMessage struct {
-	OriginData []byte
-	Topic      string          `json:"topic"`
-	Data       json.RawMessage `json:"data"`
-	Timestamp  int64           `json:"ts"`
+	Stream string          `json:"stream"`
+	Data   json.RawMessage `json:"data"`
 }
 
 func (m AnyMessage) MarshalJSON() ([]byte, error) {
@@ -47,7 +43,7 @@ func (m AnyMessage) MarshalJSON() ([]byte, error) {
 		return json.Marshal(v)
 	}
 
-	return nil, errors.New("woox websocket: message must have exactly one of the Response or SubscribedMessage fields set")
+	return nil, errors.New("message must have exactly one of the Response or SubscribedMessage fields set")
 }
 
 func (m *AnyMessage) UnmarshalJSON(data []byte) error {
@@ -57,7 +53,7 @@ func (m *AnyMessage) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	if v.Exists("event") {
+	if v.Exists("id") {
 		var resp Response
 
 		if err := json.Unmarshal(data, &resp); err != nil {
@@ -69,15 +65,10 @@ func (m *AnyMessage) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	if v.Exists("topic") {
-		des := make([]byte, len(data))
-		copy(des, data)
-
+	if v.Exists("stream") {
 		var msg = &SubscribedMessage{
-			OriginData: des,
-			Topic:      string(v.GetStringBytes("topic")),
-			Timestamp:  v.GetInt64("ts"),
-			Data:       v.GetStringBytes("data"),
+			Stream: string(v.GetStringBytes("stream")),
+			Data:   v.Get("data").MarshalTo(nil),
 		}
 
 		m.SubscribedMessage = msg

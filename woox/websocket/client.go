@@ -76,6 +76,7 @@ func NewWooXWebsocketClient(ctx context.Context, cfg *WooXWebsocketCfg) (*WooXWe
 
 	if cli.logger == nil {
 		cli.logger = log.Default()
+		cli.logger.SetPrefix("woox-websocket")
 	}
 
 	err := cli.start()
@@ -96,7 +97,7 @@ func (w *WooXWebsocketClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := w.connect()
 		if err != nil {
-			w.logger.Printf("woox connect error, times(%v), error: %s", i, err.Error())
+			w.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -140,7 +141,7 @@ func (w *WooXWebsocketClient) reconnect() {
 
 	w.setIsConnected(false)
 
-	w.logger.Printf("woox disconnect, then reconnect...")
+	w.logger.Printf("disconnect, then reconnect...")
 
 	close(w.heartCancel)
 
@@ -148,7 +149,7 @@ func (w *WooXWebsocketClient) reconnect() {
 
 	select {
 	case <-w.ctx.Done():
-		w.logger.Printf("woox never reconnect, %s", w.ctx.Err())
+		w.logger.Printf("never reconnect, %s", w.ctx.Err())
 		return
 	default:
 		w.start()
@@ -164,7 +165,7 @@ func (w *WooXWebsocketClient) close(cause error) error {
 		return err
 	}
 
-	w.logger.Printf("woox websocket connection closed, %s", cause.Error())
+	w.logger.Printf("websocket connection closed, %s", cause.Error())
 
 	return nil
 }
@@ -220,14 +221,14 @@ func (w *WooXWebsocketClient) readMessages() {
 			case m.SubscribedMessage != nil:
 				err := w.handle(m.SubscribedMessage)
 				if err != nil {
-					w.logger.Printf("woox read messages error: %s", err.Error())
+					w.logger.Printf("read messages error: %s", err.Error())
 				}
 			}
 		}
 	}
 }
 
-func (w *WooXWebsocketClient) readObject(v interface{}) error {
+func (w *WooXWebsocketClient) readObject(v any) error {
 	err := wsjson.Read(context.Background(), w.conn, v)
 	if e, ok := err.(*websocket.CloseError); ok {
 		if e.Code == websocket.StatusNormalClosure && e.Error() == io.ErrUnexpectedEOF.Error() {
@@ -239,18 +240,18 @@ func (w *WooXWebsocketClient) readObject(v interface{}) error {
 }
 
 func (w *WooXWebsocketClient) resubscribe() error {
-	var publicChannels []string
+	var topics []string
 
 	for _, v := range w.subscriptions {
 		if ok := w.subscriptionsMap.Has(v); ok {
 			continue
 		}
 
-		publicChannels = append(publicChannels, v)
+		topics = append(topics, v)
 	}
 
 	// do subscription
-	for _, v := range publicChannels {
+	for _, v := range topics {
 		err := w.send(&types.Request{
 			ID:    genClientID(),
 			Topic: v,
@@ -268,18 +269,18 @@ func (w *WooXWebsocketClient) resubscribe() error {
 }
 
 func (w *WooXWebsocketClient) subscribe(channels []string) error {
-	var publicChannels []string
+	var topics []string
 
 	for _, v := range channels {
 		if ok := w.subscriptionsMap.Has(v); ok {
 			continue
 		}
 
-		publicChannels = append(publicChannels, v)
+		topics = append(topics, v)
 	}
 
 	// do subscription
-	for _, v := range publicChannels {
+	for _, v := range topics {
 		err := w.send(&types.Request{
 			ID:    genClientID(),
 			Topic: v,
@@ -322,7 +323,7 @@ func (w *WooXWebsocketClient) send(req *types.Request) error {
 		return errors.New("woox: connection is closed")
 	}
 
-	return wsjson.Write(context.Background(), w.conn, req)
+	return wsjson.Write(context.TODO(), w.conn, req)
 }
 
 func genClientID() string {

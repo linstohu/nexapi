@@ -5,8 +5,8 @@ type HTTPRequest struct {
 	Path    string
 	Method  string
 	Headers map[string]string
-	Query   interface{}
-	Body    interface{}
+	Query   any
+	Body    any
 	Debug   bool
 }
 
