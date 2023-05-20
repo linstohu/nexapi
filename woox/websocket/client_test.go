@@ -64,6 +64,14 @@ func TestSubscribeOrderbook(t *testing.T) {
 
 	cli.Subscribe([]string{topic})
 
+	time.Sleep(3 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
+
+	time.Sleep(5 * time.Second)
+
+	cli.Subscribe([]string{topic})
+
 	select {}
 }
 
@@ -88,6 +96,10 @@ func TestSubscribeTrade(t *testing.T) {
 
 	cli.Subscribe([]string{topic})
 
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
+
 	select {}
 }
 
@@ -111,6 +123,10 @@ func TestSubscribeTickerForSymbol(t *testing.T) {
 	})
 
 	cli.Subscribe([]string{topic})
+
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
 
 	select {}
 }
@@ -138,6 +154,10 @@ func TestSubscribeTickers(t *testing.T) {
 
 	cli.Subscribe([]string{topic})
 
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
+
 	select {}
 }
 
@@ -161,6 +181,10 @@ func TestSubscribeBBOForSymbol(t *testing.T) {
 	})
 
 	cli.Subscribe([]string{topic})
+
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
 
 	select {}
 }
@@ -187,6 +211,10 @@ func TestSubscribeBBOs(t *testing.T) {
 	})
 
 	cli.Subscribe([]string{topic})
+
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
 
 	select {}
 }
@@ -215,6 +243,10 @@ func TestSubscribeKline(t *testing.T) {
 
 	cli.Subscribe([]string{topic})
 
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
+
 	select {}
 }
 
@@ -238,6 +270,10 @@ func TestSubscribeIndexPrice(t *testing.T) {
 
 	cli.Subscribe([]string{topic})
 
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
+
 	select {}
 }
 
@@ -260,6 +296,10 @@ func TestSubscribeMarkPrice(t *testing.T) {
 	})
 
 	cli.Subscribe([]string{topic})
+
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
 
 	select {}
 }
@@ -286,6 +326,10 @@ func TestSubscribeAllMarkPrice(t *testing.T) {
 
 	cli.Subscribe([]string{topic})
 
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
+
 	select {}
 }
 
@@ -309,6 +353,10 @@ func TestSubscribeOpenInterest(t *testing.T) {
 
 	cli.Subscribe([]string{topic})
 
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
+
 	select {}
 }
 
@@ -331,6 +379,10 @@ func TestSubscribeEstFundingRate(t *testing.T) {
 	})
 
 	cli.Subscribe([]string{topic})
+
+	time.Sleep(5 * time.Second)
+
+	cli.UnSubscribe([]string{topic})
 
 	select {}
 }

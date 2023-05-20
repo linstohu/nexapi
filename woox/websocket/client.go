@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -13,10 +12,9 @@ import (
 
 	"github.com/chuckpreslar/emission"
 	"github.com/go-playground/validator"
+	"github.com/gorilla/websocket"
 	"github.com/linstohu/nexapi/woox/websocket/types"
 	cmap "github.com/orcaman/concurrent-map/v2"
-	"nhooyr.io/websocket"
-	"nhooyr.io/websocket/wsjson"
 )
 
 type WooXWebsocketClient struct {
@@ -36,10 +34,8 @@ type WooXWebsocketClient struct {
 	heartCancel   chan struct{}
 	disconnect    chan struct{}
 
-	sending sync.Mutex
-
-	subscriptions    []string
-	subscriptionsMap cmap.ConcurrentMap[string, struct{}]
+	sending       sync.Mutex
+	subscriptions cmap.ConcurrentMap[string, struct{}]
 
 	emitter *emission.Emitter
 }
@@ -70,7 +66,7 @@ func NewWooXWebsocketClient(ctx context.Context, cfg *WooXWebsocketCfg) (*WooXWe
 		ctx:           ctx,
 		autoReconnect: true,
 
-		subscriptions: make([]string, 0),
+		subscriptions: cmap.New[struct{}](),
 		emitter:       emission.NewEmitter(),
 	}
 
@@ -92,7 +88,6 @@ func (w *WooXWebsocketClient) start() error {
 	w.setIsConnected(false)
 	w.heartCancel = make(chan struct{})
 	w.disconnect = make(chan struct{})
-	w.subscriptionsMap = cmap.New[struct{}]()
 
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := w.connect()
@@ -128,7 +123,7 @@ func (w *WooXWebsocketClient) connect() (*websocket.Conn, *http.Response, error)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	conn, resp, err := websocket.Dial(ctx, w.baseURL+w.applicationID, &websocket.DialOptions{})
+	conn, resp, err := websocket.DefaultDialer.DialContext(ctx, w.baseURL+w.applicationID, nil)
 	if err == nil {
 		conn.SetReadLimit(32768 * 64)
 	}
@@ -157,15 +152,13 @@ func (w *WooXWebsocketClient) reconnect() {
 }
 
 // close closes the websocket connection
-func (w *WooXWebsocketClient) close(cause error) error {
+func (w *WooXWebsocketClient) close() error {
 	close(w.disconnect)
 
-	err := w.conn.Close(websocket.StatusNormalClosure, cause.Error())
+	err := w.conn.Close()
 	if err != nil {
 		return err
 	}
-
-	w.logger.Printf("websocket connection closed, %s", cause.Error())
 
 	return nil
 }
@@ -205,21 +198,31 @@ func (w *WooXWebsocketClient) readMessages() {
 	for {
 		select {
 		case <-w.ctx.Done():
-			w.close(w.ctx.Err())
+			w.logger.Println(w.ctx.Err())
+
+			if err := w.close(); err != nil {
+				w.logger.Printf("websocket connection closed error, %s", err.Error())
+			}
+
 			return
 		default:
-			var m types.AnyMessage
-			err := w.readObject(&m)
+			var msg types.AnyMessage
+			err := w.conn.ReadJSON(&msg)
 			if err != nil {
-				w.close(fmt.Errorf("woox read object error, %s", err))
+				w.logger.Printf("read object error, %s", err)
+
+				if err := w.close(); err != nil {
+					w.logger.Printf("websocket connection closed error, %s", err.Error())
+				}
+
 				return
 			}
 
 			switch {
-			case m.Response != nil:
+			case msg.Response != nil:
 				// todo
-			case m.SubscribedMessage != nil:
-				err := w.handle(m.SubscribedMessage)
+			case msg.SubscribedMessage != nil:
+				err := w.handle(msg.SubscribedMessage)
 				if err != nil {
 					w.logger.Printf("read messages error: %s", err.Error())
 				}
@@ -228,61 +231,17 @@ func (w *WooXWebsocketClient) readMessages() {
 	}
 }
 
-func (w *WooXWebsocketClient) readObject(v any) error {
-	err := wsjson.Read(context.Background(), w.conn, v)
-	if e, ok := err.(*websocket.CloseError); ok {
-		if e.Code == websocket.StatusNormalClosure && e.Error() == io.ErrUnexpectedEOF.Error() {
-			// unwrapping this error.
-			err = io.ErrUnexpectedEOF
-		}
-	}
-	return err
-}
-
 func (w *WooXWebsocketClient) resubscribe() error {
-	var topics []string
+	topics := w.subscriptions.Keys()
 
-	for _, v := range w.subscriptions {
-		if ok := w.subscriptionsMap.Has(v); ok {
-			continue
-		}
-
-		topics = append(topics, v)
+	if len(topics) == 0 {
+		return nil
 	}
 
 	// do subscription
 	for _, v := range topics {
 		err := w.send(&types.Request{
-			ID:    genClientID(),
-			Topic: v,
-			Event: "subscribe",
-		})
-
-		if err != nil {
-			return err
-		}
-
-		w.subscriptionsMap.Set(v, struct{}{})
-	}
-
-	return nil
-}
-
-func (w *WooXWebsocketClient) subscribe(channels []string) error {
-	var topics []string
-
-	for _, v := range channels {
-		if ok := w.subscriptionsMap.Has(v); ok {
-			continue
-		}
-
-		topics = append(topics, v)
-	}
-
-	// do subscription
-	for _, v := range topics {
-		err := w.send(&types.Request{
-			ID:    genClientID(),
+			ID:    fmt.Sprintf("ClientID%d", rand.Intn(100)),
 			Topic: v,
 			Event: SUBSCRIBE,
 		})
@@ -290,8 +249,36 @@ func (w *WooXWebsocketClient) subscribe(channels []string) error {
 		if err != nil {
 			return err
 		}
+	}
 
-		w.subscriptionsMap.Set(v, struct{}{})
+	return nil
+}
+
+func (w *WooXWebsocketClient) subscribe(topics []string) error {
+	ts := make([]string, 0)
+
+	for _, topic := range topics {
+		if w.subscriptions.Has(topic) {
+			continue
+		}
+		ts = append(ts, topic)
+	}
+
+	if len(ts) == 0 {
+		return nil
+	}
+
+	// do subscription
+	for _, v := range ts {
+		err := w.send(&types.Request{
+			ID:    fmt.Sprintf("ClientID%d", rand.Intn(100)),
+			Topic: v,
+			Event: SUBSCRIBE,
+		})
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -300,7 +287,7 @@ func (w *WooXWebsocketClient) subscribe(channels []string) error {
 func (w *WooXWebsocketClient) unsubscribe(channels []string) error {
 	for _, v := range channels {
 		err := w.send(&types.Request{
-			ID:    genClientID(),
+			ID:    fmt.Sprintf("ClientID%d", rand.Intn(100)),
 			Topic: v,
 			Event: UNSUBSCRIBE,
 		})
@@ -309,7 +296,7 @@ func (w *WooXWebsocketClient) unsubscribe(channels []string) error {
 			return err
 		}
 
-		w.subscriptionsMap.Remove(v)
+		w.subscriptions.Remove(v)
 	}
 
 	return nil
@@ -320,12 +307,8 @@ func (w *WooXWebsocketClient) send(req *types.Request) error {
 	defer w.sending.Unlock()
 
 	if !w.IsConnected() {
-		return errors.New("woox: connection is closed")
+		return errors.New("connection is closed")
 	}
 
-	return wsjson.Write(context.TODO(), w.conn, req)
-}
-
-func genClientID() string {
-	return fmt.Sprintf("ClientID%d", rand.Intn(100))
+	return w.conn.WriteJSON(req)
 }

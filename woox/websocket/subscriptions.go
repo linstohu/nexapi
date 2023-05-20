@@ -9,26 +9,10 @@ import (
 )
 
 func (w *WooXWebsocketClient) Subscribe(topics []string) error {
-	w.subscriptions = append(w.subscriptions, topics...)
 	return w.subscribe(topics)
 }
 
 func (w *WooXWebsocketClient) UnSubscribe(topics []string) error {
-	channelMap := make(map[string]struct{})
-	for _, v := range topics {
-		channelMap[v] = struct{}{}
-	}
-
-	subscriptions := make([]string, 0)
-
-	for _, v := range w.subscriptions {
-		if _, ok := channelMap[v]; !ok {
-			subscriptions = append(subscriptions, v)
-		}
-	}
-
-	w.subscriptions = subscriptions
-
 	return w.unsubscribe(topics)
 }
 

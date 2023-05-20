@@ -62,6 +62,7 @@ func NewWooXRestClient(cfg *WooXRestClientCfg) (*WooXRestClient, error) {
 
 	if cli.logger == nil {
 		cli.logger = log.Default()
+		cli.logger.SetPrefix("woox-rest-api")
 	}
 
 	return &cli, nil
