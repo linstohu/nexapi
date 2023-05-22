@@ -16,7 +16,7 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
-type SpotMarketStreamClient struct {
+type USDMarginedMarketStreamClient struct {
 	baseURL string
 	// debug mode
 	debug bool
@@ -37,19 +37,19 @@ type SpotMarketStreamClient struct {
 	emitter *emission.Emitter
 }
 
-type SpotMarketStreamCfg struct {
+type USDMarginedMarketStreamCfg struct {
 	BaseURL string `validate:"required"`
 	Debug   bool
 	// Logger
 	Logger *log.Logger
 }
 
-func NewSpotMarketStreamClient(ctx context.Context, cfg *SpotMarketStreamCfg) (*SpotMarketStreamClient, error) {
+func NewMarketStreamClient(ctx context.Context, cfg *USDMarginedMarketStreamCfg) (*USDMarginedMarketStreamClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
 
-	cli := &SpotMarketStreamClient{
+	cli := &USDMarginedMarketStreamClient{
 		baseURL: cfg.BaseURL,
 		debug:   cfg.Debug,
 		logger:  cfg.Logger,
@@ -63,7 +63,7 @@ func NewSpotMarketStreamClient(ctx context.Context, cfg *SpotMarketStreamCfg) (*
 
 	if cli.logger == nil {
 		cli.logger = log.Default()
-		cli.logger.SetPrefix("binance-spot-market-streams")
+		cli.logger.SetPrefix("binance_USDⓈ-M-Futures_market_streams")
 	}
 
 	err := cli.start()
@@ -74,44 +74,44 @@ func NewSpotMarketStreamClient(ctx context.Context, cfg *SpotMarketStreamCfg) (*
 	return cli, nil
 }
 
-func (m *SpotMarketStreamClient) start() error {
-	m.conn = nil
-	m.setIsConnected(false)
-	m.disconnect = make(chan struct{})
+func (u *USDMarginedMarketStreamClient) start() error {
+	u.conn = nil
+	u.setIsConnected(false)
+	u.disconnect = make(chan struct{})
 
 	for i := 0; i < MaxTryTimes; i++ {
-		conn, _, err := m.connect()
+		conn, _, err := u.connect()
 		if err != nil {
-			m.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
+			u.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
 		}
-		m.conn = conn
+		u.conn = conn
 		break
 	}
-	if m.conn == nil {
+	if u.conn == nil {
 		return errors.New("connect failed")
 	}
 
-	m.setIsConnected(true)
+	u.setIsConnected(true)
 
-	m.resubscribe()
+	u.resubscribe()
 
-	if m.autoReconnect {
-		go m.reconnect()
+	if u.autoReconnect {
+		go u.reconnect()
 	}
 
-	go m.readMessages()
+	go u.readMessages()
 
 	return nil
 }
 
-func (m *SpotMarketStreamClient) connect() (*websocket.Conn, *http.Response, error) {
+func (u *USDMarginedMarketStreamClient) connect() (*websocket.Conn, *http.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	conn, resp, err := websocket.DefaultDialer.DialContext(ctx, m.baseURL+CombinedStreamRouter, nil)
+	conn, resp, err := websocket.DefaultDialer.DialContext(ctx, u.baseURL+CombinedStreamRouter, nil)
 	if err == nil {
 		conn.SetReadLimit(32768 * 64)
 	}
@@ -119,29 +119,29 @@ func (m *SpotMarketStreamClient) connect() (*websocket.Conn, *http.Response, err
 	return conn, resp, err
 }
 
-func (m *SpotMarketStreamClient) reconnect() {
-	<-m.disconnect
+func (u *USDMarginedMarketStreamClient) reconnect() {
+	<-u.disconnect
 
-	m.setIsConnected(false)
+	u.setIsConnected(false)
 
-	m.logger.Println("disconnect, then reconnect...")
+	u.logger.Println("disconnect, then reconnect...")
 
 	time.Sleep(1 * time.Second)
 
 	select {
-	case <-m.ctx.Done():
-		m.logger.Printf("never reconnect, %s", m.ctx.Err())
+	case <-u.ctx.Done():
+		u.logger.Printf("never reconnect, %s", u.ctx.Err())
 		return
 	default:
-		m.start()
+		u.start()
 	}
 }
 
 // close closes the websocket connection
-func (m *SpotMarketStreamClient) close() error {
-	close(m.disconnect)
+func (u *USDMarginedMarketStreamClient) close() error {
+	close(u.disconnect)
 
-	err := m.conn.Close()
+	err := u.conn.Close()
 	if err != nil {
 		return err
 	}
@@ -150,40 +150,40 @@ func (m *SpotMarketStreamClient) close() error {
 }
 
 // setIsConnected sets state for isConnected
-func (m *SpotMarketStreamClient) setIsConnected(state bool) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (u *USDMarginedMarketStreamClient) setIsConnected(state bool) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
 
-	m.isConnected = state
+	u.isConnected = state
 }
 
 // IsConnected returns the WebSocket connection state
-func (m *SpotMarketStreamClient) IsConnected() bool {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
+func (u *USDMarginedMarketStreamClient) IsConnected() bool {
+	u.mu.RLock()
+	defer u.mu.RUnlock()
 
-	return m.isConnected
+	return u.isConnected
 }
 
-func (m *SpotMarketStreamClient) readMessages() {
+func (u *USDMarginedMarketStreamClient) readMessages() {
 	for {
 		select {
-		case <-m.ctx.Done():
-			m.logger.Println(m.ctx.Err())
+		case <-u.ctx.Done():
+			u.logger.Println(u.ctx.Err())
 
-			if err := m.close(); err != nil {
-				m.logger.Printf("websocket connection closed error, %s", err.Error())
+			if err := u.close(); err != nil {
+				u.logger.Printf("websocket connection closed error, %s", err.Error())
 			}
 
 			return
 		default:
 			var msg utils.AnyMessage
-			err := m.conn.ReadJSON(&msg)
+			err := u.conn.ReadJSON(&msg)
 			if err != nil {
-				m.logger.Printf("read object error, %s", err)
+				u.logger.Printf("read object error, %s", err)
 
-				if err := m.close(); err != nil {
-					m.logger.Printf("websocket connection closed error, %s", err.Error())
+				if err := u.close(); err != nil {
+					u.logger.Printf("websocket connection closed error, %s", err.Error())
 				}
 
 				return
@@ -193,24 +193,24 @@ func (m *SpotMarketStreamClient) readMessages() {
 			case msg.Response != nil:
 				// todo
 			case msg.SubscribedMessage != nil:
-				err := m.handle(msg.SubscribedMessage)
+				err := u.handle(msg.SubscribedMessage)
 				if err != nil {
-					m.logger.Printf("read messages error: %s", err.Error())
+					u.logger.Printf("read messages error: %s", err.Error())
 				}
 			}
 		}
 	}
 }
 
-func (m *SpotMarketStreamClient) resubscribe() error {
-	topics := m.subscriptions.Keys()
+func (u *USDMarginedMarketStreamClient) resubscribe() error {
+	topics := u.subscriptions.Keys()
 
 	if len(topics) == 0 {
 		return nil
 	}
 
 	// do subscription
-	err := m.send(&utils.Request{
+	err := u.send(&utils.Request{
 		ID:     rand.Uint32(),
 		Method: SUBSCRIBE,
 		Params: topics,
@@ -223,11 +223,11 @@ func (m *SpotMarketStreamClient) resubscribe() error {
 	return nil
 }
 
-func (m *SpotMarketStreamClient) subscribe(topics []string) error {
+func (u *USDMarginedMarketStreamClient) subscribe(topics []string) error {
 	ts := make([]string, 0)
 
 	for _, topic := range topics {
-		if m.subscriptions.Has(topic) {
+		if u.subscriptions.Has(topic) {
 			continue
 		}
 		ts = append(ts, topic)
@@ -238,7 +238,7 @@ func (m *SpotMarketStreamClient) subscribe(topics []string) error {
 	}
 
 	// do subscription
-	err := m.send(&utils.Request{
+	err := u.send(&utils.Request{
 		ID:     rand.Uint32(),
 		Method: SUBSCRIBE,
 		Params: ts,
@@ -249,14 +249,14 @@ func (m *SpotMarketStreamClient) subscribe(topics []string) error {
 	}
 
 	for _, v := range ts {
-		m.subscriptions.Set(v, struct{}{})
+		u.subscriptions.Set(v, struct{}{})
 	}
 
 	return nil
 }
 
-func (m *SpotMarketStreamClient) unsubscribe(topics []string) error {
-	err := m.send(&utils.Request{
+func (u *USDMarginedMarketStreamClient) unsubscribe(topics []string) error {
+	err := u.send(&utils.Request{
 		ID:     rand.Uint32(),
 		Method: UNSUBSCRIBE,
 		Params: topics,
@@ -267,19 +267,19 @@ func (m *SpotMarketStreamClient) unsubscribe(topics []string) error {
 	}
 
 	for _, v := range topics {
-		m.subscriptions.Remove(v)
+		u.subscriptions.Remove(v)
 	}
 
 	return nil
 }
 
-func (m *SpotMarketStreamClient) send(req *utils.Request) error {
-	m.sending.Lock()
-	defer m.sending.Unlock()
+func (u *USDMarginedMarketStreamClient) send(req *utils.Request) error {
+	u.sending.Lock()
+	defer u.sending.Unlock()
 
-	if !m.IsConnected() {
+	if !u.IsConnected() {
 		return errors.New("connection is closed")
 	}
 
-	return m.conn.WriteJSON(req)
+	return u.conn.WriteJSON(req)
 }

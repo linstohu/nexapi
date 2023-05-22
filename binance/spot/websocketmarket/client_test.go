@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewMarketStreamClient(ctx context.Context, t *testing.T) *MarketStreamClient {
-	cli, err := NewMarketStreamClient(ctx, &MarketStreamCfg{
-		BaseURL: MarketStreamBaseURL,
+func testNewSpotMarketStreamClient(ctx context.Context, t *testing.T) *SpotMarketStreamClient {
+	cli, err := NewSpotMarketStreamClient(ctx, &SpotMarketStreamCfg{
+		BaseURL: SpotMarketStreamBaseURL,
 		Debug:   true,
 	})
 
@@ -26,7 +26,7 @@ func TestSubscribeAggTrade(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewSpotMarketStreamClient(ctx, t)
 
 	topic, err := cli.GetAggTradeTopic("btcusdt")
 	assert.Nil(t, err)

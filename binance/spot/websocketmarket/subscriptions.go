@@ -6,17 +6,18 @@ import (
 	"strings"
 
 	"github.com/linstohu/nexapi/binance/spot/websocketmarket/types"
+	"github.com/linstohu/nexapi/binance/utils"
 )
 
-func (m *MarketStreamClient) Subscribe(topics []string) error {
+func (m *SpotMarketStreamClient) Subscribe(topics []string) error {
 	return m.subscribe(topics)
 }
 
-func (m *MarketStreamClient) UnSubscribe(topics []string) error {
+func (m *SpotMarketStreamClient) UnSubscribe(topics []string) error {
 	return m.unsubscribe(topics)
 }
 
-func (m *MarketStreamClient) handle(msg *types.SubscribedMessage) error {
+func (m *SpotMarketStreamClient) handle(msg *utils.SubscribedMessage) error {
 	if m.debug {
 		m.logger.Printf("subscribed message, stream: %s", msg.Stream)
 	}
@@ -56,7 +57,7 @@ func (m *MarketStreamClient) handle(msg *types.SubscribedMessage) error {
 		if err != nil {
 			return err
 		}
-		m.GetListeners(msg.Stream, &data)
+		m.GetListeners(msg.Stream, data)
 	case strings.HasSuffix(msg.Stream, "@ticker"):
 		var data types.Ticker
 		err := json.Unmarshal(msg.Data, &data)
@@ -70,7 +71,7 @@ func (m *MarketStreamClient) handle(msg *types.SubscribedMessage) error {
 		if err != nil {
 			return err
 		}
-		m.GetListeners(msg.Stream, &data)
+		m.GetListeners(msg.Stream, data)
 	case strings.HasSuffix(msg.Stream, "@bookTicker"):
 		var data types.BookTicker
 		err := json.Unmarshal(msg.Data, &data)

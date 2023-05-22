@@ -1,8 +1,8 @@
 package websocketmarket
 
 var (
-	SpotMarketStreamBaseURL = "wss://data-stream.binance.com"
-	CombinedStreamRouter    = "/stream"
+	USDMarginedMarketStreamBaseURL = "wss://fstream.binance.com"
+	CombinedStreamRouter           = "/stream"
 )
 
 const (
