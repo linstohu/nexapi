@@ -1,7 +1,7 @@
 package utils
 
 var (
-	BaseURL = "https://dapi.binance.com"
+	CoinMarginedBaseURL = "https://dapi.binance.com"
 )
 
 type ContractType = string

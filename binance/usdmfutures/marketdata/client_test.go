@@ -11,7 +11,7 @@ import (
 
 func testUSDMFuturesMarketDataClient(t *testing.T) *USDMFuturesMarketDataClient {
 	cli, err := NewUSDMFuturesMarketDataClient(&utils.USDMarginedClientCfg{
-		BaseURL: utils.BaseURL,
+		BaseURL: utils.USDMarginedBaseURL,
 		Debug:   true,
 	})
 

@@ -1,7 +1,7 @@
 package utils
 
 var (
-	BaseURL = "https://fapi.binance.com"
+	USDMarginedBaseURL = "https://fapi.binance.com"
 )
 
 type SecurityType = string

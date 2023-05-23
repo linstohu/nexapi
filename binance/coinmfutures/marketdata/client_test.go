@@ -13,7 +13,7 @@ import (
 
 func testCoinMFuturesMarketDataClient(t *testing.T) *CoinMFuturesMarketDataClient {
 	cli, err := NewCoinMFuturesMarketDataClient(&utils.CoinMarginedClientCfg{
-		BaseURL: utils.BaseURL,
+		BaseURL: utils.CoinMarginedBaseURL,
 		Debug:   true,
 	})
 
