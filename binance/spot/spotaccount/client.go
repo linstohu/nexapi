@@ -1,4 +1,4 @@
-package account
+package spotaccount
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/binance/spot/account/types"
+	"github.com/linstohu/nexapi/binance/spot/spotaccount/types"
 	"github.com/linstohu/nexapi/binance/spot/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )

@@ -43,6 +43,12 @@ var (
 	RESULT NewOrderRespType = "RESULT"
 )
 
+type OrderType = string
+
+var (
+	Limit OrderType = "LIMIT"
+)
+
 type OrderStatus = string
 
 var (

@@ -112,7 +112,7 @@ func TestGetKlines(t *testing.T) {
 func TestGetTickerPrice(t *testing.T) {
 	cli := testCoinMFuturesMarketDataClient(t)
 
-	_, err := cli.GetTickerPrice(context.TODO(), types.GetTickerPriceParam{
+	_, err := cli.GetTickerPrice(context.TODO(), types.GetPriceTickerParam{
 		Symbol: "ETHUSD_PERP",
 	})
 	assert.Nil(t, err)

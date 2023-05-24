@@ -342,7 +342,7 @@ func (c *CoinMFuturesMarketDataClient) GetKlines(ctx context.Context, param usdm
 	return ret, nil
 }
 
-func (c *CoinMFuturesMarketDataClient) GetTickerPrice(ctx context.Context, param types.GetTickerPriceParam) ([]*types.TickerPrice, error) {
+func (c *CoinMFuturesMarketDataClient) GetTickerPrice(ctx context.Context, param types.GetPriceTickerParam) ([]*types.PriceTicker, error) {
 	err := c.validate.Struct(param)
 	if err != nil {
 		return nil, err
@@ -367,7 +367,7 @@ func (c *CoinMFuturesMarketDataClient) GetTickerPrice(ctx context.Context, param
 		return nil, err
 	}
 
-	var ret []*types.TickerPrice
+	var ret []*types.PriceTicker
 	if err := json.Unmarshal(resp, &ret); err != nil {
 		return nil, err
 	}

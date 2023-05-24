@@ -1,11 +1,11 @@
-package account
+package spotaccount
 
 import (
 	"context"
 	"os"
 	"testing"
 
-	"github.com/linstohu/nexapi/binance/spot/account/types"
+	"github.com/linstohu/nexapi/binance/spot/spotaccount/types"
 	"github.com/linstohu/nexapi/binance/spot/utils"
 	"github.com/stretchr/testify/assert"
 )
