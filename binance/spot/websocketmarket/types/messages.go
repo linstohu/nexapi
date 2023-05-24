@@ -33,7 +33,7 @@ type Kline struct {
 	EventTime int64  `json:"E"`
 	Symbol    string `json:"s"`
 	Kline     struct {
-		StartTime                int64    `json:"t"`
+		StartTime                int64  `json:"t"`
 		CloseTime                int64  `json:"T"`
 		Symbol                   string `json:"s"`
 		Interval                 string `json:"i"`
@@ -92,7 +92,7 @@ type Ticker struct {
 }
 
 type BookTicker struct {
-	UpdateID     int64    `json:"u"`
+	UpdateID     int64  `json:"u"`
 	Symbol       string `json:"s"`
 	BestBidPrice string `json:"b"`
 	BestBidQty   string `json:"B"`
@@ -101,17 +101,17 @@ type BookTicker struct {
 }
 
 type OrderbookDepth struct {
-	LastUpdateID int64        `json:"lastUpdateId"`
+	LastUpdateID int64      `json:"lastUpdateId"`
 	Bids         [][]string `json:"bids"`
 	Asks         [][]string `json:"asks"`
 }
 
 type OrderbookDiffDepth struct {
 	EventType     string     `json:"e"`
-	EventTime     int64        `json:"E"`
+	EventTime     int64      `json:"E"`
 	Symbol        string     `json:"s"`
-	FirstUpdateID int64        `json:"U"`
-	FinalUpdateID int64        `json:"u"`
+	FirstUpdateID int64      `json:"U"`
+	FinalUpdateID int64      `json:"u"`
 	Bids          [][]string `json:"b"`
 	Asks          [][]string `json:"a"`
 }

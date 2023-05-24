@@ -16,7 +16,7 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
-type CoinMarginedMarketStreamClient struct {
+type OptionsMarketStreamClient struct {
 	baseURL string
 	// debug mode
 	debug bool
@@ -37,19 +37,19 @@ type CoinMarginedMarketStreamClient struct {
 	emitter *emission.Emitter
 }
 
-type CoinMarginedMarketStreamCfg struct {
+type OptionsMarketStreamCfg struct {
 	BaseURL string `validate:"required"`
 	Debug   bool
 	// Logger
 	Logger *log.Logger
 }
 
-func NewMarketStreamClient(ctx context.Context, cfg *CoinMarginedMarketStreamCfg) (*CoinMarginedMarketStreamClient, error) {
+func NewMarketStreamClient(ctx context.Context, cfg *OptionsMarketStreamCfg) (*OptionsMarketStreamClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
 
-	cli := &CoinMarginedMarketStreamClient{
+	cli := &OptionsMarketStreamClient{
 		baseURL: cfg.BaseURL,
 		debug:   cfg.Debug,
 		logger:  cfg.Logger,
@@ -63,7 +63,7 @@ func NewMarketStreamClient(ctx context.Context, cfg *CoinMarginedMarketStreamCfg
 
 	if cli.logger == nil {
 		cli.logger = log.Default()
-		cli.logger.SetPrefix("binance_Coin-M-Futures_market_streams")
+		cli.logger.SetPrefix("binance_options_market_streams")
 	}
 
 	err := cli.start()
@@ -74,44 +74,44 @@ func NewMarketStreamClient(ctx context.Context, cfg *CoinMarginedMarketStreamCfg
 	return cli, nil
 }
 
-func (u *CoinMarginedMarketStreamClient) start() error {
-	u.conn = nil
-	u.setIsConnected(false)
-	u.disconnect = make(chan struct{})
+func (o *OptionsMarketStreamClient) start() error {
+	o.conn = nil
+	o.setIsConnected(false)
+	o.disconnect = make(chan struct{})
 
 	for i := 0; i < MaxTryTimes; i++ {
-		conn, _, err := u.connect()
+		conn, _, err := o.connect()
 		if err != nil {
-			u.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
+			o.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
 		}
-		u.conn = conn
+		o.conn = conn
 		break
 	}
-	if u.conn == nil {
+	if o.conn == nil {
 		return errors.New("connect failed")
 	}
 
-	u.setIsConnected(true)
+	o.setIsConnected(true)
 
-	u.resubscribe()
+	o.resubscribe()
 
-	if u.autoReconnect {
-		go u.reconnect()
+	if o.autoReconnect {
+		go o.reconnect()
 	}
 
-	go u.readMessages()
+	go o.readMessages()
 
 	return nil
 }
 
-func (u *CoinMarginedMarketStreamClient) connect() (*websocket.Conn, *http.Response, error) {
+func (o *OptionsMarketStreamClient) connect() (*websocket.Conn, *http.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	conn, resp, err := websocket.DefaultDialer.DialContext(ctx, u.baseURL+CombinedStreamRouter, nil)
+	conn, resp, err := websocket.DefaultDialer.DialContext(ctx, o.baseURL+CombinedStreamRouter, nil)
 	if err == nil {
 		conn.SetReadLimit(32768 * 64)
 	}
@@ -119,29 +119,29 @@ func (u *CoinMarginedMarketStreamClient) connect() (*websocket.Conn, *http.Respo
 	return conn, resp, err
 }
 
-func (u *CoinMarginedMarketStreamClient) reconnect() {
-	<-u.disconnect
+func (o *OptionsMarketStreamClient) reconnect() {
+	<-o.disconnect
 
-	u.setIsConnected(false)
+	o.setIsConnected(false)
 
-	u.logger.Println("disconnect, then reconnect...")
+	o.logger.Println("disconnect, then reconnect...")
 
 	time.Sleep(1 * time.Second)
 
 	select {
-	case <-u.ctx.Done():
-		u.logger.Printf("never reconnect, %s", u.ctx.Err())
+	case <-o.ctx.Done():
+		o.logger.Printf("never reconnect, %s", o.ctx.Err())
 		return
 	default:
-		u.start()
+		o.start()
 	}
 }
 
 // close closes the websocket connection
-func (u *CoinMarginedMarketStreamClient) close() error {
-	close(u.disconnect)
+func (o *OptionsMarketStreamClient) close() error {
+	close(o.disconnect)
 
-	err := u.conn.Close()
+	err := o.conn.Close()
 	if err != nil {
 		return err
 	}
@@ -150,40 +150,40 @@ func (u *CoinMarginedMarketStreamClient) close() error {
 }
 
 // setIsConnected sets state for isConnected
-func (u *CoinMarginedMarketStreamClient) setIsConnected(state bool) {
-	u.mu.Lock()
-	defer u.mu.Unlock()
+func (o *OptionsMarketStreamClient) setIsConnected(state bool) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
 
-	u.isConnected = state
+	o.isConnected = state
 }
 
 // IsConnected returns the WebSocket connection state
-func (u *CoinMarginedMarketStreamClient) IsConnected() bool {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
+func (o *OptionsMarketStreamClient) IsConnected() bool {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
 
-	return u.isConnected
+	return o.isConnected
 }
 
-func (u *CoinMarginedMarketStreamClient) readMessages() {
+func (o *OptionsMarketStreamClient) readMessages() {
 	for {
 		select {
-		case <-u.ctx.Done():
-			u.logger.Println(u.ctx.Err())
+		case <-o.ctx.Done():
+			o.logger.Println(o.ctx.Err())
 
-			if err := u.close(); err != nil {
-				u.logger.Printf("websocket connection closed error, %s", err.Error())
+			if err := o.close(); err != nil {
+				o.logger.Printf("websocket connection closed error, %s", err.Error())
 			}
 
 			return
 		default:
 			var msg utils.AnyMessage
-			err := u.conn.ReadJSON(&msg)
+			err := o.conn.ReadJSON(&msg)
 			if err != nil {
-				u.logger.Printf("read object error, %s", err)
+				o.logger.Printf("read object error, %s", err)
 
-				if err := u.close(); err != nil {
-					u.logger.Printf("websocket connection closed error, %s", err.Error())
+				if err := o.close(); err != nil {
+					o.logger.Printf("websocket connection closed error, %s", err.Error())
 				}
 
 				return
@@ -193,24 +193,24 @@ func (u *CoinMarginedMarketStreamClient) readMessages() {
 			case msg.Response != nil:
 				// todo
 			case msg.SubscribedMessage != nil:
-				err := u.handle(msg.SubscribedMessage)
+				err := o.handle(msg.SubscribedMessage)
 				if err != nil {
-					u.logger.Printf("read messages error: %s", err.Error())
+					o.logger.Printf("read messages error: %s", err.Error())
 				}
 			}
 		}
 	}
 }
 
-func (u *CoinMarginedMarketStreamClient) resubscribe() error {
-	topics := u.subscriptions.Keys()
+func (o *OptionsMarketStreamClient) resubscribe() error {
+	topics := o.subscriptions.Keys()
 
 	if len(topics) == 0 {
 		return nil
 	}
 
 	// do subscription
-	err := u.send(&utils.Request{
+	err := o.send(&utils.Request{
 		ID:     rand.Uint32(),
 		Method: SUBSCRIBE,
 		Params: topics,
@@ -223,11 +223,11 @@ func (u *CoinMarginedMarketStreamClient) resubscribe() error {
 	return nil
 }
 
-func (u *CoinMarginedMarketStreamClient) subscribe(topics []string) error {
+func (o *OptionsMarketStreamClient) subscribe(topics []string) error {
 	ts := make([]string, 0)
 
 	for _, topic := range topics {
-		if u.subscriptions.Has(topic) {
+		if o.subscriptions.Has(topic) {
 			continue
 		}
 		ts = append(ts, topic)
@@ -238,7 +238,7 @@ func (u *CoinMarginedMarketStreamClient) subscribe(topics []string) error {
 	}
 
 	// do subscription
-	err := u.send(&utils.Request{
+	err := o.send(&utils.Request{
 		ID:     rand.Uint32(),
 		Method: SUBSCRIBE,
 		Params: ts,
@@ -249,14 +249,14 @@ func (u *CoinMarginedMarketStreamClient) subscribe(topics []string) error {
 	}
 
 	for _, v := range ts {
-		u.subscriptions.Set(v, struct{}{})
+		o.subscriptions.Set(v, struct{}{})
 	}
 
 	return nil
 }
 
-func (u *CoinMarginedMarketStreamClient) unsubscribe(topics []string) error {
-	err := u.send(&utils.Request{
+func (o *OptionsMarketStreamClient) unsubscribe(topics []string) error {
+	err := o.send(&utils.Request{
 		ID:     rand.Uint32(),
 		Method: UNSUBSCRIBE,
 		Params: topics,
@@ -267,19 +267,19 @@ func (u *CoinMarginedMarketStreamClient) unsubscribe(topics []string) error {
 	}
 
 	for _, v := range topics {
-		u.subscriptions.Remove(v)
+		o.subscriptions.Remove(v)
 	}
 
 	return nil
 }
 
-func (u *CoinMarginedMarketStreamClient) send(req *utils.Request) error {
-	u.sending.Lock()
-	defer u.sending.Unlock()
+func (o *OptionsMarketStreamClient) send(req *utils.Request) error {
+	o.sending.Lock()
+	defer o.sending.Unlock()
 
-	if !u.IsConnected() {
+	if !o.IsConnected() {
 		return errors.New("connection is closed")
 	}
 
-	return u.conn.WriteJSON(req)
+	return o.conn.WriteJSON(req)
 }
