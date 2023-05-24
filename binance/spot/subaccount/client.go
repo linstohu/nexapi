@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -22,13 +23,36 @@ type SpotSubAccountClient struct {
 	validate *validator.Validate
 }
 
-func NewSpotSubAccountClient(cfg *utils.SpotClientCfg) (*SpotSubAccountClient, error) {
-	cli, err := utils.NewSpotClient(cfg)
+type SpotSubAccountClientCfg struct {
+	Debug bool
+	// Logger
+	Logger *log.Logger
+
+	BaseURL    string `validate:"required"`
+	Key        string `validate:"required"`
+	Secret     string `validate:"required"`
+	RecvWindow int
+}
+
+func NewSpotSubAccountClient(cfg *SpotSubAccountClientCfg) (*SpotSubAccountClient, error) {
+	validator := validator.New()
+
+	err := validator.Struct(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	validator := validator.New()
+	cli, err := utils.NewSpotClient(&utils.SpotClientCfg{
+		Debug:      cfg.Debug,
+		Logger:     cfg.Logger,
+		BaseURL:    cfg.BaseURL,
+		Key:        cfg.Key,
+		Secret:     cfg.Secret,
+		RecvWindow: cfg.RecvWindow,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &SpotSubAccountClient{
 		SpotClient: cli,

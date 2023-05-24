@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -24,13 +25,36 @@ type OptionsAccountClient struct {
 	validate *validator.Validate
 }
 
+type OptionsAccountClientCfg struct {
+	Debug bool
+	// Logger
+	Logger *log.Logger
+
+	BaseURL    string `validate:"required"`
+	Key        string `validate:"required"`
+	Secret     string `validate:"required"`
+	RecvWindow int
+}
+
 func NewOptionsAccountClient(cfg *utils.OptionsClientCfg) (*OptionsAccountClient, error) {
-	cli, err := utils.NewOptionsClient(cfg)
+	validator := validator.New()
+
+	err := validator.Struct(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	validator := validator.New()
+	cli, err := utils.NewOptionsClient(&utils.OptionsClientCfg{
+		Debug:      cfg.Debug,
+		Logger:     cfg.Logger,
+		BaseURL:    cfg.BaseURL,
+		Key:        cfg.Key,
+		Secret:     cfg.Secret,
+		RecvWindow: cfg.RecvWindow,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &OptionsAccountClient{
 		OptionsClient: cli,

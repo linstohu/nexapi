@@ -11,7 +11,7 @@ import (
 )
 
 func testNewSpotWalletClient(t *testing.T) *SpotWalletClient {
-	cli, err := NewSpotWalletClient(&utils.SpotClientCfg{
+	cli, err := NewSpotWalletClient(&SpotWalletClientCfg{
 		BaseURL: utils.BaseURL,
 		Key:     os.Getenv("BINANCE_KEY"),
 		Secret:  os.Getenv("BINANCE_SECRET"),

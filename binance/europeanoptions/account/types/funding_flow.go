@@ -18,7 +18,7 @@ type GetFundingFlowParams struct {
 }
 
 type FundingFlow struct {
-	ID         int64  `json:"id"`
+	ID         string `json:"id"`
 	Asset      string `json:"asset"`
 	Amount     string `json:"amount"`
 	Type       string `json:"type"`

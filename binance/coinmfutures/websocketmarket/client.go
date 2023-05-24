@@ -195,7 +195,7 @@ func (u *CoinMarginedMarketStreamClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := u.handle(msg.SubscribedMessage)
 				if err != nil {
-					u.logger.Printf("read messages error: %s", err.Error())
+					u.logger.Printf("handle message error: %s", err.Error())
 				}
 			}
 		}

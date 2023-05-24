@@ -224,7 +224,7 @@ func (w *WooXWebsocketClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := w.handle(msg.SubscribedMessage)
 				if err != nil {
-					w.logger.Printf("read messages error: %s", err.Error())
+					w.logger.Printf("handle message error: %s", err.Error())
 				}
 			}
 		}

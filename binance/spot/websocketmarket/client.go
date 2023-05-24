@@ -195,7 +195,7 @@ func (m *SpotMarketStreamClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := m.handle(msg.SubscribedMessage)
 				if err != nil {
-					m.logger.Printf("read messages error: %s", err.Error())
+					m.logger.Printf("handle message error: %s", err.Error())
 				}
 			}
 		}

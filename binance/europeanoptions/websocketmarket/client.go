@@ -195,7 +195,7 @@ func (o *OptionsMarketStreamClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := o.handle(msg.SubscribedMessage)
 				if err != nil {
-					o.logger.Printf("read messages error: %s", err.Error())
+					o.logger.Printf("handle message error: %s", err.Error())
 				}
 			}
 		}

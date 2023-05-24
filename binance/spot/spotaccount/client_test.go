@@ -11,7 +11,7 @@ import (
 )
 
 func testNewSpotAccountClient(t *testing.T) *SpotAccountClient {
-	cli, err := NewSpotAccountClient(&utils.SpotClientCfg{
+	cli, err := NewSpotAccountClient(&SpotAccountClientCfg{
 		BaseURL: utils.BaseURL,
 		Key:     os.Getenv("BINANCE_KEY"),
 		Secret:  os.Getenv("BINANCE_SECRET"),
