@@ -21,7 +21,7 @@ func testNewWooXWebsocketClient(ctx context.Context, t *testing.T) *WooXWebsocke
 	})
 
 	if err != nil {
-		t.Fatalf("Could not create websocket client for woox, %s", err)
+		t.Fatalf("Could not create websocket client, %s", err)
 	}
 
 	return cli

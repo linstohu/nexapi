@@ -3,12 +3,15 @@ package websocketuserdata
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 )
 
 func testNewUserDataStreamClient(ctx context.Context, t *testing.T) *OptionsUserDataStreamClient {
 	cli, err := NewUserDataStreamClient(ctx, &OptionsUserDataStreamCfg{
 		BaseURL: OptionsUserDataStreamBaseURL,
+		Key:     os.Getenv("BINANCE_KEY"),
+		Secret:  os.Getenv("BINANCE_SECRET"),
 		Debug:   true,
 	})
 

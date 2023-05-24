@@ -12,6 +12,7 @@ import (
 	"github.com/chuckpreslar/emission"
 	"github.com/go-playground/validator"
 	"github.com/gorilla/websocket"
+	"github.com/linstohu/nexapi/binance/europeanoptions/utils"
 )
 
 type OptionsUserDataStreamClient struct {
@@ -134,7 +135,7 @@ func (o *OptionsUserDataStreamClient) genListenKey() (string, error) {
 	cli, err := newHttpAuthClient(&httpAuthClientCfg{
 		Debug:      o.debug,
 		Logger:     o.logger,
-		BaseURL:    o.baseURL,
+		BaseURL:    utils.OptionsBaseURL,
 		Key:        o.key,
 		Secret:     o.secret,
 		RecvWindow: 5000,
@@ -155,7 +156,7 @@ func (o *OptionsUserDataStreamClient) updateListenKey() error {
 	cli, err := newHttpAuthClient(&httpAuthClientCfg{
 		Debug:      o.debug,
 		Logger:     o.logger,
-		BaseURL:    o.baseURL,
+		BaseURL:    utils.OptionsBaseURL,
 		Key:        o.key,
 		Secret:     o.secret,
 		RecvWindow: 5000,

@@ -81,7 +81,7 @@ type CancelAllOrdersParams struct {
 }
 
 type CancelAllOrdersByUnderlyingParam struct {
-	Symbol string `url:"symbol" validate:"required"`
+	Underlying string `url:"underlying" validate:"required"`
 }
 
 type CancelAllOrdersByUnderlyingParams struct {

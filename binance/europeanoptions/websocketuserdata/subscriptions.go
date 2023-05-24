@@ -7,7 +7,6 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-
 func (o *OptionsUserDataStreamClient) handle(origind []byte) error {
 	var p fastjson.Parser
 	pb, err := p.ParseBytes(origind)
@@ -15,7 +14,7 @@ func (o *OptionsUserDataStreamClient) handle(origind []byte) error {
 		return err
 	}
 
-	eventType := pb.Get("e").String()
+	eventType := string(pb.GetStringBytes("e"))
 
 	if o.debug {
 		o.logger.Printf("subscribed message, event-type: %s", eventType)

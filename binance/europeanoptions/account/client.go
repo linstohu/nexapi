@@ -317,7 +317,7 @@ func (o *OptionsAccountClient) CancelOrder(ctx context.Context, param types.Canc
 	return &ret, nil
 }
 
-func (o *OptionsAccountClient) CancelAllOrders(ctx context.Context, param types.CancelAllOrdersParam) error {
+func (o *OptionsAccountClient) CancelAllOrdersBySymbol(ctx context.Context, param types.CancelAllOrdersParam) error {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return err
@@ -341,6 +341,65 @@ func (o *OptionsAccountClient) CancelAllOrders(ctx context.Context, param types.
 	{
 		query := types.CancelAllOrdersParams{
 			CancelAllOrdersParam: param,
+			DefaultParam: bnutils.DefaultParam{
+				RecvWindow: o.GetRecvWindow(),
+				Timestamp:  time.Now().UnixMilli(),
+			},
+		}
+
+		err := o.validate.Struct(query)
+		if err != nil {
+			return err
+		}
+
+		if need := o.NeedSignature(req.SecurityType); need {
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
+			if err != nil {
+				return err
+			}
+
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
+			h.Write([]byte(signString))
+			signature := hex.EncodeToString(h.Sum(nil))
+
+			query.Signature = signature
+		}
+
+		req.Query = query
+	}
+
+	_, err = o.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *OptionsAccountClient) CancelAllOrdersByUnderlying(ctx context.Context, param types.CancelAllOrdersByUnderlyingParam) error {
+	err := o.validate.Struct(param)
+	if err != nil {
+		return err
+	}
+
+	req := utils.HTTPRequest{
+		SecurityType: usdmutils.TRADE,
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/eapi/v1/allOpenOrdersByUnderlying",
+		Method:       http.MethodDelete,
+	}
+
+	{
+		headers, err := o.GenHeaders(req.SecurityType)
+		if err != nil {
+			return err
+		}
+		req.Headers = headers
+	}
+
+	{
+		query := types.CancelAllOrdersByUnderlyingParams{
+			CancelAllOrdersByUnderlyingParam: param,
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),

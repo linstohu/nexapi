@@ -40,7 +40,7 @@ func TestNewOrder(t *testing.T) {
 		Side:        utils.BuySide,
 		Type:        utils.Limit,
 		Quantity:    1,
-		Price:       5,
+		Price:       4.5,
 		TimeInForce: utils.GTC,
 	})
 	assert.Nil(t, err)
@@ -62,6 +62,24 @@ func TestCancelOrder(t *testing.T) {
 	_, err := cli.CancelOrder(context.TODO(), types.CancelOrderParam{
 		Symbol:  "ETH-230609-2100-C",
 		OrderID: 0,
+	})
+	assert.Nil(t, err)
+}
+
+func TestCancelAllOrdersBySymbol(t *testing.T) {
+	cli := testNewAccountClient(t)
+
+	err := cli.CancelAllOrdersBySymbol(context.TODO(), types.CancelAllOrdersParam{
+		Symbol: "ETH-230609-2100-C",
+	})
+	assert.Nil(t, err)
+}
+
+func TestCancelAllOrdersByUnderlying(t *testing.T) {
+	cli := testNewAccountClient(t)
+
+	err := cli.CancelAllOrdersByUnderlying(context.TODO(), types.CancelAllOrdersByUnderlyingParam{
+		Underlying: "ETHUSDT",
 	})
 	assert.Nil(t, err)
 }
