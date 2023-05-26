@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/linstohu/nexapi/binance/usdmfutures/account/types"
-	"github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testNewAccountClient(t *testing.T) *UsdMFuturesAccountClient {
-	cli, err := NewUsdMFuturesAccountClient(&utils.USDMarginedClientCfg{
-		BaseURL: utils.USDMarginedBaseURL,
+	cli, err := NewUsdMFuturesAccountClient(&umutils.USDMarginedClientCfg{
+		BaseURL: umutils.USDMarginedBaseURL,
 		Key:     os.Getenv("BINANCE_KEY"),
 		Secret:  os.Getenv("BINANCE_SECRET"),
 		Debug:   true,

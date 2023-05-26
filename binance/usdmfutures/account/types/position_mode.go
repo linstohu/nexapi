@@ -5,7 +5,7 @@ import (
 )
 
 type ChangePositionModeParam struct {
-	DualSidePosition string `url:"dualSidePosition" validate:"required,oneof=ture false"`
+	DualSidePosition string `url:"dualSidePosition" validate:"required,oneof=true false"`
 }
 
 type ChangePositionModeParams struct {

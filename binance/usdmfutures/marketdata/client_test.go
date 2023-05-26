@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
-	"github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testUSDMFuturesMarketDataClient(t *testing.T) *USDMFuturesMarketDataClient {
-	cli, err := NewUSDMFuturesMarketDataClient(&utils.USDMarginedClientCfg{
-		BaseURL: utils.USDMarginedBaseURL,
+	cli, err := NewUSDMFuturesMarketDataClient(&umutils.USDMarginedClientCfg{
+		BaseURL: umutils.USDMarginedBaseURL,
 		Debug:   true,
 	})
 
@@ -78,7 +78,7 @@ func TestGetKlines(t *testing.T) {
 
 	_, err := cli.GetKlines(context.TODO(), types.GetKlineParam{
 		Symbol:   "BTCUSDT",
-		Interval: utils.Minute1,
+		Interval: umutils.Minute1,
 		Limit:    2,
 	})
 	assert.Nil(t, err)

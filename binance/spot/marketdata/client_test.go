@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/linstohu/nexapi/binance/spot/marketdata/types"
-	"github.com/linstohu/nexapi/binance/spot/utils"
+	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testNewSpotMarketDataClient(t *testing.T) *SpotMarketDataClient {
-	cli, err := NewSpotMarketDataClient(&utils.SpotClientCfg{
-		BaseURL: utils.BaseURL,
+	cli, err := NewSpotMarketDataClient(&spotutils.SpotClientCfg{
+		BaseURL: spotutils.BaseURL,
 		Debug:   true,
 	})
 
@@ -105,7 +105,7 @@ func TestGetKlines(t *testing.T) {
 
 	_, err := cli.GetKlines(context.TODO(), types.GetKlineParam{
 		Symbol:   "BTCUSDT",
-		Interval: utils.Minute1,
+		Interval: spotutils.Minute1,
 		Limit:    1,
 	})
 	assert.Nil(t, err)

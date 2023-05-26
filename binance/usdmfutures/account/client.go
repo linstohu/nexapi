@@ -12,12 +12,12 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/usdmfutures/account/types"
-	"github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
 type UsdMFuturesAccountClient struct {
-	*utils.USDMarginedClient
+	*umutils.USDMarginedClient
 
 	// validate struct fields
 	validate *validator.Validate
@@ -34,7 +34,7 @@ type UsdMFuturesAccountClientCfg struct {
 	RecvWindow int
 }
 
-func NewUsdMFuturesAccountClient(cfg *utils.USDMarginedClientCfg) (*UsdMFuturesAccountClient, error) {
+func NewUsdMFuturesAccountClient(cfg *umutils.USDMarginedClientCfg) (*UsdMFuturesAccountClient, error) {
 	validator := validator.New()
 
 	err := validator.Struct(cfg)
@@ -42,7 +42,7 @@ func NewUsdMFuturesAccountClient(cfg *utils.USDMarginedClientCfg) (*UsdMFuturesA
 		return nil, err
 	}
 
-	cli, err := utils.NewUSDMarginedClient(&utils.USDMarginedClientCfg{
+	cli, err := umutils.NewUSDMarginedClient(&umutils.USDMarginedClientCfg{
 		Debug:      cfg.Debug,
 		Logger:     cfg.Logger,
 		BaseURL:    cfg.BaseURL,
@@ -61,8 +61,8 @@ func NewUsdMFuturesAccountClient(cfg *utils.USDMarginedClientCfg) (*UsdMFuturesA
 }
 
 func (o *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param types.ChangePositionModeParam) (*types.Response, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.TRADE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/fapi/v1/positionSide/dual",
 		Method:       http.MethodPost,
@@ -119,8 +119,8 @@ func (o *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param
 }
 
 func (o *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.GetCurrentPositionModeResp, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.TRADE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/fapi/v1/positionSide/dual",
 		Method:       http.MethodGet,
@@ -174,8 +174,8 @@ func (o *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.
 }
 
 func (o *UsdMFuturesAccountClient) ChangeMultiAssetsMode(ctx context.Context, param types.ChangeMultiAssetsModeParam) (*types.Response, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.TRADE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/fapi/v1/multiAssetsMargin",
 		Method:       http.MethodPost,
@@ -232,8 +232,8 @@ func (o *UsdMFuturesAccountClient) ChangeMultiAssetsMode(ctx context.Context, pa
 }
 
 func (o *UsdMFuturesAccountClient) GetMultiAssetsMode(ctx context.Context) (*types.GetCurrentMultiAssetsModeResp, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.TRADE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/fapi/v1/multiAssetsMargin",
 		Method:       http.MethodGet,

@@ -8,19 +8,19 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/spot/marketdata/types"
-	"github.com/linstohu/nexapi/binance/spot/utils"
+	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	"github.com/valyala/fastjson"
 )
 
 type SpotMarketDataClient struct {
-	*utils.SpotClient
+	*spotutils.SpotClient
 
 	// validate struct fields
 	validate *validator.Validate
 }
 
-func NewSpotMarketDataClient(cfg *utils.SpotClientCfg) (*SpotMarketDataClient, error) {
-	cli, err := utils.NewSpotClient(cfg)
+func NewSpotMarketDataClient(cfg *spotutils.SpotClientCfg) (*SpotMarketDataClient, error) {
+	cli, err := spotutils.NewSpotClient(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -34,13 +34,13 @@ func NewSpotMarketDataClient(cfg *utils.SpotClientCfg) (*SpotMarketDataClient, e
 }
 
 func (s *SpotMarketDataClient) Ping(ctx context.Context) error {
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ping",
 		Method:  http.MethodGet,
 	}
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return err
 	}
@@ -55,13 +55,13 @@ func (s *SpotMarketDataClient) Ping(ctx context.Context) error {
 }
 
 func (s *SpotMarketDataClient) GetServerTime(ctx context.Context) (*types.ServerTime, error) {
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/time",
 		Method:  http.MethodGet,
 	}
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (s *SpotMarketDataClient) GetServerTime(ctx context.Context) (*types.Server
 }
 
 func (s *SpotMarketDataClient) GetExchangeInfo(ctx context.Context, param types.GetExchangeInfoParam) (*types.ExchangeInfo, error) {
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/exchangeInfo",
 		Method:  http.MethodGet,
@@ -104,7 +104,7 @@ func (s *SpotMarketDataClient) GetExchangeInfo(ctx context.Context, param types.
 	}
 	req.Query = query
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -129,14 +129,14 @@ func (s *SpotMarketDataClient) GetOrderbook(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/depth",
 		Method:  http.MethodGet,
 		Query:   param,
 	}
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -161,14 +161,14 @@ func (s *SpotMarketDataClient) GetRecentTradeList(ctx context.Context, param typ
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/trades",
 		Method:  http.MethodGet,
 		Query:   param,
 	}
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -193,14 +193,14 @@ func (s *SpotMarketDataClient) GetAggTrades(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/aggTrades",
 		Method:  http.MethodGet,
 		Query:   param,
 	}
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -225,14 +225,14 @@ func (s *SpotMarketDataClient) GetKlines(ctx context.Context, param types.GetKli
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/klines",
 		Method:  http.MethodGet,
 		Query:   param,
 	}
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -289,14 +289,14 @@ func (s *SpotMarketDataClient) GetAvgPrice(ctx context.Context, param types.GetA
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/avgPrice",
 		Method:  http.MethodGet,
 		Query:   param,
 	}
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +321,7 @@ func (s *SpotMarketDataClient) GetTickerForSymbol(ctx context.Context, param typ
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/24hr",
 		Method:  http.MethodGet,
@@ -332,7 +332,7 @@ func (s *SpotMarketDataClient) GetTickerForSymbol(ctx context.Context, param typ
 	}
 	req.Query = query
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -357,7 +357,7 @@ func (s *SpotMarketDataClient) GetTickerForSymbols(ctx context.Context, param ty
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/24hr",
 		Method:  http.MethodGet,
@@ -371,7 +371,7 @@ func (s *SpotMarketDataClient) GetTickerForSymbols(ctx context.Context, param ty
 	query.Symbols = string(stringsJson)
 	req.Query = query
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -396,7 +396,7 @@ func (s *SpotMarketDataClient) GetTickerPriceForSymbol(ctx context.Context, para
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/price",
 		Method:  http.MethodGet,
@@ -407,7 +407,7 @@ func (s *SpotMarketDataClient) GetTickerPriceForSymbol(ctx context.Context, para
 	}
 	req.Query = query
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -432,7 +432,7 @@ func (s *SpotMarketDataClient) GetTickerPriceForSymbols(ctx context.Context, par
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/price",
 		Method:  http.MethodGet,
@@ -446,7 +446,7 @@ func (s *SpotMarketDataClient) GetTickerPriceForSymbols(ctx context.Context, par
 	query.Symbols = string(stringsJson)
 	req.Query = query
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -465,14 +465,13 @@ func (s *SpotMarketDataClient) GetTickerPriceForSymbols(ctx context.Context, par
 	return ret, nil
 }
 
-
 func (s *SpotMarketDataClient) GetBookTickerForSymbol(ctx context.Context, param types.GetBookTickerForSymbolParam) (*types.BookTicker, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/bookTicker",
 		Method:  http.MethodGet,
@@ -483,7 +482,7 @@ func (s *SpotMarketDataClient) GetBookTickerForSymbol(ctx context.Context, param
 	}
 	req.Query = query
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -508,7 +507,7 @@ func (s *SpotMarketDataClient) GetBookTickerForSymbols(ctx context.Context, para
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/bookTicker",
 		Method:  http.MethodGet,
@@ -522,7 +521,7 @@ func (s *SpotMarketDataClient) GetBookTickerForSymbols(ctx context.Context, para
 	query.Symbols = string(stringsJson)
 	req.Query = query
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}

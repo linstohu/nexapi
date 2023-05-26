@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/binance/spot/utils"
+	umutils "github.com/linstohu/nexapi/binance/spot/utils"
 )
 
 func (u *USDMarginedMarketStreamClient) GetAggTradeTopic(symbol string) (string, error) {
@@ -42,8 +42,8 @@ func (u *USDMarginedMarketStreamClient) GetAllMarketPriceTopic(param *AllMarkPri
 }
 
 type KlineTopicParam struct {
-	Symbol   string              `validate:"required"`
-	Interval utils.KlineInterval `validate:"required,oneof=1m 3m 5m 15m 30m 1h 2h 4h 6h 8h 12h 1d 3d 1w 1M"`
+	Symbol   string                `validate:"required"`
+	Interval umutils.KlineInterval `validate:"required,oneof=1m 3m 5m 15m 30m 1h 2h 4h 6h 8h 12h 1d 3d 1w 1M"`
 }
 
 func (u *USDMarginedMarketStreamClient) GetKlineTopic(params *KlineTopicParam) (string, error) {

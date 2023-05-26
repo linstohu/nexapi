@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/linstohu/nexapi/binance/europeanoptions/marketdata/types"
-	"github.com/linstohu/nexapi/binance/europeanoptions/utils"
+	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	usdmtypes "github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testOptionsMarketDataClient(t *testing.T) *OptionsMarketDataClient {
-	cli, err := NewOptionsMarketDataClient(&utils.OptionsClientCfg{
-		BaseURL: utils.OptionsBaseURL,
+	cli, err := NewOptionsMarketDataClient(&eoutils.OptionsClientCfg{
+		BaseURL: eoutils.OptionsBaseURL,
 		Debug:   true,
 	})
 

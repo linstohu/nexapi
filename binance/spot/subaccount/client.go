@@ -12,12 +12,12 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/spot/subaccount/types"
-	"github.com/linstohu/nexapi/binance/spot/utils"
+	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
 type SpotSubAccountClient struct {
-	*utils.SpotClient
+	*spotutils.SpotClient
 
 	// validate struct fields
 	validate *validator.Validate
@@ -42,7 +42,7 @@ func NewSpotSubAccountClient(cfg *SpotSubAccountClientCfg) (*SpotSubAccountClien
 		return nil, err
 	}
 
-	cli, err := utils.NewSpotClient(&utils.SpotClientCfg{
+	cli, err := spotutils.NewSpotClient(&spotutils.SpotClientCfg{
 		Debug:      cfg.Debug,
 		Logger:     cfg.Logger,
 		BaseURL:    cfg.BaseURL,
@@ -61,8 +61,8 @@ func NewSpotSubAccountClient(cfg *SpotSubAccountClientCfg) (*SpotSubAccountClien
 }
 
 func (s *SpotSubAccountClient) GetSubAccountTransferHistory(ctx context.Context, param types.GetSubAccountTransferHistoryParam) ([]*types.SubAccountTransferHistory, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v1/sub-account/transfer/subUserHistory",
 		Method:       http.MethodGet,

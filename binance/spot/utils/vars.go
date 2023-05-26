@@ -1,4 +1,4 @@
-package utils
+package spotutils
 
 var (
 	BaseURL = "https://api.binance.com"

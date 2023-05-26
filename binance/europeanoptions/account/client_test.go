@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/linstohu/nexapi/binance/europeanoptions/account/types"
-	"github.com/linstohu/nexapi/binance/europeanoptions/utils"
+	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testNewAccountClient(t *testing.T) *OptionsAccountClient {
-	cli, err := NewOptionsAccountClient(&utils.OptionsClientCfg{
-		BaseURL: utils.OptionsBaseURL,
+	cli, err := NewOptionsAccountClient(&eoutils.OptionsClientCfg{
+		BaseURL: eoutils.OptionsBaseURL,
 		Key:     os.Getenv("BINANCE_KEY"),
 		Secret:  os.Getenv("BINANCE_SECRET"),
 		Debug:   true,
@@ -37,11 +37,11 @@ func TestNewOrder(t *testing.T) {
 
 	_, err := cli.NewOrder(context.TODO(), types.NewOrderParam{
 		Symbol:      "ETH-230609-2100-C",
-		Side:        utils.BuySide,
-		Type:        utils.Limit,
+		Side:        eoutils.BuySide,
+		Type:        eoutils.Limit,
 		Quantity:    1,
 		Price:       4.5,
-		TimeInForce: utils.GTC,
+		TimeInForce: eoutils.GTC,
 	})
 	assert.Nil(t, err)
 }

@@ -5,7 +5,7 @@ import (
 )
 
 type ChangeMultiAssetsModeParam struct {
-	MultiAssetsMargin string `url:"multiAssetsMargin" validate:"required,oneof=ture false"`
+	MultiAssetsMargin string `url:"multiAssetsMargin" validate:"required,oneof=true false"`
 }
 
 type ChangeMultiAssetsModeParams struct {

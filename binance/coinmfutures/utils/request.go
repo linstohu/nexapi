@@ -1,4 +1,4 @@
-package utils
+package cmutils
 
 import (
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"

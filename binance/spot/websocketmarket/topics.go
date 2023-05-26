@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/binance/spot/utils"
+	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 )
 
 func (m *SpotMarketStreamClient) GetAggTradeTopic(symbol string) (string, error) {
@@ -22,8 +22,8 @@ func (m *SpotMarketStreamClient) GetTradeTopic(symbol string) (string, error) {
 }
 
 type KlineTopicParam struct {
-	Symbol   string              `validate:"required"`
-	Interval utils.KlineInterval `validate:"required,oneof=1s 1m 3m 5m 15m 30m 1h 2h 4h 6h 8h 12h 1d 3d 1w 1M"`
+	Symbol   string                  `validate:"required"`
+	Interval spotutils.KlineInterval `validate:"required,oneof=1s 1m 3m 5m 15m 30m 1h 2h 4h 6h 8h 12h 1d 3d 1w 1M"`
 }
 
 func (m *SpotMarketStreamClient) GetKlineTopic(params *KlineTopicParam) (string, error) {

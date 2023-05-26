@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/binance/spot/utils"
+	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	"github.com/linstohu/nexapi/binance/spot/wallet/types"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
 type SpotWalletClient struct {
-	*utils.SpotClient
+	*spotutils.SpotClient
 
 	// validate struct fields
 	validate *validator.Validate
@@ -42,7 +42,7 @@ func NewSpotWalletClient(cfg *SpotWalletClientCfg) (*SpotWalletClient, error) {
 		return nil, err
 	}
 
-	cli, err := utils.NewSpotClient(&utils.SpotClientCfg{
+	cli, err := spotutils.NewSpotClient(&spotutils.SpotClientCfg{
 		Debug:      cfg.Debug,
 		Logger:     cfg.Logger,
 		BaseURL:    cfg.BaseURL,
@@ -61,13 +61,13 @@ func NewSpotWalletClient(cfg *SpotWalletClientCfg) (*SpotWalletClient, error) {
 }
 
 func (s *SpotWalletClient) GetSystemStatus(ctx context.Context) (*types.SystemStatus, error) {
-	req := utils.HTTPRequest{
+	req := spotutils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/sapi/v1/system/status",
 		Method:  http.MethodGet,
 	}
 
-	headers, err := s.GenHeaders(utils.NONE)
+	headers, err := s.GenHeaders(spotutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -87,8 +87,8 @@ func (s *SpotWalletClient) GetSystemStatus(ctx context.Context) (*types.SystemSt
 }
 
 func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinInfo, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v1/capital/config/getall",
 		Method:       http.MethodGet,
@@ -143,8 +143,8 @@ func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinIn
 }
 
 func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAssetDetailParam) (map[string]*types.AssetDetail, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v1/asset/assetDetail",
 		Method:       http.MethodGet,
@@ -202,8 +202,8 @@ func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAs
 }
 
 func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTradeFeeParam) ([]*types.TradeFee, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v1/asset/tradeFee",
 		Method:       http.MethodGet,
@@ -261,8 +261,8 @@ func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTrade
 }
 
 func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.UniversalTransferParam) (*types.UniversalTransferResp, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v1/asset/transfer",
 		Method:       http.MethodPost,
@@ -320,8 +320,8 @@ func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.Un
 }
 
 func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, param types.GetUniversalTransferHistoryParam) (*types.GetUniversalTransferHistory, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v1/asset/transfer",
 		Method:       http.MethodGet,
@@ -379,8 +379,8 @@ func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, para
 }
 
 func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetFundingAssetParam) ([]*types.FundingAsset, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v1/asset/get-funding-asset",
 		Method:       http.MethodPost,
@@ -438,8 +438,8 @@ func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetF
 }
 
 func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUserAssetParam) ([]*types.UserAsset, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v3/asset/getUserAsset",
 		Method:       http.MethodPost,
@@ -497,8 +497,8 @@ func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUser
 }
 
 func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRestrictions, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/sapi/v1/account/apiRestrictions",
 		Method:       http.MethodGet,

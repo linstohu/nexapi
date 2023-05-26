@@ -7,21 +7,21 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/europeanoptions/marketdata/types"
-	"github.com/linstohu/nexapi/binance/europeanoptions/utils"
+	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	spottypes "github.com/linstohu/nexapi/binance/spot/marketdata/types"
 	usdmtypes "github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 )
 
 type OptionsMarketDataClient struct {
-	*utils.OptionsClient
+	*eoutils.OptionsClient
 
 	// validate struct fields
 	validate *validator.Validate
 }
 
-func NewOptionsMarketDataClient(cfg *utils.OptionsClientCfg) (*OptionsMarketDataClient, error) {
-	cli, err := utils.NewOptionsClient(cfg)
+func NewOptionsMarketDataClient(cfg *eoutils.OptionsClientCfg) (*OptionsMarketDataClient, error) {
+	cli, err := eoutils.NewOptionsClient(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func NewOptionsMarketDataClient(cfg *utils.OptionsClientCfg) (*OptionsMarketData
 }
 
 func (o *OptionsMarketDataClient) Ping(ctx context.Context) error {
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/ping",
@@ -57,7 +57,7 @@ func (o *OptionsMarketDataClient) Ping(ctx context.Context) error {
 }
 
 func (o *OptionsMarketDataClient) GetServerTime(ctx context.Context) (*spottypes.ServerTime, error) {
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/time",
@@ -84,7 +84,7 @@ func (o *OptionsMarketDataClient) GetServerTime(ctx context.Context) (*spottypes
 }
 
 func (o *OptionsMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.ExchangeInfo, error) {
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/exchangeInfo",
@@ -116,7 +116,7 @@ func (o *OptionsMarketDataClient) GetOrderbook(ctx context.Context, param types.
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/depth",
@@ -149,7 +149,7 @@ func (o *OptionsMarketDataClient) GetRecentTradesList(ctx context.Context, param
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/trades",
@@ -182,7 +182,7 @@ func (o *OptionsMarketDataClient) GetKlines(ctx context.Context, param usdmtypes
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/klines",
@@ -215,7 +215,7 @@ func (o *OptionsMarketDataClient) GetMarkPrice(ctx context.Context, param types.
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/mark",
@@ -248,7 +248,7 @@ func (o *OptionsMarketDataClient) GetTickerPrice(ctx context.Context, param type
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/ticker",
@@ -281,7 +281,7 @@ func (o *OptionsMarketDataClient) GetUnderlyingIndexPrice(ctx context.Context, p
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/index",
@@ -314,7 +314,7 @@ func (o *OptionsMarketDataClient) GetOpenInterest(ctx context.Context, param typ
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/openInterest",

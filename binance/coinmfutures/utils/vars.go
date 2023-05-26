@@ -1,4 +1,4 @@
-package utils
+package cmutils
 
 var (
 	CoinMarginedBaseURL = "https://dapi.binance.com"

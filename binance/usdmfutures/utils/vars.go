@@ -1,4 +1,4 @@
-package utils
+package umutils
 
 var (
 	USDMarginedBaseURL = "https://fapi.binance.com"

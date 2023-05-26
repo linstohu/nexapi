@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/linstohu/nexapi/binance/coinmfutures/marketdata/types"
-	"github.com/linstohu/nexapi/binance/coinmfutures/utils"
+	cmutils "github.com/linstohu/nexapi/binance/coinmfutures/utils"
 	usdmtypes "github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testCoinMFuturesMarketDataClient(t *testing.T) *CoinMFuturesMarketDataClient {
-	cli, err := NewCoinMFuturesMarketDataClient(&utils.CoinMarginedClientCfg{
-		BaseURL: utils.CoinMarginedBaseURL,
+	cli, err := NewCoinMFuturesMarketDataClient(&cmutils.CoinMarginedClientCfg{
+		BaseURL: cmutils.CoinMarginedBaseURL,
 		Debug:   true,
 	})
 

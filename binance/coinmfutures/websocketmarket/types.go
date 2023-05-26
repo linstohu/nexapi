@@ -1,7 +1,7 @@
 package websocketmarket
 
 import (
-	"github.com/linstohu/nexapi/binance/coinmfutures/utils"
+	cmutils "github.com/linstohu/nexapi/binance/coinmfutures/utils"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 )
 
@@ -82,7 +82,7 @@ type LiquidationOrder struct {
 		OriginalQuantity          string                `json:"q"`
 		Price                     string                `json:"p"`
 		AveragePrice              string                `json:"ap"`
-		OrderStatus               utils.OrderStatus     `json:"X"`
+		OrderStatus               cmutils.OrderStatus     `json:"X"`
 		LastFilledQuantity        string                `json:"l"`
 		FilledAccumulatedQuantity string                `json:"z"`
 		TradeTime                 int64                 `json:"T"`

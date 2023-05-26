@@ -9,19 +9,19 @@ import (
 	"github.com/go-playground/validator"
 	spottypes "github.com/linstohu/nexapi/binance/spot/marketdata/types"
 	"github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
-	"github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	"github.com/valyala/fastjson"
 )
 
 type USDMFuturesMarketDataClient struct {
-	*utils.USDMarginedClient
+	*umutils.USDMarginedClient
 
 	// validate struct fields
 	validate *validator.Validate
 }
 
-func NewUSDMFuturesMarketDataClient(cfg *utils.USDMarginedClientCfg) (*USDMFuturesMarketDataClient, error) {
-	cli, err := utils.NewUSDMarginedClient(cfg)
+func NewUSDMFuturesMarketDataClient(cfg *umutils.USDMarginedClientCfg) (*USDMFuturesMarketDataClient, error) {
+	cli, err := umutils.NewUSDMarginedClient(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -35,8 +35,8 @@ func NewUSDMFuturesMarketDataClient(cfg *utils.USDMarginedClientCfg) (*USDMFutur
 }
 
 func (u *USDMFuturesMarketDataClient) Ping(ctx context.Context) error {
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/ping",
 		Method:       http.MethodGet,
@@ -57,8 +57,8 @@ func (u *USDMFuturesMarketDataClient) Ping(ctx context.Context) error {
 }
 
 func (u *USDMFuturesMarketDataClient) GetServerTime(ctx context.Context) (*spottypes.ServerTime, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/time",
 		Method:       http.MethodGet,
@@ -84,8 +84,8 @@ func (u *USDMFuturesMarketDataClient) GetServerTime(ctx context.Context) (*spott
 }
 
 func (u *USDMFuturesMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.ExchangeInfo, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/exchangeInfo",
 		Method:       http.MethodGet,
@@ -116,8 +116,8 @@ func (u *USDMFuturesMarketDataClient) GetOrderbook(ctx context.Context, param ty
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/depth",
 		Method:       http.MethodGet,
@@ -149,8 +149,8 @@ func (u *USDMFuturesMarketDataClient) GetRecentTradeList(ctx context.Context, pa
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/trades",
 		Method:       http.MethodGet,
@@ -182,8 +182,8 @@ func (u *USDMFuturesMarketDataClient) GetAggTrades(ctx context.Context, param ty
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/aggTrades",
 		Method:       http.MethodGet,
@@ -215,8 +215,8 @@ func (u *USDMFuturesMarketDataClient) GetKlines(ctx context.Context, param types
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/klines",
 		Method:       http.MethodGet,
@@ -280,8 +280,8 @@ func (u *USDMFuturesMarketDataClient) GetMarkPriceForSymbol(ctx context.Context,
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/premiumIndex",
 		Method:       http.MethodGet,
@@ -308,8 +308,8 @@ func (u *USDMFuturesMarketDataClient) GetMarkPriceForSymbol(ctx context.Context,
 }
 
 func (u *USDMFuturesMarketDataClient) GetMarkPriceForAllSymbols(ctx context.Context) ([]*types.MarkPrice, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/premiumIndex",
 		Method:       http.MethodGet,
@@ -340,8 +340,8 @@ func (u *USDMFuturesMarketDataClient) GetFundingRateHistory(ctx context.Context,
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/fundingRate",
 		Method:       http.MethodGet,
@@ -373,8 +373,8 @@ func (u *USDMFuturesMarketDataClient) GetTickerPriceForSymbol(ctx context.Contex
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/ticker/price",
 		Method:       http.MethodGet,
@@ -401,8 +401,8 @@ func (u *USDMFuturesMarketDataClient) GetTickerPriceForSymbol(ctx context.Contex
 }
 
 func (u *USDMFuturesMarketDataClient) GetTickerPriceForAllSymbols(ctx context.Context) ([]*types.TickerPrice, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/ticker/price",
 		Method:       http.MethodGet,
@@ -433,8 +433,8 @@ func (u *USDMFuturesMarketDataClient) GetBookTickerForSymbol(ctx context.Context
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/ticker/bookTicker",
 		Method:       http.MethodGet,
@@ -461,8 +461,8 @@ func (u *USDMFuturesMarketDataClient) GetBookTickerForSymbol(ctx context.Context
 }
 
 func (u *USDMFuturesMarketDataClient) GetBookTickerForAllSymbols(ctx context.Context) ([]*types.BookTicker, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/fapi/v1/ticker/bookTicker",
 		Method:       http.MethodGet,
@@ -493,8 +493,8 @@ func (u *USDMFuturesMarketDataClient) GetOpenInterestHistory(ctx context.Context
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
-		SecurityType: utils.NONE,
+	req := umutils.HTTPRequest{
+		SecurityType: umutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/futures/data/openInterestHist",
 		Method:       http.MethodGet,

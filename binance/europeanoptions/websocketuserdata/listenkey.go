@@ -7,12 +7,12 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/binance/europeanoptions/utils"
+	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 )
 
 type httpAuthClient struct {
-	*utils.OptionsClient
+	*eoutils.OptionsClient
 }
 
 type httpAuthClientCfg struct {
@@ -32,7 +32,7 @@ func newHttpAuthClient(cfg *httpAuthClientCfg) (*httpAuthClient, error) {
 		return nil, err
 	}
 
-	cli, err := utils.NewOptionsClient(&utils.OptionsClientCfg{
+	cli, err := eoutils.NewOptionsClient(&eoutils.OptionsClientCfg{
 		Debug:      cfg.Debug,
 		Logger:     cfg.Logger,
 		BaseURL:    cfg.BaseURL,
@@ -54,7 +54,7 @@ type listenKeyResp struct {
 }
 
 func (h *httpAuthClient) genListenKey(ctx context.Context) (*listenKeyResp, error) {
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.USER_STREAM,
 		BaseURL:      h.GetBaseURL(),
 		Path:         "/eapi/v1/listenKey",
@@ -82,7 +82,7 @@ func (h *httpAuthClient) genListenKey(ctx context.Context) (*listenKeyResp, erro
 }
 
 func (h *httpAuthClient) updateListenKey(ctx context.Context) error {
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.USER_STREAM,
 		BaseURL:      h.GetBaseURL(),
 		Path:         "/eapi/v1/listenKey",

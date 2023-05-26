@@ -1,6 +1,8 @@
 package types
 
-import "github.com/linstohu/nexapi/binance/utils"
+import (
+	"github.com/linstohu/nexapi/binance/utils"
+)
 
 type SideType string
 

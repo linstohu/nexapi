@@ -1,4 +1,4 @@
-package utils
+package eoutils
 
 var (
 	OptionsBaseURL = "https://eapi.binance.com"

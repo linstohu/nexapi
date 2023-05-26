@@ -1,4 +1,4 @@
-package utils
+package umutils
 
 type HTTPRequest struct {
 	// SecurityType each endpoint has a security type that determines how you will interact with it

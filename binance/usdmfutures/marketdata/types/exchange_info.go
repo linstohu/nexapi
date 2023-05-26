@@ -1,6 +1,8 @@
 package types
 
-import "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+import (
+	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+)
 
 type ExchangeInfo struct {
 	Timezone    string `json:"timezone"`
@@ -18,28 +20,28 @@ type ExchangeInfo struct {
 		AutoAssetExchange string `json:"autoAssetExchange"`
 	} `json:"assets"`
 	Symbols []struct {
-		Symbol                string             `json:"symbol"`
-		Pair                  string             `json:"pair"`
-		ContractType          utils.ContractType `json:"contractType"`
-		DeliveryDate          int64              `json:"deliveryDate"`
-		OnboardDate           int64              `json:"onboardDate"`
-		Status                string             `json:"status"`
-		MaintMarginPercent    string             `json:"maintMarginPercent"`
-		RequiredMarginPercent string             `json:"requiredMarginPercent"`
-		BaseAsset             string             `json:"baseAsset"`
-		QuoteAsset            string             `json:"quoteAsset"`
-		MarginAsset           string             `json:"marginAsset"`
-		PricePrecision        int                `json:"pricePrecision"`
-		QuantityPrecision     int                `json:"quantityPrecision"`
-		BaseAssetPrecision    int                `json:"baseAssetPrecision"`
-		QuotePrecision        int                `json:"quotePrecision"`
-		UnderlyingType        string             `json:"underlyingType"`
-		UnderlyingSubType     []string           `json:"underlyingSubType"`
-		SettlePlan            int                `json:"settlePlan"`
-		TriggerProtect        string             `json:"triggerProtect"`
-		LiquidationFee        string             `json:"liquidationFee"`
-		MarketTakeBound       string             `json:"marketTakeBound"`
-		MaxMoveOrderLimit     int                `json:"maxMoveOrderLimit"`
+		Symbol                string               `json:"symbol"`
+		Pair                  string               `json:"pair"`
+		ContractType          umutils.ContractType `json:"contractType"`
+		DeliveryDate          int64                `json:"deliveryDate"`
+		OnboardDate           int64                `json:"onboardDate"`
+		Status                string               `json:"status"`
+		MaintMarginPercent    string               `json:"maintMarginPercent"`
+		RequiredMarginPercent string               `json:"requiredMarginPercent"`
+		BaseAsset             string               `json:"baseAsset"`
+		QuoteAsset            string               `json:"quoteAsset"`
+		MarginAsset           string               `json:"marginAsset"`
+		PricePrecision        int                  `json:"pricePrecision"`
+		QuantityPrecision     int                  `json:"quantityPrecision"`
+		BaseAssetPrecision    int                  `json:"baseAssetPrecision"`
+		QuotePrecision        int                  `json:"quotePrecision"`
+		UnderlyingType        string               `json:"underlyingType"`
+		UnderlyingSubType     []string             `json:"underlyingSubType"`
+		SettlePlan            int                  `json:"settlePlan"`
+		TriggerProtect        string               `json:"triggerProtect"`
+		LiquidationFee        string               `json:"liquidationFee"`
+		MarketTakeBound       string               `json:"marketTakeBound"`
+		MaxMoveOrderLimit     int                  `json:"maxMoveOrderLimit"`
 		Filters               []struct {
 			MinPrice          string `json:"minPrice,omitempty"`
 			MaxPrice          string `json:"maxPrice,omitempty"`
@@ -54,7 +56,7 @@ type ExchangeInfo struct {
 			MultiplierUp      string `json:"multiplierUp,omitempty"`
 			MultiplierDecimal string `json:"multiplierDecimal,omitempty"`
 		} `json:"filters"`
-		OrderTypes  []utils.OrderType   `json:"orderTypes"`
-		TimeInForce []utils.TimeInForce `json:"timeInForce"`
+		OrderTypes  []umutils.OrderType   `json:"orderTypes"`
+		TimeInForce []umutils.TimeInForce `json:"timeInForce"`
 	} `json:"symbols"`
 }

@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/linstohu/nexapi/binance/europeanoptions/utils"
+	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
@@ -32,14 +32,14 @@ type Order struct {
 
 type NewOrderParam struct {
 	Symbol           string                 `url:"symbol" validate:"required"`
-	Side             utils.OrderSide        `url:"side" validate:"required,oneof=BUY SELL"`
-	Type             utils.OrderType        `url:"type" validate:"required"`
+	Side             eoutils.OrderSide        `url:"side" validate:"required,oneof=BUY SELL"`
+	Type             eoutils.OrderType        `url:"type" validate:"required"`
 	Quantity         float64                `url:"quantity" validate:"required"`
 	Price            float64                `url:"price,omitempty" validate:"omitempty"`
-	TimeInForce      utils.TimeInForce      `url:"timeInForce,omitempty" validate:"omitempty"`
+	TimeInForce      eoutils.TimeInForce      `url:"timeInForce,omitempty" validate:"omitempty"`
 	ReduceOnly       bool                   `url:"reduceOnly,omitempty" validate:"omitempty"`
 	PostOnly         bool                   `url:"postOnly,omitempty" validate:"omitempty"`
-	NewOrderRespType utils.NewOrderRespType `url:"newOrderRespType,omitempty" validate:"omitempty"`
+	NewOrderRespType eoutils.NewOrderRespType `url:"newOrderRespType,omitempty" validate:"omitempty"`
 	ClientOrderID    string                 `url:"clientOrderId,omitempty" validate:"omitempty"`
 	IsMmp            bool                   `url:"isMmp,omitempty" validate:"omitempty"`
 }

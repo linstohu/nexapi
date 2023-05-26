@@ -12,12 +12,12 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/spot/spotaccount/types"
-	"github.com/linstohu/nexapi/binance/spot/utils"
+	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
 type SpotAccountClient struct {
-	*utils.SpotClient
+	*spotutils.SpotClient
 
 	// validate struct fields
 	validate *validator.Validate
@@ -42,7 +42,7 @@ func NewSpotAccountClient(cfg *SpotAccountClientCfg) (*SpotAccountClient, error)
 		return nil, err
 	}
 
-	cli, err := utils.NewSpotClient(&utils.SpotClientCfg{
+	cli, err := spotutils.NewSpotClient(&spotutils.SpotClientCfg{
 		Debug:      cfg.Debug,
 		Logger:     cfg.Logger,
 		BaseURL:    cfg.BaseURL,
@@ -61,8 +61,8 @@ func NewSpotAccountClient(cfg *SpotAccountClientCfg) (*SpotAccountClient, error)
 }
 
 func (s *SpotAccountClient) TestNewOrder(ctx context.Context, param types.NewOrderParam) error {
-	req := utils.HTTPRequest{
-		SecurityType: utils.TRADE,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.TRADE,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/order/test",
 		Method:       http.MethodPost,
@@ -115,8 +115,8 @@ func (s *SpotAccountClient) TestNewOrder(ctx context.Context, param types.NewOrd
 }
 
 func (s *SpotAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.NewOrderResp, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.TRADE,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.TRADE,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/order",
 		Method:       http.MethodPost,
@@ -174,8 +174,8 @@ func (s *SpotAccountClient) NewOrder(ctx context.Context, param types.NewOrderPa
 }
 
 func (s *SpotAccountClient) CancelOrder(ctx context.Context, param types.CancelOrderParam) (*types.OrderInfo, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.TRADE,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.TRADE,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/order",
 		Method:       http.MethodDelete,
@@ -233,8 +233,8 @@ func (s *SpotAccountClient) CancelOrder(ctx context.Context, param types.CancelO
 }
 
 func (s *SpotAccountClient) CancelOrdersOnOneSymbol(ctx context.Context, param types.CancelOrdersOnOneSymbolParam) ([]*types.OrderInfo, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.TRADE,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.TRADE,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/openOrders",
 		Method:       http.MethodDelete,
@@ -292,8 +292,8 @@ func (s *SpotAccountClient) CancelOrdersOnOneSymbol(ctx context.Context, param t
 }
 
 func (s *SpotAccountClient) QueryOrder(ctx context.Context, param types.QueryOrderParam) (*types.Order, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/order",
 		Method:       http.MethodGet,
@@ -351,8 +351,8 @@ func (s *SpotAccountClient) QueryOrder(ctx context.Context, param types.QueryOrd
 }
 
 func (s *SpotAccountClient) GetOpenOrders(ctx context.Context, param types.GetOpenOrdersParam) ([]*types.Order, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/openOrders",
 		Method:       http.MethodGet,
@@ -410,8 +410,8 @@ func (s *SpotAccountClient) GetOpenOrders(ctx context.Context, param types.GetOp
 }
 
 func (s *SpotAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) ([]*types.Order, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/allOrders",
 		Method:       http.MethodGet,
@@ -469,8 +469,8 @@ func (s *SpotAccountClient) GetAllOrders(ctx context.Context, param types.GetAll
 }
 
 func (s *SpotAccountClient) GetAccountInfo(ctx context.Context) (*types.AccountInfo, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/account",
 		Method:       http.MethodGet,
@@ -525,8 +525,8 @@ func (s *SpotAccountClient) GetAccountInfo(ctx context.Context) (*types.AccountI
 }
 
 func (s *SpotAccountClient) GetTradeList(ctx context.Context, param types.GetTradesParam) ([]*types.Trade, error) {
-	req := utils.HTTPRequest{
-		SecurityType: utils.USER_DATA,
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
 		BaseURL:      s.GetBaseURL(),
 		Path:         "/api/v3/myTrades",
 		Method:       http.MethodGet,

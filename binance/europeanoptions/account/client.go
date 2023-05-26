@@ -13,13 +13,13 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/europeanoptions/account/types"
-	"github.com/linstohu/nexapi/binance/europeanoptions/utils"
+	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
 type OptionsAccountClient struct {
-	*utils.OptionsClient
+	*eoutils.OptionsClient
 
 	// validate struct fields
 	validate *validator.Validate
@@ -36,7 +36,7 @@ type OptionsAccountClientCfg struct {
 	RecvWindow int
 }
 
-func NewOptionsAccountClient(cfg *utils.OptionsClientCfg) (*OptionsAccountClient, error) {
+func NewOptionsAccountClient(cfg *eoutils.OptionsClientCfg) (*OptionsAccountClient, error) {
 	validator := validator.New()
 
 	err := validator.Struct(cfg)
@@ -44,7 +44,7 @@ func NewOptionsAccountClient(cfg *utils.OptionsClientCfg) (*OptionsAccountClient
 		return nil, err
 	}
 
-	cli, err := utils.NewOptionsClient(&utils.OptionsClientCfg{
+	cli, err := eoutils.NewOptionsClient(&eoutils.OptionsClientCfg{
 		Debug:      cfg.Debug,
 		Logger:     cfg.Logger,
 		BaseURL:    cfg.BaseURL,
@@ -63,7 +63,7 @@ func NewOptionsAccountClient(cfg *utils.OptionsClientCfg) (*OptionsAccountClient
 }
 
 func (o *OptionsAccountClient) GetAccountInfo(ctx context.Context) (*types.AccountInfo, error) {
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/account",
@@ -123,7 +123,7 @@ func (o *OptionsAccountClient) NewOrder(ctx context.Context, param types.NewOrde
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/order",
@@ -191,7 +191,7 @@ func (o *OptionsAccountClient) GetSingleOrder(ctx context.Context, param types.G
 		return nil, fmt.Errorf("either orderId or clientOrderId must be sent")
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/order",
@@ -259,7 +259,7 @@ func (o *OptionsAccountClient) CancelOrder(ctx context.Context, param types.Canc
 		return nil, fmt.Errorf("either orderId or clientOrderId must be sent")
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/order",
@@ -323,7 +323,7 @@ func (o *OptionsAccountClient) CancelAllOrdersBySymbol(ctx context.Context, para
 		return err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/allOpenOrders",
@@ -382,7 +382,7 @@ func (o *OptionsAccountClient) CancelAllOrdersByUnderlying(ctx context.Context, 
 		return err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/allOpenOrdersByUnderlying",
@@ -441,7 +441,7 @@ func (o *OptionsAccountClient) GetOpenOrders(ctx context.Context, param types.Ge
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/openOrders",
@@ -505,7 +505,7 @@ func (o *OptionsAccountClient) GetOrderHistory(ctx context.Context, param types.
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/historyOrders",
@@ -569,7 +569,7 @@ func (o *OptionsAccountClient) GetPositionInfo(ctx context.Context, param types.
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/position",
@@ -633,7 +633,7 @@ func (o *OptionsAccountClient) GetTradeList(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/userTrades",
@@ -697,7 +697,7 @@ func (o *OptionsAccountClient) GetExerciseRecord(ctx context.Context, param type
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/exerciseRecord",
@@ -761,7 +761,7 @@ func (o *OptionsAccountClient) GetFundingFlow(ctx context.Context, param types.G
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := eoutils.HTTPRequest{
 		SecurityType: usdmutils.TRADE,
 		BaseURL:      o.GetBaseURL(),
 		Path:         "/eapi/v1/bill",

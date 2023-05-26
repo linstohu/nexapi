@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/linstohu/nexapi/binance/spot/subaccount/types"
-	"github.com/linstohu/nexapi/binance/spot/utils"
+	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testNewSpotSubAccountClient(t *testing.T) *SpotSubAccountClient {
 	cli, err := NewSpotSubAccountClient(&SpotSubAccountClientCfg{
-		BaseURL: utils.BaseURL,
+		BaseURL: spotutils.BaseURL,
 		Key:     os.Getenv("BINANCE_KEY"),
 		Secret:  os.Getenv("BINANCE_SECRET"),
 		Debug:   true,

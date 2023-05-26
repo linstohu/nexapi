@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/coinmfutures/marketdata/types"
-	"github.com/linstohu/nexapi/binance/coinmfutures/utils"
+	cmutils "github.com/linstohu/nexapi/binance/coinmfutures/utils"
 	spottypes "github.com/linstohu/nexapi/binance/spot/marketdata/types"
 	usdmtypes "github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
@@ -16,14 +16,14 @@ import (
 )
 
 type CoinMFuturesMarketDataClient struct {
-	*utils.CoinMarginedClient
+	*cmutils.CoinMarginedClient
 
 	// validate struct fields
 	validate *validator.Validate
 }
 
-func NewCoinMFuturesMarketDataClient(cfg *utils.CoinMarginedClientCfg) (*CoinMFuturesMarketDataClient, error) {
-	cli, err := utils.NewCoinMarginedClient(cfg)
+func NewCoinMFuturesMarketDataClient(cfg *cmutils.CoinMarginedClientCfg) (*CoinMFuturesMarketDataClient, error) {
+	cli, err := cmutils.NewCoinMarginedClient(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func NewCoinMFuturesMarketDataClient(cfg *utils.CoinMarginedClientCfg) (*CoinMFu
 }
 
 func (c *CoinMFuturesMarketDataClient) Ping(ctx context.Context) error {
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/ping",
@@ -59,7 +59,7 @@ func (c *CoinMFuturesMarketDataClient) Ping(ctx context.Context) error {
 }
 
 func (c *CoinMFuturesMarketDataClient) GetServerTime(ctx context.Context) (*spottypes.ServerTime, error) {
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/time",
@@ -86,7 +86,7 @@ func (c *CoinMFuturesMarketDataClient) GetServerTime(ctx context.Context) (*spot
 }
 
 func (c *CoinMFuturesMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.ExchangeInfo, error) {
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/exchangeInfo",
@@ -118,7 +118,7 @@ func (c *CoinMFuturesMarketDataClient) GetOrderbook(ctx context.Context, param t
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/depth",
@@ -151,7 +151,7 @@ func (c *CoinMFuturesMarketDataClient) GetRecentTradeList(ctx context.Context, p
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/trades",
@@ -184,7 +184,7 @@ func (u *CoinMFuturesMarketDataClient) GetAggTrades(ctx context.Context, param u
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      u.GetBaseURL(),
 		Path:         "/dapi/v1/aggTrades",
@@ -217,7 +217,7 @@ func (c *CoinMFuturesMarketDataClient) GetMarkPrice(ctx context.Context, param t
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/premiumIndex",
@@ -250,7 +250,7 @@ func (c *CoinMFuturesMarketDataClient) GetFundingRateHistory(ctx context.Context
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/fundingRate",
@@ -283,7 +283,7 @@ func (c *CoinMFuturesMarketDataClient) GetKlines(ctx context.Context, param usdm
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/klines",
@@ -348,7 +348,7 @@ func (c *CoinMFuturesMarketDataClient) GetTickerPrice(ctx context.Context, param
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/ticker/price",
@@ -381,7 +381,7 @@ func (c *CoinMFuturesMarketDataClient) GetBookTicker(ctx context.Context, param 
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/ticker/bookTicker",
@@ -414,7 +414,7 @@ func (c *CoinMFuturesMarketDataClient) GetOpenInterest(ctx context.Context, para
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/dapi/v1/openInterest",
@@ -447,7 +447,7 @@ func (c *CoinMFuturesMarketDataClient) GetOpenInterestHistory(ctx context.Contex
 		return nil, err
 	}
 
-	req := utils.HTTPRequest{
+	req := cmutils.HTTPRequest{
 		SecurityType: usdmutils.NONE,
 		BaseURL:      c.GetBaseURL(),
 		Path:         "/futures/data/openInterestHist",

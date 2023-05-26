@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/binance/europeanoptions/utils"
+	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 )
 
 // GetTradeTopic
@@ -35,8 +35,8 @@ func (o *OptionsMarketStreamClient) GetMarkPriceTopic(underlying string) (string
 }
 
 type KlineTopicParam struct {
-	Symbol   string              `validate:"required"`
-	Interval utils.KlineInterval `validate:"required,oneof=1m 3m 5m 15m 30m 1h 2h 4h 6h 12h 1d 3d 1w"`
+	Symbol   string                `validate:"required"`
+	Interval eoutils.KlineInterval `validate:"required,oneof=1m 3m 5m 15m 30m 1h 2h 4h 6h 12h 1d 3d 1w"`
 }
 
 func (o *OptionsMarketStreamClient) GetKlineTopic(params *KlineTopicParam) (string, error) {

@@ -1,6 +1,8 @@
 package types
 
-import "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+import (
+	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+)
 
 type AggregateTrade struct {
 	EventType        string `json:"e"`
@@ -63,17 +65,17 @@ type LiquidationOrder struct {
 	EventType string `json:"e"`
 	EventTime int64  `json:"E"`
 	Order     struct {
-		Symbol                    string            `json:"s"`
-		Side                      string            `json:"S"`
-		OrderType                 utils.OrderType   `json:"o"`
-		TimeInForce               utils.TimeInForce `json:"f"`
-		OriginalQuantity          string            `json:"q"`
-		Price                     string            `json:"p"`
-		AveragePrice              string            `json:"ap"`
-		OrderStatus               utils.OrderStatus `json:"X"`
-		LastFilledQuantity        string            `json:"l"`
-		FilledAccumulatedQuantity string            `json:"z"`
-		TradeTime                 int64             `json:"T"`
+		Symbol                    string              `json:"s"`
+		Side                      string              `json:"S"`
+		OrderType                 umutils.OrderType   `json:"o"`
+		TimeInForce               umutils.TimeInForce `json:"f"`
+		OriginalQuantity          string              `json:"q"`
+		Price                     string              `json:"p"`
+		AveragePrice              string              `json:"ap"`
+		OrderStatus               umutils.OrderStatus `json:"X"`
+		LastFilledQuantity        string              `json:"l"`
+		FilledAccumulatedQuantity string              `json:"z"`
+		TradeTime                 int64               `json:"T"`
 	} `json:"o"`
 }
 

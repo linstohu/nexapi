@@ -1,6 +1,8 @@
 package types
 
-import "github.com/linstohu/nexapi/binance/coinmfutures/utils"
+import (
+	cmutils "github.com/linstohu/nexapi/binance/coinmfutures/utils"
+)
 
 type GetOpenInterestParam struct {
 	Symbol string `url:"symbol" validate:"required"`
@@ -15,12 +17,12 @@ type OpenInterest struct {
 }
 
 type GetOpenInterestHistParam struct {
-	Pair         string             `url:"pair" validate:"required"`
-	ContractType utils.ContractType `url:"contractType" validate:"required,oneof=ALL CURRENT_QUARTER NEXT_QUARTER PERPETUAL"`
-	Period       string             `url:"period" validate:"required,oneof=5m 15m 30m 1h 2h 4h 6h 12h 1d"`
-	StartTime    int64              `url:"startTime,omitempty" validate:"omitempty"`
-	EndTime      int64              `url:"endTime,omitempty" validate:"omitempty"`
-	Limit        int                `url:"limit,omitempty" validate:"omitempty,max=500"`
+	Pair         string               `url:"pair" validate:"required"`
+	ContractType cmutils.ContractType `url:"contractType" validate:"required,oneof=ALL CURRENT_QUARTER NEXT_QUARTER PERPETUAL"`
+	Period       string               `url:"period" validate:"required,oneof=5m 15m 30m 1h 2h 4h 6h 12h 1d"`
+	StartTime    int64                `url:"startTime,omitempty" validate:"omitempty"`
+	EndTime      int64                `url:"endTime,omitempty" validate:"omitempty"`
+	Limit        int                  `url:"limit,omitempty" validate:"omitempty,max=500"`
 }
 
 type OpenInterestHist struct {
