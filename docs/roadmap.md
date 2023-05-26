@@ -20,7 +20,7 @@ NexAPI plans to integrate APIs from well-known cryptocurrency exchanges all arou
 
 ## Roadmap
 
-* [] Binance
+* [x] Binance
 * [] Kraken
 * [] KuCoin
 * [] OKX
