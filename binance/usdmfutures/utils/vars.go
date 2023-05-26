@@ -107,3 +107,10 @@ var (
 	Week1    KlineInterval = "1w"
 	Month1   KlineInterval = "1M"
 )
+
+type MarginType = string
+
+var (
+	ISOLATED MarginType = "ISOLATED"
+	CROSSED  MarginType = "CROSSED"
+)

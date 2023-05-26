@@ -5,6 +5,32 @@ import (
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
+type Order struct {
+	ClientOrderID string `json:"clientOrderId"`
+	CumQty        string `json:"cumQty"`
+	CumQuote      string `json:"cumQuote"`
+	ExecutedQty   string `json:"executedQty"`
+	OrderID       int64  `json:"orderId"`
+	AvgPrice      string `json:"avgPrice"`
+	OrigQty       string `json:"origQty"`
+	Price         string `json:"price"`
+	ReduceOnly    bool   `json:"reduceOnly"`
+	Side          string `json:"side"`
+	PositionSide  string `json:"positionSide"`
+	Status        string `json:"status"`
+	StopPrice     string `json:"stopPrice"`
+	ClosePosition bool   `json:"closePosition"`
+	Symbol        string `json:"symbol"`
+	TimeInForce   string `json:"timeInForce"`
+	Type          string `json:"type"`
+	OrigType      string `json:"origType"`
+	ActivatePrice string `json:"activatePrice"`
+	PriceRate     string `json:"priceRate"`
+	UpdateTime    int64  `json:"updateTime"`
+	WorkingType   string `json:"workingType"`
+	PriceProtect  bool   `json:"priceProtect"`
+}
+
 type NewOrderParam struct {
 	Symbol           string                   `url:"symbol" validate:"required"`
 	Side             umutils.OrderSide        `url:"side" validate:"required,oneof=BUY SELL"`
@@ -23,5 +49,47 @@ type NewOrderParam struct {
 
 type NewOrderParams struct {
 	NewOrderParam
+	bnutils.DefaultParam
+}
+
+type GetOrderParam struct {
+	Symbol            string `url:"symbol" validate:"required"`
+	OrderID           int64  `url:"orderId,omitempty" validate:"omitempty"`
+	OrigClientOrderId string `url:"origClientOrderId,omitempty" validate:"omitempty"`
+}
+
+type GetOrderParams struct {
+	GetOrderParam
+	bnutils.DefaultParam
+}
+
+type CancelAllOpenOrdersParam struct {
+	Symbol string `url:"symbol" validate:"required"`
+}
+
+type CancelAllOpenOrdersParams struct {
+	CancelAllOpenOrdersParam
+	bnutils.DefaultParam
+}
+
+type GetAllOpenOrdersParam struct {
+	Symbol string `url:"symbol,omitempty" validate:"omitempty"`
+}
+
+type GetAllOpenOrdersParams struct {
+	GetAllOpenOrdersParam
+	bnutils.DefaultParam
+}
+
+type GetAllOrdersParam struct {
+	Symbol    string `url:"symbol" validate:"required"`
+	OrderID   int64  `url:"orderId,omitempty" validate:"omitempty"`
+	StartTime int64  `url:"startTime,omitempty" validate:"omitempty"`
+	EndTime   int64  `url:"endTime,omitempty" validate:"omitempty"`
+	Limit     int    `url:"limit,omitempty" validate:"omitempty,max=1000"`
+}
+
+type GetAllOrdersParams struct {
+	GetAllOrdersParam
 	bnutils.DefaultParam
 }
