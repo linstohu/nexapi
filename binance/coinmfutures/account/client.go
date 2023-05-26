@@ -11,19 +11,20 @@ import (
 	"time"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/binance/usdmfutures/account/types"
+	"github.com/linstohu/nexapi/binance/coinmfutures/account/types"
+	cmutils "github.com/linstohu/nexapi/binance/coinmfutures/utils"
 	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
 )
 
-type UsdMFuturesAccountClient struct {
-	*umutils.USDMarginedClient
+type CoinMFuturesAccountClient struct {
+	*cmutils.CoinMarginedClient
 
 	// validate struct fields
 	validate *validator.Validate
 }
 
-type UsdMFuturesAccountClientCfg struct {
+type CoinMFuturesAccountClientCfg struct {
 	Debug bool
 	// Logger
 	Logger *log.Logger
@@ -34,7 +35,7 @@ type UsdMFuturesAccountClientCfg struct {
 	RecvWindow int
 }
 
-func NewUsdMFuturesAccountClient(cfg *umutils.USDMarginedClientCfg) (*UsdMFuturesAccountClient, error) {
+func NewCoinMFuturesAccountClient(cfg *cmutils.CoinMarginedClientCfg) (*CoinMFuturesAccountClient, error) {
 	validator := validator.New()
 
 	err := validator.Struct(cfg)
@@ -42,7 +43,7 @@ func NewUsdMFuturesAccountClient(cfg *umutils.USDMarginedClientCfg) (*UsdMFuture
 		return nil, err
 	}
 
-	cli, err := umutils.NewUSDMarginedClient(&umutils.USDMarginedClientCfg{
+	cli, err := cmutils.NewCoinMarginedClient(&cmutils.CoinMarginedClientCfg{
 		Debug:      cfg.Debug,
 		Logger:     cfg.Logger,
 		BaseURL:    cfg.BaseURL,
@@ -54,21 +55,21 @@ func NewUsdMFuturesAccountClient(cfg *umutils.USDMarginedClientCfg) (*UsdMFuture
 		return nil, err
 	}
 
-	return &UsdMFuturesAccountClient{
-		USDMarginedClient: cli,
-		validate:          validator,
+	return &CoinMFuturesAccountClient{
+		CoinMarginedClient: cli,
+		validate:           validator,
 	}, nil
 }
 
-func (u *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param types.ChangePositionModeParam) (*types.Response, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) ChangePositionMode(ctx context.Context, param types.ChangePositionModeParam) (*types.Response, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/positionSide/dual",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/positionSide/dual",
 		Method:       http.MethodPost,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -79,23 +80,23 @@ func (u *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param
 		body := types.ChangePositionModeParams{
 			ChangePositionModeParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(body)
+		err := o.validate.Struct(body)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -105,7 +106,7 @@ func (u *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param
 		req.Body = body
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -118,15 +119,15 @@ func (u *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.GetCurrentPositionModeResp, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.GetCurrentPositionModeResp, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/positionSide/dual",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/positionSide/dual",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -135,22 +136,22 @@ func (u *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.
 
 	{
 		query := bnutils.DefaultParam{
-			RecvWindow: u.GetRecvWindow(),
+			RecvWindow: o.GetRecvWindow(),
 			Timestamp:  time.Now().UnixMilli(),
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -160,7 +161,7 @@ func (u *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -173,128 +174,15 @@ func (u *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) ChangeMultiAssetsMode(ctx context.Context, param types.ChangeMultiAssetsModeParam) (*types.Response, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.Order, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/multiAssetsMargin",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/order",
 		Method:       http.MethodPost,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
-		if err != nil {
-			return nil, err
-		}
-		req.Headers = headers
-	}
-
-	{
-		body := types.ChangeMultiAssetsModeParams{
-			ChangeMultiAssetsModeParam: param,
-			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
-				Timestamp:  time.Now().UnixMilli(),
-			},
-		}
-
-		err := u.validate.Struct(body)
-		if err != nil {
-			return nil, err
-		}
-
-		if need := u.NeedSignature(req.SecurityType); need {
-			signString, err := bnutils.NormalizeRequestContent(nil, body)
-			if err != nil {
-				return nil, err
-			}
-
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
-			h.Write([]byte(signString))
-			signature := hex.EncodeToString(h.Sum(nil))
-
-			body.Signature = signature
-		}
-
-		req.Body = body
-	}
-
-	resp, err := u.SendHTTPRequest(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	var ret types.Response
-	if err := json.Unmarshal(resp, &ret); err != nil {
-		return nil, err
-	}
-
-	return &ret, nil
-}
-
-func (u *UsdMFuturesAccountClient) GetMultiAssetsMode(ctx context.Context) (*types.GetCurrentMultiAssetsModeResp, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/multiAssetsMargin",
-		Method:       http.MethodGet,
-	}
-	{
-		headers, err := u.GenHeaders(req.SecurityType)
-		if err != nil {
-			return nil, err
-		}
-		req.Headers = headers
-	}
-
-	{
-		query := bnutils.DefaultParam{
-			RecvWindow: u.GetRecvWindow(),
-			Timestamp:  time.Now().UnixMilli(),
-		}
-
-		err := u.validate.Struct(query)
-		if err != nil {
-			return nil, err
-		}
-
-		if need := u.NeedSignature(req.SecurityType); need {
-			signString, err := bnutils.NormalizeRequestContent(query, nil)
-			if err != nil {
-				return nil, err
-			}
-
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
-			h.Write([]byte(signString))
-			signature := hex.EncodeToString(h.Sum(nil))
-
-			query.Signature = signature
-		}
-
-		req.Query = query
-	}
-
-	resp, err := u.SendHTTPRequest(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	var ret types.GetCurrentMultiAssetsModeResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
-		return nil, err
-	}
-
-	return &ret, nil
-}
-
-func (u *UsdMFuturesAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.Order, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/order",
-		Method:       http.MethodPost,
-	}
-	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -305,23 +193,23 @@ func (u *UsdMFuturesAccountClient) NewOrder(ctx context.Context, param types.New
 		body := types.NewOrderParams{
 			NewOrderParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(body)
+		err := o.validate.Struct(body)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -331,7 +219,7 @@ func (u *UsdMFuturesAccountClient) NewOrder(ctx context.Context, param types.New
 		req.Body = body
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -344,15 +232,15 @@ func (u *UsdMFuturesAccountClient) NewOrder(ctx context.Context, param types.New
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) QueryOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) QueryOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/order",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/order",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -363,23 +251,23 @@ func (u *UsdMFuturesAccountClient) QueryOrder(ctx context.Context, param types.G
 		query := types.GetOrderParams{
 			GetOrderParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -389,7 +277,7 @@ func (u *UsdMFuturesAccountClient) QueryOrder(ctx context.Context, param types.G
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -402,15 +290,15 @@ func (u *UsdMFuturesAccountClient) QueryOrder(ctx context.Context, param types.G
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/openOrder",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/openOrder",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -421,23 +309,23 @@ func (u *UsdMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param typ
 		query := types.GetOrderParams{
 			GetOrderParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -447,7 +335,7 @@ func (u *UsdMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param typ
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -460,15 +348,15 @@ func (u *UsdMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param typ
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param types.GetAllOpenOrdersParam) ([]*types.Order, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param types.GetAllOpenOrdersParam) ([]*types.Order, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/openOrders",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/openOrders",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -479,23 +367,23 @@ func (u *UsdMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param
 		query := types.GetAllOpenOrdersParams{
 			GetAllOpenOrdersParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -505,7 +393,7 @@ func (u *UsdMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -518,15 +406,15 @@ func (u *UsdMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param
 	return ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) CancelOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) CancelOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/order",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/order",
 		Method:       http.MethodDelete,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -537,23 +425,23 @@ func (u *UsdMFuturesAccountClient) CancelOrder(ctx context.Context, param types.
 		body := types.GetOrderParams{
 			GetOrderParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(body)
+		err := o.validate.Struct(body)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -563,7 +451,7 @@ func (u *UsdMFuturesAccountClient) CancelOrder(ctx context.Context, param types.
 		req.Body = body
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -576,15 +464,15 @@ func (u *UsdMFuturesAccountClient) CancelOrder(ctx context.Context, param types.
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, param types.CancelAllOpenOrdersParam) error {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, param types.CancelAllOpenOrdersParam) error {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/allOpenOrders",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/allOpenOrders",
 		Method:       http.MethodDelete,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return err
 		}
@@ -595,23 +483,23 @@ func (u *UsdMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, para
 		body := types.CancelAllOpenOrdersParams{
 			CancelAllOpenOrdersParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(body)
+		err := o.validate.Struct(body)
 		if err != nil {
 			return err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -621,7 +509,7 @@ func (u *UsdMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, para
 		req.Body = body
 	}
 
-	_, err := u.SendHTTPRequest(ctx, req)
+	_, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -629,15 +517,15 @@ func (u *UsdMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, para
 	return nil
 }
 
-func (u *UsdMFuturesAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) ([]*types.Order, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) ([]*types.Order, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/allOrders",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/allOrders",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -648,23 +536,23 @@ func (u *UsdMFuturesAccountClient) GetAllOrders(ctx context.Context, param types
 		query := types.GetAllOrdersParams{
 			GetAllOrdersParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -674,7 +562,7 @@ func (u *UsdMFuturesAccountClient) GetAllOrders(ctx context.Context, param types
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -687,15 +575,15 @@ func (u *UsdMFuturesAccountClient) GetAllOrders(ctx context.Context, param types
 	return ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Balance, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Balance, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v2/balance",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/balance",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -704,22 +592,22 @@ func (u *UsdMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Bal
 
 	{
 		query := bnutils.DefaultParam{
-			RecvWindow: u.GetRecvWindow(),
+			RecvWindow: o.GetRecvWindow(),
 			Timestamp:  time.Now().UnixMilli(),
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -729,7 +617,7 @@ func (u *UsdMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Bal
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -742,15 +630,15 @@ func (u *UsdMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Bal
 	return ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*types.Account, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*types.Account, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v2/account",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/account",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -759,22 +647,22 @@ func (u *UsdMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*
 
 	{
 		query := bnutils.DefaultParam{
-			RecvWindow: u.GetRecvWindow(),
+			RecvWindow: o.GetRecvWindow(),
 			Timestamp:  time.Now().UnixMilli(),
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -784,7 +672,7 @@ func (u *UsdMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -797,15 +685,15 @@ func (u *UsdMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, param types.ChangeLeverageParam) (*types.ChangeLeverageResp, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, param types.ChangeLeverageParam) (*types.ChangeLeverageResp, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/leverage",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/leverage",
 		Method:       http.MethodPost,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -816,23 +704,23 @@ func (u *UsdMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, pa
 		body := types.ChangeLeverageParams{
 			ChangeLeverageParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(body)
+		err := o.validate.Struct(body)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -842,7 +730,7 @@ func (u *UsdMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, pa
 		req.Body = body
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -855,15 +743,15 @@ func (u *UsdMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, pa
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) ChangeMarginType(ctx context.Context, param types.ChangeMarginTypeParam) error {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) ChangeMarginType(ctx context.Context, param types.ChangeMarginTypeParam) error {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/marginType",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/marginType",
 		Method:       http.MethodPost,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return err
 		}
@@ -874,23 +762,23 @@ func (u *UsdMFuturesAccountClient) ChangeMarginType(ctx context.Context, param t
 		body := types.ChangeMarginTypeParams{
 			ChangeMarginTypeParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(body)
+		err := o.validate.Struct(body)
 		if err != nil {
 			return err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -900,7 +788,7 @@ func (u *UsdMFuturesAccountClient) ChangeMarginType(ctx context.Context, param t
 		req.Body = body
 	}
 
-	_, err := u.SendHTTPRequest(ctx, req)
+	_, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -908,15 +796,15 @@ func (u *UsdMFuturesAccountClient) ChangeMarginType(ctx context.Context, param t
 	return nil
 }
 
-func (u *UsdMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Context, param types.ModifyIsolatedPositionMarginParam) (*types.ModifyIsolatedPositionMarginResp, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Context, param types.ModifyIsolatedPositionMarginParam) (*types.ModifyIsolatedPositionMarginResp, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/positionMargin",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/positionMargin",
 		Method:       http.MethodPost,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -927,23 +815,23 @@ func (u *UsdMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Cont
 		body := types.ModifyIsolatedPositionMarginParams{
 			ModifyIsolatedPositionMarginParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(body)
+		err := o.validate.Struct(body)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -953,7 +841,7 @@ func (u *UsdMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Cont
 		req.Body = body
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -966,15 +854,15 @@ func (u *UsdMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Cont
 	return &ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetPositionInformation(ctx context.Context, param types.GetPositionParam) ([]*types.Position, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) GetPositionInformation(ctx context.Context, param types.GetPositionParam) ([]*types.Position, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v2/positionRisk",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/positionRisk",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -985,23 +873,23 @@ func (u *UsdMFuturesAccountClient) GetPositionInformation(ctx context.Context, p
 		query := types.GetPositionParams{
 			GetPositionParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -1011,7 +899,7 @@ func (u *UsdMFuturesAccountClient) GetPositionInformation(ctx context.Context, p
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -1024,15 +912,15 @@ func (u *UsdMFuturesAccountClient) GetPositionInformation(ctx context.Context, p
 	return ret, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetAccountTradeList(ctx context.Context, param types.GetTradeListParam) ([]*types.Trade, error) {
-	req := umutils.HTTPRequest{
+func (o *CoinMFuturesAccountClient) GetAccountTradeList(ctx context.Context, param types.GetTradeListParam) ([]*types.Trade, error) {
+	req := cmutils.HTTPRequest{
 		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/userTrades",
+		BaseURL:      o.GetBaseURL(),
+		Path:         "/dapi/v1/userTrades",
 		Method:       http.MethodGet,
 	}
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(req.SecurityType)
 		if err != nil {
 			return nil, err
 		}
@@ -1043,23 +931,23 @@ func (u *UsdMFuturesAccountClient) GetAccountTradeList(ctx context.Context, para
 		query := types.GetTradeListParams{
 			GetTradeListParam: param,
 			DefaultParam: bnutils.DefaultParam{
-				RecvWindow: u.GetRecvWindow(),
+				RecvWindow: o.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),
 			},
 		}
 
-		err := u.validate.Struct(query)
+		err := o.validate.Struct(query)
 		if err != nil {
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(req.SecurityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			h := hmac.New(sha256.New, []byte(u.GetSecret()))
+			h := hmac.New(sha256.New, []byte(o.GetSecret()))
 			h.Write([]byte(signString))
 			signature := hex.EncodeToString(h.Sum(nil))
 
@@ -1069,7 +957,7 @@ func (u *UsdMFuturesAccountClient) GetAccountTradeList(ctx context.Context, para
 		req.Query = query
 	}
 
-	resp, err := u.SendHTTPRequest(ctx, req)
+	resp, err := o.SendHTTPRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
