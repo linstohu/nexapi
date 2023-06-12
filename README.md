@@ -27,6 +27,94 @@ It is intended to be used by coders, developers, technically-skilled traders, da
 
 ### Binance Example
 
+#### Example 1: REST API
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	bnUsdmMarket "github.com/linstohu/nexapi/binance/usdmfutures/marketdata"
+	umtypes "github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
+	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+)
+
+func main() {
+	cli, err := bnUsdmMarket.NewUSDMFuturesMarketDataClient(&umutils.USDMarginedClientCfg{
+		Debug:   false,
+		Logger:  log.Default(),
+		BaseURL: umutils.USDMarginedBaseURL,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	trades, err := cli.GetRecentTradeList(context.TODO(), umtypes.GetTradeParams{
+		Symbol: "BTCUSDT",
+		Limit:  10,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	for i, v := range trades {
+		fmt.Printf("Index-%v, %+v\n", i, v)
+	}
+}
+```
+
+#### Example 2: Websocket API
+
+```go
+
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	bnUsdmWsMarket "github.com/linstohu/nexapi/binance/usdmfutures/websocketmarket"
+	bnUsdmWsTypes "github.com/linstohu/nexapi/binance/usdmfutures/websocketmarket/types"
+)
+
+func main() {
+	cli, err := bnUsdmWsMarket.NewMarketStreamClient(context.TODO(), &bnUsdmWsMarket.USDMarginedMarketStreamCfg{
+		Debug:   false,
+		Logger:  log.Default(),
+		BaseURL: bnUsdmWsMarket.USDMarginedMarketStreamBaseURL,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	topic, err := cli.GetAggTradeTopic("btcusdt")
+	if err != nil {
+		panic(err)
+	}
+
+	cli.AddListener(topic, func(e any) {
+		trade, ok := e.(*bnUsdmWsTypes.AggregateTrade)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Topic: %s, Symbol: %v, Price: %v, Quantity: %v, Time: %v\n",
+			topic, trade.Symbol, trade.Price, trade.Quantity, trade.EventTime)
+	})
+
+	cli.Subscribe([]string{topic})
+
+	select {}
+}
+
+```
+
 ### Gate.io Example
 
 ## ⭐ Give a Star!
