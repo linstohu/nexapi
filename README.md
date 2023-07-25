@@ -23,8 +23,6 @@ It is intended to be used by coders, developers, technically-skilled traders, da
 
 ## 🔎 Usage
 
-### Intro
-
 ### Binance Example
 
 #### Example 1: REST API
@@ -114,8 +112,6 @@ func main() {
 }
 
 ```
-
-### Gate.io Example
 
 ## ⭐ Give a Star!
 
