@@ -11,7 +11,7 @@ type Position struct {
 	Fee24H           float64 `json:"fee_24_h"`
 	MarkPrice        float64 `json:"mark_price"`
 	EstLiqPrice      float64 `json:"est_liq_price"`
-	Timestamp        string  `json:"timestamp"`
+	Timestamp        float64  `json:"timestamp"`
 }
 
 type GetOnePositionInfo struct {
