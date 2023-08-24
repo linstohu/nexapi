@@ -473,6 +473,41 @@ func (w *WooXRestClient) TransferAsset(ctx context.Context, params types.Transfe
 	return &ret, nil
 }
 
+func (w *WooXRestClient) UpdateAccountMode(ctx context.Context, params types.UpdateAccountModeParam) (*types.Response, error) {
+	err := w.validate.Struct(params)
+	if err != nil {
+		return nil, err
+	}
+
+	path := "/v1/client/account_mode"
+
+	req := types.HTTPRequest{
+		URL:    w.baseURL + path,
+		Path:   path,
+		Method: http.MethodPost,
+		Body:   params,
+		Debug:  w.debug,
+	}
+
+	headers, err := w.GenV1APIAuthHeaders(req)
+	if err != nil {
+		return nil, err
+	}
+	req.Headers = headers
+
+	resp, err := w.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.Response
+	if err := json.Unmarshal(resp, &ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
 func (w *WooXRestClient) UpdateLeverageSetting(ctx context.Context, params types.UpdateLeverageSettingParam) (*types.Response, error) {
 	err := w.validate.Struct(params)
 	if err != nil {
@@ -570,7 +605,7 @@ func (w *WooXRestClient) GetOnePositionInfo(ctx context.Context, symbol string) 
 	return &ret, nil
 }
 
-func (w *WooXRestClient) GetAllPositionInfo(ctx context.Context) (*types.GetAllPositionInfo, error) {
+func (w *WooXRestClient) GetAllPositionInfo(ctx context.Context) (*types.GetAllV3PositionInfo, error) {
 	path := "/v3/positions"
 
 	req := types.HTTPRequest{
@@ -591,7 +626,7 @@ func (w *WooXRestClient) GetAllPositionInfo(ctx context.Context) (*types.GetAllP
 		return nil, err
 	}
 
-	var ret types.GetAllPositionInfo
+	var ret types.GetAllV3PositionInfo
 	if err := json.Unmarshal(resp, &ret); err != nil {
 		return nil, err
 	}

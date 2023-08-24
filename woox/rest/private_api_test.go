@@ -109,6 +109,15 @@ func TestTransferAsset(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestUpdateAccountMode(t *testing.T) {
+	woox := testNewWooXRestPrivateClient(t)
+
+	_, err := woox.UpdateAccountMode(context.TODO(), types.UpdateAccountModeParam{
+		AccountMode: "FUTURES", // PURE_SPOT, MARGIN, FUTURES
+	})
+	assert.Nil(t, err)
+}
+
 func TestGetIPRestriction(t *testing.T) {
 	woox := testNewWooXRestPrivateClient(t)
 
