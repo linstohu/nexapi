@@ -3,9 +3,9 @@
 NexAPI plans to integrate APIs from well-known cryptocurrency exchanges all around the world. Typically, we use [CoinMarketCap](https://coinmarketcap.com/rankings/exchanges/) to choose the exchanges to integrate with NexAPI.
 
 - [NexAPI Roadmap](#nexapi-roadmap)
-    - [Product Principles](#product-principles)
-    - [Features](#features)
-    - [Roadmap](#roadmap)
+  - [Product Principles](#product-principles)
+  - [Features](#features)
+  - [Roadmap](#roadmap)
 
 ## Product Principles
 
@@ -14,16 +14,16 @@ NexAPI plans to integrate APIs from well-known cryptocurrency exchanges all arou
 
 ## Features
 
-* Support HTTP requests.
-* Support WebSocket streams for live updates.
-* Support reconnection after disconnection when using WebSocket.
+- Support HTTP requests.
+- Support WebSocket streams for live updates.
+- Support reconnection after disconnection when using WebSocket.
 
 ## Roadmap
 
-* [x] Binance
-* [] Kraken
-* [] KuCoin
-* [] OKX
-* [] Bybit
-* [] Gate.io
-* [x] WOO X
+- [x] Binance
+- [] Kraken
+- [] KuCoin
+- [] OKX
+- [] Bybit
+- [] Gate.io
+- [x] WOO X

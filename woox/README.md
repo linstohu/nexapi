@@ -16,8 +16,8 @@ WOO Network is a deep liquidity network connecting traders, exchanges, instituti
 ## Base URL
 
 - Testnet(Staging)
-    - RESTful API: https://api.staging.woo.org
-    - WebSocket API: wss://wss.staging.woo.org/ws/stream/{application_id}
+  - RESTful API: https://api.staging.woo.org
+  - WebSocket API: wss://wss.staging.woo.org/ws/stream/{application_id}
 - Production
-    - RESTful API: https://api.woo.org
-    - WebSocket API: wss://wss.woo.org/ws/stream/{application_id}
+  - RESTful API: https://api.woo.org
+  - WebSocket API: wss://wss.woo.org/ws/stream/{application_id}
