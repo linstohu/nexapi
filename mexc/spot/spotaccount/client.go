@@ -111,3 +111,53 @@ func (s *SpotAccountClient) GetAccountInfo(ctx context.Context) (*types.AccountI
 
 	return &ret, nil
 }
+
+func (s *SpotAccountClient) Transfer(ctx context.Context, param types.TransferParam) error {
+	req := spotutils.HTTPRequest{
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/capital/transfer",
+		Method:  http.MethodPost,
+	}
+
+	{
+		headers, err := s.GenAuthHeaders(req)
+		if err != nil {
+			return err
+		}
+		req.Headers = headers
+	}
+
+	{
+		query := types.TransferParams{
+			TransferParam: param,
+			DefaultParam: mexcutils.DefaultParam{
+				RecvWindow: s.GetRecvWindow(),
+				Timestamp:  time.Now().UnixMilli(),
+			},
+		}
+
+		err := s.validate.Struct(query)
+		if err != nil {
+			return err
+		}
+
+		signString, err := mexcutils.NormalizeRequestContent(query, nil)
+		if err != nil {
+			return err
+		}
+
+		h := hmac.New(sha256.New, []byte(s.GetSecret()))
+		h.Write([]byte(signString))
+		signature := hex.EncodeToString(h.Sum(nil))
+		query.Signature = signature
+
+		req.Query = query
+	}
+
+	_, err := s.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

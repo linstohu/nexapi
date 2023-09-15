@@ -53,7 +53,7 @@ func NewSpotClient(cfg *SpotClientCfg) (*SpotClient, error) {
 	}
 
 	if cfg.RecvWindow == 0 {
-		cli.recvWindow = 10
+		cli.recvWindow = 5000
 	}
 
 	if cli.logger == nil {

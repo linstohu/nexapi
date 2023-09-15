@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/linstohu/nexapi/mexc/spot/spotaccount/types"
 	spotutils "github.com/linstohu/nexapi/mexc/spot/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,5 +29,17 @@ func TestGetAccountInfo(t *testing.T) {
 	cli := testNewAccountClient(t)
 
 	_, err := cli.GetAccountInfo(context.TODO())
+	assert.Nil(t, err)
+}
+
+func TestTransfer(t *testing.T) {
+	cli := testNewAccountClient(t)
+
+	err := cli.Transfer(context.TODO(), types.TransferParam{
+		FromAccountType: "SPOT",
+		ToAccountType: "FUTURES",
+		Asset: "USDT",
+		Amount: "5",
+	})
 	assert.Nil(t, err)
 }

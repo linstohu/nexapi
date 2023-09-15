@@ -61,6 +61,7 @@ func (c *ContractAccountClient) GetAccountAsset(ctx context.Context) (*types.Get
 		Path:    "/api/v1/private/account/assets",
 		Method:  http.MethodGet,
 	}
+
 	{
 		headers, err := c.GenAuthHeaders(req)
 		if err != nil {
@@ -75,6 +76,108 @@ func (c *ContractAccountClient) GetAccountAsset(ctx context.Context) (*types.Get
 	}
 
 	var ret types.GetAccountAsset
+	if err := json.Unmarshal(resp, &ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
+func (c *ContractAccountClient) GetOpenPositions(ctx context.Context, param types.GetOpenPositionsParams) (*types.GetOpenPositions, error) {
+	err := c.validate.Struct(param)
+	if err != nil {
+		return nil, err
+	}
+
+	req := ctutils.HTTPRequest{
+		BaseURL: c.GetBaseURL(),
+		Path:    "/api/v1/private/position/open_positions",
+		Method:  http.MethodGet,
+		Query:   param,
+	}
+
+	{
+		headers, err := c.GenAuthHeaders(req)
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	resp, err := c.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetOpenPositions
+	if err := json.Unmarshal(resp, &ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
+func (c *ContractAccountClient) GetPositionLeverage(ctx context.Context, param types.GetLeverageParams) (*types.GetLeverageResp, error) {
+	err := c.validate.Struct(param)
+	if err != nil {
+		return nil, err
+	}
+
+	req := ctutils.HTTPRequest{
+		BaseURL: c.GetBaseURL(),
+		Path:    "/api/v1/private/position/leverage",
+		Method:  http.MethodGet,
+		Query:   param,
+	}
+
+	{
+		headers, err := c.GenAuthHeaders(req)
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	resp, err := c.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetLeverageResp
+	if err := json.Unmarshal(resp, &ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
+func (c *ContractAccountClient) SetPositionLeverage(ctx context.Context, param types.SetLeverageParams) (*types.SetLeverageResp, error) {
+	err := c.validate.Struct(param)
+	if err != nil {
+		return nil, err
+	}
+
+	req := ctutils.HTTPRequest{
+		BaseURL: c.GetBaseURL(),
+		Path:    "/api/v1/private/position/change_leverage",
+		Method:  http.MethodPost,
+		Body:    param,
+	}
+
+	{
+		headers, err := c.GenAuthHeaders(req)
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	resp, err := c.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.SetLeverageResp
 	if err := json.Unmarshal(resp, &ret); err != nil {
 		return nil, err
 	}
