@@ -55,6 +55,11 @@ func NewTradingAccountClient(cfg *TradingAccountClientCfg) (*TradingAccountClien
 }
 
 func (t *TradingAccountClient) GetBalance(ctx context.Context, param types.GetBalanceParam) (*types.GetBalanceResp, error) {
+	err := t.validate.Struct(param)
+	if err != nil {
+		return nil, err
+	}
+
 	req := okxutils.HTTPRequest{
 		BaseURL: t.GetBaseURL(),
 		Path:    "/api/v5/account/balance",

@@ -5,7 +5,7 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
-	"encoding/hex"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/go-playground/validator"
@@ -161,8 +160,8 @@ func (o *OKXRestClient) GenPubHeaders() (map[string]string, error) {
 }
 
 func (o *OKXRestClient) GenAuthHeaders(req HTTPRequest) (map[string]string, error) {
-	if o.key == "" || o.secret == "" {
-		return nil, fmt.Errorf("key and secret needed when init client")
+	if o.key == "" || o.secret == "" || o.passphrase == "" {
+		return nil, fmt.Errorf("key, secret and passphrase needed when init client")
 	}
 
 	headers := map[string]string{
@@ -193,16 +192,16 @@ func (o *OKXRestClient) GenAuthHeaders(req HTTPRequest) (map[string]string, erro
 		}
 	}
 
-	timestamp := time.Now().UnixMilli()
-	signString := fmt.Sprintf("%d%s%s%s", timestamp, req.Method, path, strBody)
+	timestamp := time.Now().UTC().Format(time.RFC3339)
+	signString := fmt.Sprintf("%s%s%s%s", timestamp, req.Method, path, strBody)
 
 	h := hmac.New(sha256.New, []byte(o.secret))
 	h.Write([]byte(signString))
-	signature := hex.EncodeToString(h.Sum(nil))
+	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
 	headers["OK-ACCESS-KEY"] = o.key
 	headers["OK-ACCESS-PASSPHRASE"] = o.passphrase
-	headers["OK-ACCESS-TIMESTAMP"] = strconv.FormatInt(timestamp, 10)
+	headers["OK-ACCESS-TIMESTAMP"] = timestamp
 	headers["OK-ACCESS-SIGN"] = signature
 
 	return headers, nil

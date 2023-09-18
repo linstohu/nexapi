@@ -10,7 +10,7 @@ type GetBalanceParam struct {
 
 type GetBalanceResp struct {
 	okxutils.Response
-	Data struct {
+	Data []struct {
 		AdjEq       string          `json:"adjEq"`
 		BorrowFroz  string          `json:"borrowFroz"`
 		Details     []BalanceDetail `json:"details"`
