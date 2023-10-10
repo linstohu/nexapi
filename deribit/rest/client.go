@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
 
 	validator "github.com/go-playground/validator/v10"
 	"github.com/google/go-querystring/query"
@@ -28,7 +29,8 @@ type DeribitRestClient struct {
 	validate *validator.Validate
 
 	auth struct {
-		token string
+		token     string
+		expiresAt int64
 	}
 }
 
@@ -74,7 +76,9 @@ func NewDeribitRestClient(cfg *DeribitRestClientCfg) (*DeribitRestClient, error)
 			return nil, fmt.Errorf("init private rest client failed, error: %v", err)
 		}
 
+		now := time.Now().Unix()
 		cli.auth.token = token.AccessToken
+		cli.auth.expiresAt = now + token.ExpiresIn - 5
 	}
 
 	return &cli, nil
