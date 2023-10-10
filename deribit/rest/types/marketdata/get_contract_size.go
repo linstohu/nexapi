@@ -5,5 +5,5 @@ type GetContractSizeParams struct {
 }
 
 type GetContractSizeResponse struct {
-	ContractSize int `json:"contract_size"`
+	ContractSize float64 `json:"contract_size"`
 }

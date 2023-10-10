@@ -14,6 +14,7 @@ import (
 	validator "github.com/go-playground/validator/v10"
 	"github.com/google/go-querystring/query"
 	"github.com/linstohu/nexapi/deribit/rest/types"
+	"github.com/linstohu/nexapi/deribit/rest/types/auth"
 )
 
 type DeribitRestClient struct {
@@ -25,6 +26,10 @@ type DeribitRestClient struct {
 	logger *log.Logger
 	// validate struct fields
 	validate *validator.Validate
+
+	auth struct {
+		token string
+	}
 }
 
 type DeribitRestClientCfg struct {
@@ -59,10 +64,23 @@ func NewDeribitRestClient(cfg *DeribitRestClientCfg) (*DeribitRestClient, error)
 		cli.logger.SetPrefix("deribit-rest-api")
 	}
 
+	if cfg.Key != "" && cfg.Secret != "" {
+		token, err := cli.Auth(context.TODO(), auth.AuthParams{
+			GrantType:    "client_credentials",
+			ClientID:     cfg.Key,
+			ClientSecret: cfg.Secret,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("init private rest client failed, error: %v", err)
+		}
+
+		cli.auth.token = token.AccessToken
+	}
+
 	return &cli, nil
 }
 
-func (w *DeribitRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequest) ([]byte, error) {
+func (d *DeribitRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequest) ([]byte, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -100,7 +118,7 @@ func (w *DeribitRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPR
 		if err != nil {
 			return nil, err
 		}
-		w.logger.Printf("\n%s\n", string(dump))
+		d.logger.Printf("\n%s\n", string(dump))
 	}
 
 	resp, err := client.Do(request)
@@ -114,7 +132,7 @@ func (w *DeribitRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPR
 		if err != nil {
 			return nil, err
 		}
-		w.logger.Printf("\n%s\n", string(dump))
+		d.logger.Printf("\n%s\n", string(dump))
 	}
 
 	buf := new(bytes.Buffer)

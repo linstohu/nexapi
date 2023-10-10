@@ -1,9 +1,9 @@
 package auth
 
 type AuthParams struct {
-	GrantType    string `json:"grant_type"`
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
+	GrantType    string `json:"grant_type" validate:"required"`
+	ClientID     string `json:"client_id" validate:"required"`
+	ClientSecret string `json:"client_secret" validate:"required"`
 }
 
 type AuthResponse struct {

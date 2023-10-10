@@ -1,10 +1,10 @@
 package marketdata
 
 type GetTradingviewChartDataParams struct {
-	InstrumentName string `json:"instrument_name"`
-	StartTimestamp int64  `json:"start_timestamp"`
-	EndTimestamp   int64  `json:"end_timestamp"`
-	Resolution     string `json:"resolution"`
+	InstrumentName string `url:"instrument_name,omitempty" json:"instrument_name"`
+	StartTimestamp int64  `url:"start_timestamp,omitempty" json:"start_timestamp"`
+	EndTimestamp   int64  `url:"end_timestamp,omitempty" json:"end_timestamp"`
+	Resolution     string `url:"resolution,omitempty" json:"resolution"`
 }
 
 type GetTradingviewChartDataResponse struct {
