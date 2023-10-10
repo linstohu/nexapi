@@ -60,11 +60,11 @@ func TestGetTransactionLog(t *testing.T) {
 	deribit := testNewDeribitRestPrivateClient(t)
 
 	_, err := deribit.GetTransactionLog(context.TODO(), account.GetTransactionLogParams{
-		Currency:       "USDC",
+		Currency:       "BTC",
 		StartTimestamp: 1683743286000,
 		EndTimestamp:   1696976886000,
 		Query:          "buy",
-		Count:          30,
+		Count:          1,
 		Continuation:   0,
 	})
 	assert.Nil(t, err)
@@ -94,7 +94,7 @@ func TestSell(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestCancel(t *testing.T) {
+func TestCancelOne(t *testing.T) {
 	deribit := testNewDeribitRestPrivateClient(t)
 
 	_, err := deribit.Cancel(context.TODO(), trading.CancelParams{

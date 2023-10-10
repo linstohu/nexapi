@@ -32,11 +32,11 @@ type TransLog struct {
 
 type GetTransactionLogParams struct {
 	Currency       string `json:"currency"`
-	StartTimestamp int64  `json:"start_timestamp"`
-	EndTimestamp   int64  `json:"end_timestamp"`
-	Query          string `json:"query"`
-	Count          int64  `json:"count"`
-	Continuation   int64  `json:"continuation"`
+	StartTimestamp int64  `json:"start_timestamp,omitempty"`
+	EndTimestamp   int64  `json:"end_timestamp,omitempty"`
+	Query          string `json:"query,omitempty"`
+	Count          int64  `json:"count,omitempty"`
+	Continuation   int64  `json:"continuation,omitempty"`
 }
 
 type GetTransactionLogResponse struct {
