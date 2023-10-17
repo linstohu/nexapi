@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2023, LinstoHu
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package types
 
 import (
@@ -31,17 +48,17 @@ type Order struct {
 }
 
 type NewOrderParam struct {
-	Symbol           string                 `url:"symbol" validate:"required"`
+	Symbol           string                   `url:"symbol" validate:"required"`
 	Side             eoutils.OrderSide        `url:"side" validate:"required,oneof=BUY SELL"`
 	Type             eoutils.OrderType        `url:"type" validate:"required"`
-	Quantity         float64                `url:"quantity" validate:"required"`
-	Price            float64                `url:"price,omitempty" validate:"omitempty"`
+	Quantity         float64                  `url:"quantity" validate:"required"`
+	Price            float64                  `url:"price,omitempty" validate:"omitempty"`
 	TimeInForce      eoutils.TimeInForce      `url:"timeInForce,omitempty" validate:"omitempty"`
-	ReduceOnly       bool                   `url:"reduceOnly,omitempty" validate:"omitempty"`
-	PostOnly         bool                   `url:"postOnly,omitempty" validate:"omitempty"`
+	ReduceOnly       bool                     `url:"reduceOnly,omitempty" validate:"omitempty"`
+	PostOnly         bool                     `url:"postOnly,omitempty" validate:"omitempty"`
 	NewOrderRespType eoutils.NewOrderRespType `url:"newOrderRespType,omitempty" validate:"omitempty"`
-	ClientOrderID    string                 `url:"clientOrderId,omitempty" validate:"omitempty"`
-	IsMmp            bool                   `url:"isMmp,omitempty" validate:"omitempty"`
+	ClientOrderID    string                   `url:"clientOrderId,omitempty" validate:"omitempty"`
+	IsMmp            bool                     `url:"isMmp,omitempty" validate:"omitempty"`
 }
 
 type NewOrderParams struct {
