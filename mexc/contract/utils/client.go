@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -24,7 +24,7 @@ type ContractClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 
 	baseURL     string
 	key, secret string
@@ -34,7 +34,7 @@ type ContractClient struct {
 type ContractClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string
@@ -62,7 +62,7 @@ func NewContractClient(cfg *ContractClientCfg) (*ContractClient, error) {
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
+		cli.logger = slog.Default()
 	}
 
 	return &cli, nil
@@ -179,7 +179,7 @@ func (c *ContractClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (
 		if err != nil {
 			return nil, err
 		}
-		c.logger.Printf("\n%s\n", string(dump))
+		c.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	resp, err := client.Do(request)
@@ -193,7 +193,7 @@ func (c *ContractClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (
 		if err != nil {
 			return nil, err
 		}
-		c.logger.Printf("\n%s\n", string(dump))
+		c.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	buf := new(bytes.Buffer)

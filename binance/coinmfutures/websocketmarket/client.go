@@ -3,7 +3,8 @@ package websocketmarket
 import (
 	"context"
 	"errors"
-	"log"
+	"fmt"
+	"log/slog"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -21,7 +22,7 @@ type CoinMarginedMarketStreamClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 
 	ctx         context.Context
 	conn        *websocket.Conn
@@ -41,7 +42,7 @@ type CoinMarginedMarketStreamCfg struct {
 	BaseURL string `validate:"required"`
 	Debug   bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 }
 
 func NewMarketStreamClient(ctx context.Context, cfg *CoinMarginedMarketStreamCfg) (*CoinMarginedMarketStreamClient, error) {
@@ -62,8 +63,7 @@ func NewMarketStreamClient(ctx context.Context, cfg *CoinMarginedMarketStreamCfg
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("binance_Coin-M-Futures_market_streams")
+		cli.logger = slog.Default()
 	}
 
 	err := cli.start()
@@ -82,7 +82,7 @@ func (u *CoinMarginedMarketStreamClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := u.connect()
 		if err != nil {
-			u.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
+			u.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -124,13 +124,13 @@ func (u *CoinMarginedMarketStreamClient) reconnect() {
 
 	u.setIsConnected(false)
 
-	u.logger.Println("disconnect, then reconnect...")
+	u.logger.Info(fmt.Sprintf("disconnect, then reconnect..."))
 
 	time.Sleep(1 * time.Second)
 
 	select {
 	case <-u.ctx.Done():
-		u.logger.Printf("never reconnect, %s", u.ctx.Err())
+		u.logger.Info(fmt.Sprintf("never reconnect, %s", u.ctx.Err()))
 		return
 	default:
 		u.start()
@@ -169,10 +169,10 @@ func (u *CoinMarginedMarketStreamClient) readMessages() {
 	for {
 		select {
 		case <-u.ctx.Done():
-			u.logger.Println(u.ctx.Err())
+			u.logger.Info(fmt.Sprintf("context done, error: %s", u.ctx.Err().Error()))
 
 			if err := u.close(); err != nil {
-				u.logger.Printf("websocket connection closed error, %s", err.Error())
+				u.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
 			}
 
 			return
@@ -180,10 +180,10 @@ func (u *CoinMarginedMarketStreamClient) readMessages() {
 			var msg utils.AnyMessage
 			err := u.conn.ReadJSON(&msg)
 			if err != nil {
-				u.logger.Printf("read object error, %s", err)
+				u.logger.Info(fmt.Sprintf("read object error, %s", err))
 
 				if err := u.close(); err != nil {
-					u.logger.Printf("websocket connection closed error, %s", err.Error())
+					u.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
 				}
 
 				return
@@ -195,7 +195,7 @@ func (u *CoinMarginedMarketStreamClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := u.handle(msg.SubscribedMessage)
 				if err != nil {
-					u.logger.Printf("handle message error: %s", err.Error())
+					u.logger.Info(fmt.Sprintf("handle message error: %s", err.Error()))
 				}
 			}
 		}

@@ -33,7 +33,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 
 	bnUsdmMarket "github.com/linstohu/nexapi/binance/usdmfutures/marketdata"
 	umtypes "github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
@@ -43,7 +43,7 @@ import (
 func main() {
 	cli, err := bnUsdmMarket.NewUSDMFuturesMarketDataClient(&umutils.USDMarginedClientCfg{
 		Debug:   false,
-		Logger:  log.Default(),
+		Logger:  slog.Default(),
 		BaseURL: umutils.USDMarginedBaseURL,
 	})
 
@@ -74,7 +74,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 
 	bnUsdmWsMarket "github.com/linstohu/nexapi/binance/usdmfutures/websocketmarket"
 	bnUsdmWsTypes "github.com/linstohu/nexapi/binance/usdmfutures/websocketmarket/types"
@@ -83,7 +83,7 @@ import (
 func main() {
 	cli, err := bnUsdmWsMarket.NewMarketStreamClient(context.TODO(), &bnUsdmWsMarket.USDMarginedMarketStreamCfg{
 		Debug:   false,
-		Logger:  log.Default(),
+		Logger:  slog.Default(),
 		BaseURL: bnUsdmWsMarket.USDMarginedMarketStreamBaseURL,
 	})
 

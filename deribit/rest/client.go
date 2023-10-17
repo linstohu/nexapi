@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -24,7 +24,7 @@ type DeribitRestClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 	// validate struct fields
 	validate *validator.Validate
 
@@ -40,7 +40,7 @@ type DeribitRestClientCfg struct {
 	Secret  string
 	Debug   bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 }
 
 func NewDeribitRestClient(cfg *DeribitRestClientCfg) (*DeribitRestClient, error) {
@@ -62,8 +62,7 @@ func NewDeribitRestClient(cfg *DeribitRestClientCfg) (*DeribitRestClient, error)
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("deribit-rest-api")
+		cli.logger = slog.Default()
 	}
 
 	if cfg.Key != "" && cfg.Secret != "" {
@@ -122,7 +121,7 @@ func (d *DeribitRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPR
 		if err != nil {
 			return nil, err
 		}
-		d.logger.Printf("\n%s\n", string(dump))
+		d.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	resp, err := client.Do(request)
@@ -136,7 +135,7 @@ func (d *DeribitRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPR
 		if err != nil {
 			return nil, err
 		}
-		d.logger.Printf("\n%s\n", string(dump))
+		d.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	buf := new(bytes.Buffer)

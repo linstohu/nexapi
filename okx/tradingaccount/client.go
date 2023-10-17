@@ -3,7 +3,7 @@ package publicdata
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator"
@@ -25,7 +25,7 @@ type TradingAccountClientCfg struct {
 	Passphrase string `validate:"required"`
 	Debug      bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 }
 
 func NewTradingAccountClient(cfg *TradingAccountClientCfg) (*TradingAccountClient, error) {

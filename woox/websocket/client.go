@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -23,7 +23,7 @@ type WooXWebsocketClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 
 	ctx         context.Context
 	conn        *websocket.Conn
@@ -47,7 +47,7 @@ type WooXWebsocketCfg struct {
 	ApplicationID string `validate:"required"`
 	Debug         bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 }
 
 func NewWooXWebsocketClient(ctx context.Context, cfg *WooXWebsocketCfg) (*WooXWebsocketClient, error) {
@@ -71,8 +71,7 @@ func NewWooXWebsocketClient(ctx context.Context, cfg *WooXWebsocketCfg) (*WooXWe
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("woox-websocket")
+		cli.logger = slog.Default()
 	}
 
 	err := cli.start()
@@ -92,7 +91,7 @@ func (w *WooXWebsocketClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := w.connect()
 		if err != nil {
-			w.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
+			w.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -136,7 +135,7 @@ func (w *WooXWebsocketClient) reconnect() {
 
 	w.setIsConnected(false)
 
-	w.logger.Printf("disconnect, then reconnect...")
+	w.logger.Info(fmt.Sprintf("disconnect, then reconnect..."))
 
 	close(w.heartCancel)
 
@@ -144,7 +143,7 @@ func (w *WooXWebsocketClient) reconnect() {
 
 	select {
 	case <-w.ctx.Done():
-		w.logger.Printf("never reconnect, %s", w.ctx.Err())
+		w.logger.Info(fmt.Sprintf("never reconnect, %s", w.ctx.Err()))
 		return
 	default:
 		w.start()
@@ -198,10 +197,10 @@ func (w *WooXWebsocketClient) readMessages() {
 	for {
 		select {
 		case <-w.ctx.Done():
-			w.logger.Println(w.ctx.Err())
+			w.logger.Info(fmt.Sprintf("context done, error: %s", w.ctx.Err().Error()))
 
 			if err := w.close(); err != nil {
-				w.logger.Printf("websocket connection closed error, %s", err.Error())
+				w.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
 			}
 
 			return
@@ -209,10 +208,10 @@ func (w *WooXWebsocketClient) readMessages() {
 			var msg types.AnyMessage
 			err := w.conn.ReadJSON(&msg)
 			if err != nil {
-				w.logger.Printf("read object error, %s", err)
+				w.logger.Info(fmt.Sprintf("read object error, %s", err))
 
 				if err := w.close(); err != nil {
-					w.logger.Printf("websocket connection closed error, %s", err.Error())
+					w.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
 				}
 
 				return
@@ -224,7 +223,7 @@ func (w *WooXWebsocketClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := w.handle(msg.SubscribedMessage)
 				if err != nil {
-					w.logger.Printf("handle message error: %s", err.Error())
+					w.logger.Info(fmt.Sprintf("handle message error: %s", err.Error()))
 				}
 			}
 		}

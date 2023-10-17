@@ -3,7 +3,7 @@ package websocketuserdata
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator"
@@ -18,7 +18,7 @@ type httpAuthClient struct {
 type httpAuthClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string `validate:"required"`

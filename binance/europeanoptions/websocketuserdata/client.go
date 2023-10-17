@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"sync"
 	"time"
@@ -19,7 +19,7 @@ type OptionsUserDataStreamClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 
 	baseURL     string
 	key, secret string
@@ -39,7 +39,7 @@ type OptionsUserDataStreamClient struct {
 type OptionsUserDataStreamCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL string `validate:"required"`
 	Key     string `validate:"required"`
@@ -66,8 +66,7 @@ func NewUserDataStreamClient(ctx context.Context, cfg *OptionsUserDataStreamCfg)
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("binance_options_market_streams")
+		cli.logger = slog.Default()
 	}
 
 	err := cli.start()
@@ -87,7 +86,7 @@ func (o *OptionsUserDataStreamClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := o.connect()
 		if err != nil {
-			o.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
+			o.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -178,7 +177,7 @@ func (o *OptionsUserDataStreamClient) reconnect() {
 
 	o.setIsConnected(false)
 
-	o.logger.Println("disconnect, then reconnect...")
+	o.logger.Info(fmt.Sprintf("disconnect, then reconnect..."))
 
 	close(o.heartCancel)
 
@@ -186,7 +185,7 @@ func (o *OptionsUserDataStreamClient) reconnect() {
 
 	select {
 	case <-o.ctx.Done():
-		o.logger.Printf("never reconnect, %s", o.ctx.Err())
+		o.logger.Info(fmt.Sprintf("never reconnect, %s", o.ctx.Err()))
 		return
 	default:
 		o.start()
@@ -228,7 +227,7 @@ func (o *OptionsUserDataStreamClient) heartbeat() {
 		case <-t.C:
 			err := o.updateListenKey()
 			if err != nil {
-				o.logger.Printf("websocket update listen-key error, %s", err.Error())
+				o.logger.Info(fmt.Sprintf("websocket update listen-key error, %s", err.Error()))
 			}
 		case <-o.heartCancel:
 			return
@@ -240,20 +239,20 @@ func (o *OptionsUserDataStreamClient) readMessages() {
 	for {
 		select {
 		case <-o.ctx.Done():
-			o.logger.Println(o.ctx.Err())
+			o.logger.Info(fmt.Sprintf("context done, error: %s", o.ctx.Err().Error()))
 
 			if err := o.close(); err != nil {
-				o.logger.Printf("websocket connection closed error, %s", err.Error())
+				o.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
 			}
 
 			return
 		default:
 			_, bytes, err := o.conn.ReadMessage()
 			if err != nil {
-				o.logger.Printf("read message error, %s", err)
+				o.logger.Info(fmt.Sprintf("read message error, %s", err))
 
 				if err := o.close(); err != nil {
-					o.logger.Printf("websocket connection closed error, %s", err.Error())
+					o.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
 				}
 
 				return
@@ -261,7 +260,7 @@ func (o *OptionsUserDataStreamClient) readMessages() {
 
 			err = o.handle(bytes)
 			if err != nil {
-				o.logger.Printf("handle message error: %s", err.Error())
+				o.logger.Info(fmt.Sprintf("handle message error: %s", err.Error()))
 			}
 		}
 	}

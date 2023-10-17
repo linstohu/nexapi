@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -28,7 +28,7 @@ type OptionsAccountClient struct {
 type OptionsAccountClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string `validate:"required"`

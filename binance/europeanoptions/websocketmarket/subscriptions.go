@@ -18,7 +18,7 @@ func (o *OptionsMarketStreamClient) UnSubscribe(topics []string) error {
 
 func (o *OptionsMarketStreamClient) handle(msg *utils.SubscribedMessage) error {
 	if o.debug {
-		o.logger.Printf("subscribed message, stream: %s", msg.Stream)
+		o.logger.Info(fmt.Sprintf("subscribed message, stream: %s", msg.Stream))
 	}
 
 	switch {

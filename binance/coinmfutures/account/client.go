@@ -6,7 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -27,7 +27,7 @@ type CoinMFuturesAccountClient struct {
 type CoinMFuturesAccountClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string `validate:"required"`

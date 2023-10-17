@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -19,7 +19,7 @@ type SpotClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 
 	baseURL     string
 	key, secret string
@@ -29,7 +29,7 @@ type SpotClient struct {
 type SpotClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string
@@ -57,7 +57,7 @@ func NewSpotClient(cfg *SpotClientCfg) (*SpotClient, error) {
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
+		cli.logger = slog.Default()
 	}
 
 	return &cli, nil
@@ -149,7 +149,8 @@ func (s *SpotClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]by
 		if err != nil {
 			return nil, err
 		}
-		s.logger.Printf("\n%s\n", string(dump))
+
+		s.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	resp, err := client.Do(request)
@@ -163,7 +164,7 @@ func (s *SpotClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]by
 		if err != nil {
 			return nil, err
 		}
-		s.logger.Printf("\n%s\n", string(dump))
+		s.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	buf := new(bytes.Buffer)

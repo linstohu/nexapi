@@ -3,7 +3,7 @@ package account
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator"
@@ -21,7 +21,7 @@ type ContractAccountClient struct {
 type ContractAccountClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string `validate:"required"`

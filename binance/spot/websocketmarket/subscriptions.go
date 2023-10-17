@@ -19,7 +19,7 @@ func (m *SpotMarketStreamClient) UnSubscribe(topics []string) error {
 
 func (m *SpotMarketStreamClient) handle(msg *utils.SubscribedMessage) error {
 	if m.debug {
-		m.logger.Printf("subscribed message, stream: %s", msg.Stream)
+		m.logger.Info(fmt.Sprintf("subscribed message, stream: %s", msg.Stream))
 	}
 
 	switch {

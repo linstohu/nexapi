@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -20,7 +20,7 @@ type CoinMarginedClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 
 	baseURL     string
 	key, secret string
@@ -30,7 +30,7 @@ type CoinMarginedClient struct {
 type CoinMarginedClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string
@@ -58,8 +58,7 @@ func NewCoinMarginedClient(cfg *CoinMarginedClientCfg) (*CoinMarginedClient, err
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("binance_Coin-M-Futures_rest_api")
+		cli.logger = slog.Default()
 	}
 
 	return &cli, nil
@@ -152,7 +151,8 @@ func (u *CoinMarginedClient) SendHTTPRequest(ctx context.Context, req HTTPReques
 		if err != nil {
 			return nil, err
 		}
-		u.logger.Printf("\n%s\n", string(dump))
+
+		u.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	resp, err := client.Do(request)
@@ -166,7 +166,7 @@ func (u *CoinMarginedClient) SendHTTPRequest(ctx context.Context, req HTTPReques
 		if err != nil {
 			return nil, err
 		}
-		u.logger.Printf("\n%s\n", string(dump))
+		u.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	buf := new(bytes.Buffer)

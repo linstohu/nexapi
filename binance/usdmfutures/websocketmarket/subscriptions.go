@@ -20,7 +20,7 @@ func (u *USDMarginedMarketStreamClient) UnSubscribe(topics []string) error {
 
 func (u *USDMarginedMarketStreamClient) handle(msg *utils.SubscribedMessage) error {
 	if u.debug {
-		u.logger.Printf("subscribed message, stream: %s", msg.Stream)
+		u.logger.Info(fmt.Sprintf("subscribed message, stream: %s", msg.Stream))
 	}
 
 	switch {

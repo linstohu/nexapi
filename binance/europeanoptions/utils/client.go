@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -20,7 +20,7 @@ type OptionsClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 
 	baseURL     string
 	key, secret string
@@ -30,7 +30,7 @@ type OptionsClient struct {
 type OptionsClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string
@@ -58,8 +58,7 @@ func NewOptionsClient(cfg *OptionsClientCfg) (*OptionsClient, error) {
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("binance_options_rest_api")
+		cli.logger = slog.Default()
 	}
 
 	return &cli, nil
@@ -113,7 +112,7 @@ func (o *OptionsClient) NeedSignature(t usdmutils.SecurityType) bool {
 	}
 }
 
-func (o	 *OptionsClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
+func (o *OptionsClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -152,7 +151,7 @@ func (o	 *OptionsClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (
 		if err != nil {
 			return nil, err
 		}
-		o.logger.Printf("\n%s\n", string(dump))
+		o.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	resp, err := client.Do(request)
@@ -166,7 +165,7 @@ func (o	 *OptionsClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (
 		if err != nil {
 			return nil, err
 		}
-		o.logger.Printf("\n%s\n", string(dump))
+		o.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	buf := new(bytes.Buffer)

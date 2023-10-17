@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -25,7 +25,7 @@ type OKXRestClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 	// validate struct fields
 	validate *validator.Validate
 }
@@ -37,7 +37,7 @@ type OKXRestClientCfg struct {
 	Passphrase string
 	Debug      bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 }
 
 func NewOKXRestClient(cfg *OKXRestClientCfg) (*OKXRestClient, error) {
@@ -60,8 +60,7 @@ func NewOKXRestClient(cfg *OKXRestClientCfg) (*OKXRestClient, error) {
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("okx-rest-api")
+		cli.logger = slog.Default()
 	}
 
 	return &cli, nil
@@ -125,7 +124,7 @@ func (o *OKXRestClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([
 		if err != nil {
 			return nil, err
 		}
-		o.logger.Printf("\n%s\n", string(dump))
+		o.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	resp, err := client.Do(request)
@@ -139,7 +138,7 @@ func (o *OKXRestClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([
 		if err != nil {
 			return nil, err
 		}
-		o.logger.Printf("\n%s\n", string(dump))
+		o.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	buf := new(bytes.Buffer)

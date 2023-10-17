@@ -3,7 +3,8 @@ package websocketmarket
 import (
 	"context"
 	"errors"
-	"log"
+	"fmt"
+	"log/slog"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -21,7 +22,7 @@ type SpotMarketStreamClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 
 	ctx         context.Context
 	conn        *websocket.Conn
@@ -41,7 +42,7 @@ type SpotMarketStreamCfg struct {
 	BaseURL string `validate:"required"`
 	Debug   bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 }
 
 func NewSpotMarketStreamClient(ctx context.Context, cfg *SpotMarketStreamCfg) (*SpotMarketStreamClient, error) {
@@ -62,8 +63,7 @@ func NewSpotMarketStreamClient(ctx context.Context, cfg *SpotMarketStreamCfg) (*
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("binance-spot-market-streams")
+		cli.logger = slog.Default()
 	}
 
 	err := cli.start()
@@ -82,7 +82,7 @@ func (m *SpotMarketStreamClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := m.connect()
 		if err != nil {
-			m.logger.Printf("connect error, times(%v), error: %s", i, err.Error())
+			m.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -124,13 +124,13 @@ func (m *SpotMarketStreamClient) reconnect() {
 
 	m.setIsConnected(false)
 
-	m.logger.Println("disconnect, then reconnect...")
+	m.logger.Info(fmt.Sprintf("disconnect, then reconnect..."))
 
 	time.Sleep(1 * time.Second)
 
 	select {
 	case <-m.ctx.Done():
-		m.logger.Printf("never reconnect, %s", m.ctx.Err())
+		m.logger.Info(fmt.Sprintf("never reconnect, %s", m.ctx.Err()))
 		return
 	default:
 		m.start()
@@ -169,10 +169,10 @@ func (m *SpotMarketStreamClient) readMessages() {
 	for {
 		select {
 		case <-m.ctx.Done():
-			m.logger.Println(m.ctx.Err())
+			m.logger.Info(fmt.Sprintf("context done, error: %s", m.ctx.Err().Error()))
 
 			if err := m.close(); err != nil {
-				m.logger.Printf("websocket connection closed error, %s", err.Error())
+				m.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
 			}
 
 			return
@@ -180,10 +180,10 @@ func (m *SpotMarketStreamClient) readMessages() {
 			var msg utils.AnyMessage
 			err := m.conn.ReadJSON(&msg)
 			if err != nil {
-				m.logger.Printf("read object error, %s", err)
+				m.logger.Info(fmt.Sprintf("read object error, %s", err))
 
 				if err := m.close(); err != nil {
-					m.logger.Printf("websocket connection closed error, %s", err.Error())
+					m.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
 				}
 
 				return
@@ -195,7 +195,7 @@ func (m *SpotMarketStreamClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := m.handle(msg.SubscribedMessage)
 				if err != nil {
-					m.logger.Printf("handle message error: %s", err.Error())
+					m.logger.Info(fmt.Sprintf("handle message error: %s", err.Error()))
 				}
 			}
 		}

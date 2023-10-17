@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -23,7 +23,7 @@ type BitfinexAuthClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 	nonce  utils.NonceGenerator
 
 	baseURL     string
@@ -33,7 +33,7 @@ type BitfinexAuthClient struct {
 type BitfinexClientCfg struct {
 	Debug bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	BaseURL    string `validate:"required"`
 	Key        string `validate:"required"`
@@ -57,7 +57,7 @@ func NewBitfinexClient(cfg *BitfinexClientCfg) (*BitfinexAuthClient, error) {
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
+		cli.logger = slog.Default()
 	}
 
 	return &cli, nil
@@ -149,7 +149,7 @@ func (b *BitfinexAuthClient) SendHTTPRequest(ctx context.Context, req HTTPReques
 		if err != nil {
 			return nil, err
 		}
-		b.logger.Printf("\n%s\n", string(dump))
+		b.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	resp, err := client.Do(request)
@@ -163,7 +163,7 @@ func (b *BitfinexAuthClient) SendHTTPRequest(ctx context.Context, req HTTPReques
 		if err != nil {
 			return nil, err
 		}
-		b.logger.Printf("\n%s\n", string(dump))
+		b.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	buf := new(bytes.Buffer)

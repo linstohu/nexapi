@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -28,7 +28,7 @@ type WooXRestClient struct {
 	// debug mode
 	debug bool
 	// logger
-	logger *log.Logger
+	logger *slog.Logger
 	// validate struct fields
 	validate *validator.Validate
 }
@@ -39,7 +39,7 @@ type WooXRestClientCfg struct {
 	Secret  string
 	Debug   bool
 	// Logger
-	Logger *log.Logger
+	Logger *slog.Logger
 }
 
 func NewWooXRestClient(cfg *WooXRestClientCfg) (*WooXRestClient, error) {
@@ -61,8 +61,7 @@ func NewWooXRestClient(cfg *WooXRestClientCfg) (*WooXRestClient, error) {
 	}
 
 	if cli.logger == nil {
-		cli.logger = log.Default()
-		cli.logger.SetPrefix("woox-rest-api")
+		cli.logger = slog.Default()
 	}
 
 	return &cli, nil
@@ -114,7 +113,7 @@ func (w *WooXRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequ
 		if err != nil {
 			return nil, err
 		}
-		w.logger.Printf("\n%s\n", string(dump))
+		w.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	resp, err := client.Do(request)
@@ -128,7 +127,7 @@ func (w *WooXRestClient) SendHTTPRequest(ctx context.Context, req types.HTTPRequ
 		if err != nil {
 			return nil, err
 		}
-		w.logger.Printf("\n%s\n", string(dump))
+		w.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
 	buf := new(bytes.Buffer)
