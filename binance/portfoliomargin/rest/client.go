@@ -139,7 +139,7 @@ func (p *PortfolioMarginAccountClient) GetBalance(ctx context.Context) ([]*types
 	}
 
 	{
-		query := types.GetBalanceParams{
+		query := types.GetAllBalanceParams{
 			DefaultParam: bnutils.DefaultParam{
 				RecvWindow: p.GetRecvWindow(),
 				Timestamp:  time.Now().UnixMilli(),

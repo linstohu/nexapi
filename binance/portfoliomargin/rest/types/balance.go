@@ -13,6 +13,15 @@ type GetBalanceParams struct {
 	bnutils.DefaultParam
 }
 
+type GetAllBalanceParam struct {
+	Asset string `url:"asset"`
+}
+
+type GetAllBalanceParams struct {
+	GetAllBalanceParam
+	bnutils.DefaultParam
+}
+
 type Balance struct {
 	Asset               string `json:"asset"`
 	TotalWalletBalance  string `json:"totalWalletBalance"`
