@@ -94,9 +94,10 @@ func (d *DeribitRestClient) checkAuth() error {
 }
 
 func (d *DeribitRestClient) genAuthHeaders() map[string]string {
-	ret := DefaultContentType
-	ret["Authorization"] = fmt.Sprintf("Bearer %s", d.auth.token)
-	return ret
+	return map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": fmt.Sprintf("Bearer %s", d.auth.token),
+	}
 }
 
 func (d *DeribitRestClient) GetAccountSummary(ctx context.Context, param account.GetAccountSummaryParams) (*account.AccountSummary, error) {

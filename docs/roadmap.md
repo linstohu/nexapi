@@ -23,7 +23,10 @@ NexAPI plans to integrate APIs from well-known cryptocurrency exchanges all arou
 - [x] Binance
 - [] Kraken
 - [] KuCoin
-- [] OKX
 - [] Bybit
+- [] OKX
+- [] Bitfinex
 - [] Gate.io
+- [x] MEXC
+- [x] Deribit
 - [x] WOO X
