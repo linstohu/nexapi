@@ -112,3 +112,17 @@ func TestGetApiRestrictions(t *testing.T) {
 	_, err := cli.GetApiRestrictions(context.TODO())
 	assert.Nil(t, err)
 }
+
+func TestGetWalletBalance(t *testing.T) {
+	cli := testNewSpotWalletClient(t)
+
+	_, err := cli.GetWalletBalance(context.TODO())
+	assert.Nil(t, err)
+}
+
+func TestGetEarnAccount(t *testing.T) {
+	cli := testNewSpotWalletClient(t)
+
+	_, err := cli.GetEarnAccount(context.TODO())
+	assert.Nil(t, err)
+}

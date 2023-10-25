@@ -568,3 +568,115 @@ func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRe
 
 	return ret, nil
 }
+
+func (s *SpotWalletClient) GetWalletBalance(ctx context.Context) ([]*types.Balance, error) {
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
+		BaseURL:      s.GetBaseURL(),
+		Path:         "/sapi/v1/asset/wallet/balance",
+		Method:       http.MethodGet,
+	}
+
+	{
+		headers, err := s.GenHeaders(req.SecurityType)
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	{
+		query := bnutils.DefaultParam{
+			RecvWindow: s.GetRecvWindow(),
+			Timestamp:  time.Now().UnixMilli(),
+		}
+
+		err := s.validate.Struct(query)
+		if err != nil {
+			return nil, err
+		}
+
+		if need := s.NeedSignature(req.SecurityType); need {
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
+			if err != nil {
+				return nil, err
+			}
+
+			h := hmac.New(sha256.New, []byte(s.GetSecret()))
+			h.Write([]byte(signString))
+			signature := hex.EncodeToString(h.Sum(nil))
+
+			query.Signature = signature
+		}
+
+		req.Query = query
+	}
+
+	resp, err := s.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret []*types.Balance
+	if err := json.Unmarshal(resp, &ret); err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}
+
+func (s *SpotWalletClient) GetEarnAccount(ctx context.Context) (*types.EarnAccount, error) {
+	req := spotutils.HTTPRequest{
+		SecurityType: spotutils.USER_DATA,
+		BaseURL:      s.GetBaseURL(),
+		Path:         "/sapi/v1/simple-earn/account",
+		Method:       http.MethodGet,
+	}
+
+	{
+		headers, err := s.GenHeaders(req.SecurityType)
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	{
+		query := bnutils.DefaultParam{
+			RecvWindow: s.GetRecvWindow(),
+			Timestamp:  time.Now().UnixMilli(),
+		}
+
+		err := s.validate.Struct(query)
+		if err != nil {
+			return nil, err
+		}
+
+		if need := s.NeedSignature(req.SecurityType); need {
+			signString, err := bnutils.NormalizeRequestContent(query, nil)
+			if err != nil {
+				return nil, err
+			}
+
+			h := hmac.New(sha256.New, []byte(s.GetSecret()))
+			h.Write([]byte(signString))
+			signature := hex.EncodeToString(h.Sum(nil))
+
+			query.Signature = signature
+		}
+
+		req.Query = query
+	}
+
+	resp, err := s.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.EarnAccount
+	if err := json.Unmarshal(resp, &ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
