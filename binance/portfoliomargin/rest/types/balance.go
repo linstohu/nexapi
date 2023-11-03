@@ -54,16 +54,3 @@ type Balance struct {
 	CmUnrealizedPNL     string `json:"cmUnrealizedPNL"`
 	UpdateTime          int64  `json:"updateTime"`
 }
-
-type Account struct {
-	UniMMR                   string `json:"uniMMR"`
-	AccountEquity            string `json:"accountEquity"`
-	ActualEquity             string `json:"actualEquity"`
-	AccountInitialMargin     string `json:"accountInitialMargin"`
-	AccountMaintMargin       string `json:"accountMaintMargin"`
-	AccountStatus            string `json:"accountStatus"`
-	VirtualMaxWithdrawAmount string `json:"virtualMaxWithdrawAmount"`
-	TotalAvailableBalance    string `json:"totalAvailableBalance"`
-	TotalMarginOpenLoss      string `json:"totalMarginOpenLoss"`
-	UpdateTime               int64  `json:"updateTime"`
-}

@@ -17,23 +17,15 @@
 
 package types
 
-import "github.com/linstohu/nexapi/binance/utils"
-
-type GetFundingAssetParam struct {
-	Asset            string `url:"asset,omitempty" validate:"omitempty"`
-	NeedBtcValuation bool   `url:"needBtcValuation,omitempty" validate:"omitempty"`
-}
-
-type GetFundingAssetParams struct {
-	GetFundingAssetParam
-	utils.DefaultParam
-}
-
-type FundingAsset struct {
-	Asset        string `json:"asset"`
-	Free         string `json:"free"`
-	Locked       string `json:"locked"`
-	Freeze       string `json:"freeze"`
-	Withdrawing  string `json:"withdrawing"`
-	BtcValuation string `json:"btcValuation"`
+type Account struct {
+	UniMMR                   string `json:"uniMMR"`
+	AccountEquity            string `json:"accountEquity"`
+	ActualEquity             string `json:"actualEquity"`
+	AccountInitialMargin     string `json:"accountInitialMargin"`
+	AccountMaintMargin       string `json:"accountMaintMargin"`
+	AccountStatus            string `json:"accountStatus"`
+	VirtualMaxWithdrawAmount string `json:"virtualMaxWithdrawAmount"`
+	TotalAvailableBalance    string `json:"totalAvailableBalance"`
+	TotalMarginOpenLoss      string `json:"totalMarginOpenLoss"`
+	UpdateTime               int64  `json:"updateTime"`
 }
