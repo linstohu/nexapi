@@ -48,7 +48,7 @@ func (h *HTTPRequest) RequestURI() (string, error) {
 		url.RawQuery = q.Encode()
 	}
 
-	return url.String(), nil
+	return url.RequestURI(), nil
 }
 
 func (h *HTTPRequest) RequestBody() (string, error) {

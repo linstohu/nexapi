@@ -22,6 +22,7 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"log/slog"
@@ -41,8 +42,8 @@ type KucoinClient struct {
 	// logger
 	logger *slog.Logger
 
-	baseURL                 string
-	key, secret, passphrase string
+	baseURL                             string
+	key, secret, passphrase, keyVersion string
 }
 
 type KucoinClientCfg struct {
@@ -52,6 +53,7 @@ type KucoinClientCfg struct {
 
 	BaseURL    string `validate:"required"`
 	Key        string
+	KeyVersion string
 	Secret     string
 	Passphrase string
 }
@@ -67,8 +69,9 @@ func NewKucoinRestClient(cfg *KucoinClientCfg) (*KucoinClient, error) {
 		logger:     cfg.Logger,
 		baseURL:    cfg.BaseURL,
 		key:        cfg.Key,
+		keyVersion: cfg.KeyVersion,
 		secret:     cfg.Secret,
-		passphrase: cfg.Passphrase,
+		passphrase: sign([]byte(cfg.Secret), []byte(cfg.Passphrase)),
 	}
 
 	if cli.logger == nil {
@@ -125,24 +128,20 @@ func (k *KucoinClient) GenSignature(req HTTPRequest) (map[string]string, error) 
 		b.Write([]byte(reqBody))
 	}
 
-	t := IntToString(time.Now().UnixNano() / 1000000)
-	p := []byte(t + b.String())
-	s := string(k.Sign(p))
+	t := time.Now().UnixMilli()
+
+	signStr := fmt.Sprintf("%v%s", t, b.String())
+	s := sign([]byte(k.secret), []byte(signStr))
+
 	ksHeaders := map[string]string{
-		"KC-API-KEY":        k.key,
-		"KC-API-PASSPHRASE": k.passphrase,
-		"KC-API-TIMESTAMP":  t,
-		"KC-API-SIGN":       s,
+		"KC-API-KEY":         k.key,
+		"KC-API-PASSPHRASE":  k.passphrase,
+		"KC-API-TIMESTAMP":   fmt.Sprintf("%v", t),
+		"KC-API-SIGN":        s,
+		"KC-API-KEY-VERSION": "2",
 	}
 
 	return ksHeaders, nil
-}
-
-// Sign makes a signature by sha256.
-func (k *KucoinClient) Sign(plain []byte) []byte {
-	hm := hmac.New(sha256.New, []byte(k.secret))
-	hm.Write(plain)
-	return hm.Sum(nil)
 }
 
 func (s *KucoinClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (*HTTPResponse, error) {
@@ -203,4 +202,11 @@ func (s *KucoinClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (*H
 	}
 
 	return NewResponse(&req, resp, nil), nil
+}
+
+// sign makes a signature by sha256.
+func sign(key, plain []byte) string {
+	hm := hmac.New(sha256.New, key)
+	hm.Write(plain)
+	return base64.StdEncoding.EncodeToString(hm.Sum(nil))
 }

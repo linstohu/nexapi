@@ -29,10 +29,12 @@ import (
 
 func testNewAccountClient(t *testing.T) *AccountClient {
 	cli, err := NewAccountClient(&AccountClientCfg{
-		BaseURL: utils.SpotBaseURL,
-		Key:     os.Getenv("KUCOIN_KEY"),
-		Secret:  os.Getenv("KUCOIN_SECRET"),
-		Debug:   true,
+		BaseURL:    utils.SpotBaseURL,
+		Key:        os.Getenv("KUCOIN_KEY"),
+		KeyVersion: utils.ApiKeyVersionV2,
+		Secret:     os.Getenv("KUCOIN_SECRET"),
+		Passphrase: os.Getenv("KUCOIN_PASS"),
+		Debug:      true,
 	})
 
 	if err != nil {

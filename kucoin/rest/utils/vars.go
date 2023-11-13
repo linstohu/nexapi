@@ -23,3 +23,9 @@ var (
 )
 
 var NIL = "<nil>"
+
+// ApiKeyVersionV1 is v1 api key version
+const ApiKeyVersionV1 = "1"
+
+// ApiKeyVersionV2 is v2 api key version
+const ApiKeyVersionV2 = "2"

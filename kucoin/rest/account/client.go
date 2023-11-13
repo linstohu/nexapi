@@ -19,7 +19,6 @@ package account
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -43,6 +42,7 @@ type AccountClientCfg struct {
 
 	BaseURL    string `validate:"required"`
 	Key        string `validate:"required"`
+	KeyVersion string `validate:"required"`
 	Secret     string `validate:"required"`
 	Passphrase string `validate:"required"`
 }
@@ -56,11 +56,13 @@ func NewAccountClient(cfg *AccountClientCfg) (*AccountClient, error) {
 	}
 
 	cli, err := utils.NewKucoinRestClient(&utils.KucoinClientCfg{
-		Debug:   cfg.Debug,
-		Logger:  cfg.Logger,
-		BaseURL: cfg.BaseURL,
-		Key:     cfg.Key,
-		Secret:  cfg.Secret,
+		Debug:      cfg.Debug,
+		Logger:     cfg.Logger,
+		BaseURL:    cfg.BaseURL,
+		Key:        cfg.Key,
+		KeyVersion: cfg.KeyVersion,
+		Secret:     cfg.Secret,
+		Passphrase: cfg.Passphrase,
 	})
 	if err != nil {
 		return nil, err
@@ -114,7 +116,7 @@ func (a *AccountClient) GetAccountList(ctx context.Context, param types.GetAccou
 	}
 
 	var ret []*types.AccountModel
-	if err := json.Unmarshal(ar.RawData, &ret); err != nil {
+	if err := ar.ReadData(&ret); err != nil {
 		return nil, err
 	}
 

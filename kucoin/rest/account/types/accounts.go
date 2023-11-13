@@ -18,8 +18,8 @@
 package types
 
 type GetAccountListParam struct {
-	Currency string `url:"currency" validate:"omitempty"`
-	Type     string `url:"type" validate:"omitempty"`
+	Currency string `url:"currency,omitempty" validate:"omitempty"`
+	Type     string `url:"type,omitempty" validate:"omitempty"`
 }
 
 // An AccountModel represents an account.
