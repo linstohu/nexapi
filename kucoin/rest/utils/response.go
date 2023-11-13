@@ -82,9 +82,11 @@ func (r *HTTPResponse) Error() string {
 		return fmt.Sprintf("get request body error: %s", err.Error())
 	}
 
-	rb, err := r.ReadBody()
-	if err != nil {
-		return fmt.Sprintf("read body error, %s %s", r.Req.Method, uri)
+	var body []byte
+	if r.Body != nil {
+		body = r.Body
+	} else {
+		body = []byte(NIL)
 	}
 
 	m := fmt.Sprintf("[Parse]Failure: parse JSON body failed because %s, %s %s with body=%s, respond code=%d body=%s",
@@ -93,7 +95,7 @@ func (r *HTTPResponse) Error() string {
 		uri,
 		reqBody,
 		r.Resp.StatusCode,
-		string(rb),
+		string(body),
 	)
 
 	return m

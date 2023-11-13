@@ -125,7 +125,7 @@ func (k *KucoinClient) GenSignature(req HTTPRequest) (map[string]string, error) 
 	b.WriteString(uri)
 
 	if reqBody != NIL {
-		b.Write([]byte(reqBody))
+		b.WriteString(reqBody)
 	}
 
 	t := time.Now().UnixMilli()
@@ -138,7 +138,7 @@ func (k *KucoinClient) GenSignature(req HTTPRequest) (map[string]string, error) 
 		"KC-API-PASSPHRASE":  k.passphrase,
 		"KC-API-TIMESTAMP":   fmt.Sprintf("%v", t),
 		"KC-API-SIGN":        s,
-		"KC-API-KEY-VERSION": "2",
+		"KC-API-KEY-VERSION": k.keyVersion,
 	}
 
 	return ksHeaders, nil
