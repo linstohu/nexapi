@@ -17,7 +17,10 @@
 
 package types
 
-import "github.com/linstohu/nexapi/binance/utils"
+import (
+	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
+)
 
 type UniversalTransferParam struct {
 	Type       TransferType `url:"type" validate:"required"`
@@ -65,10 +68,15 @@ const (
 
 type UniversalTransferParams struct {
 	UniversalTransferParam
-	utils.DefaultParam
+	bnutils.DefaultParam
 }
 
 type UniversalTransferResp struct {
+	Http *utils.ApiResponse
+	Body *UniversalTransferAPIResp
+}
+
+type UniversalTransferAPIResp struct {
 	TranID int64 `json:"tranId"`
 }
 
@@ -84,7 +92,12 @@ type GetUniversalTransferHistoryParam struct {
 
 type GetUniversalTransferHistoryParams struct {
 	GetUniversalTransferHistoryParam
-	utils.DefaultParam
+	bnutils.DefaultParam
+}
+
+type GetUniversalTransferHistoryResp struct {
+	Http *utils.ApiResponse
+	Body *GetUniversalTransferHistory
 }
 
 type GetUniversalTransferHistory struct {

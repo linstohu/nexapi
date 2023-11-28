@@ -18,7 +18,8 @@
 package types
 
 import (
-	"github.com/linstohu/nexapi/binance/utils"
+	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type SideType string
@@ -56,6 +57,16 @@ var (
 	FULL   NewOrderRespType = "FULL"
 )
 
+type OrderInfoResp struct {
+	Http *utils.ApiResponse
+	Body *OrderInfo
+}
+
+type CancelOrdersResp struct {
+	Http *utils.ApiResponse
+	Body []*OrderInfo
+}
+
 type OrderInfo struct {
 	Symbol                  string `json:"symbol"`
 	OrigClientOrderID       string `json:"origClientOrderId"`
@@ -71,6 +82,21 @@ type OrderInfo struct {
 	Type                    string `json:"type"`
 	Side                    string `json:"side"`
 	SelfTradePreventionMode string `json:"selfTradePreventionMode"`
+}
+
+type QueryOrderResp struct {
+	Http *utils.ApiResponse
+	Body *Order
+}
+
+type GetOpenOrdersResp struct {
+	Http *utils.ApiResponse
+	Body []*Order
+}
+
+type GetAllOrdersResp struct {
+	Http *utils.ApiResponse
+	Body []*Order
 }
 
 type Order struct {
@@ -104,10 +130,15 @@ type NewOrderParam struct {
 
 type NewOrderParams struct {
 	NewOrderParam
-	utils.DefaultParam
+	bnutils.DefaultParam
 }
 
 type NewOrderResp struct {
+	Http *utils.ApiResponse
+	Body *NewOrderAPIResp
+}
+
+type NewOrderAPIResp struct {
 	OrderInfo
 	TransactTime int64 `json:"transactTime"`
 	WorkingTime  int64 `json:"workingTime"`
@@ -123,7 +154,7 @@ type CancelOrderParam struct {
 
 type CancelOrderParams struct {
 	CancelOrderParam
-	utils.DefaultParam
+	bnutils.DefaultParam
 }
 
 type CancelOrdersOnOneSymbolParam struct {
@@ -132,7 +163,7 @@ type CancelOrdersOnOneSymbolParam struct {
 
 type CancelOrdersOnOneSymbolParams struct {
 	CancelOrdersOnOneSymbolParam
-	utils.DefaultParam
+	bnutils.DefaultParam
 }
 
 type QueryOrderParam struct {
@@ -143,7 +174,7 @@ type QueryOrderParam struct {
 
 type QueryOrderParams struct {
 	QueryOrderParam
-	utils.DefaultParam
+	bnutils.DefaultParam
 }
 
 type GetOpenOrdersParam struct {
@@ -152,7 +183,7 @@ type GetOpenOrdersParam struct {
 
 type GetOpenOrdersParams struct {
 	GetOpenOrdersParam
-	utils.DefaultParam
+	bnutils.DefaultParam
 }
 
 type GetAllOrdersParam struct {
@@ -165,5 +196,5 @@ type GetAllOrdersParam struct {
 
 type GetAllOrdersParams struct {
 	GetAllOrdersParam
-	utils.DefaultParam
+	bnutils.DefaultParam
 }

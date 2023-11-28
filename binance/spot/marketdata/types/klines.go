@@ -19,6 +19,7 @@ package types
 
 import (
 	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type GetKlineParam struct {
@@ -27,6 +28,11 @@ type GetKlineParam struct {
 	StartTime int64                   `url:"startTime,omitempty" validate:"omitempty"`
 	EndTime   int64                   `url:"endTime,omitempty" validate:"omitempty"`
 	Limit     int                     `url:"limit,omitempty" validate:"omitempty,max=1000"`
+}
+
+type GetKlineResp struct {
+	Http *utils.ApiResponse
+	Body []*Kline
 }
 
 type Kline struct {

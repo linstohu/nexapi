@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetSystemStatusResp struct {
+	Http *utils.ApiResponse
+	Body *SystemStatus
+}
+
 type SystemStatus struct {
 	Status int    `json:"status"`
 	Msg    string `json:"msg"`

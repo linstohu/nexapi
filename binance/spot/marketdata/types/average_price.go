@@ -17,8 +17,15 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetAvgPriceParam struct {
 	Symbol string `url:"symbol" validate:"required"`
+}
+
+type GetAvgPriceResp struct {
+	Http *utils.ApiResponse
+	Body *AvgPrice
 }
 
 type AvgPrice struct {

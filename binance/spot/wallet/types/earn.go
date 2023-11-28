@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetEarnAccountResp struct {
+	Http *utils.ApiResponse
+	Body *EarnAccount
+}
+
 type EarnAccount struct {
 	TotalAmountInBTC          string `json:"totalAmountInBTC"`
 	TotalAmountInUSDT         string `json:"totalAmountInUSDT"`

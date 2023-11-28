@@ -22,7 +22,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
@@ -31,6 +30,7 @@ import (
 	"github.com/linstohu/nexapi/binance/spot/spotaccount/types"
 	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type SpotAccountClient struct {
@@ -78,15 +78,17 @@ func NewSpotAccountClient(cfg *SpotAccountClientCfg) (*SpotAccountClient, error)
 }
 
 func (s *SpotAccountClient) TestNewOrder(ctx context.Context, param types.NewOrderParam) error {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.TRADE,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/order/test",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/order/test",
+		Method:  http.MethodPost,
 	}
 
+	st := spotutils.TRADE
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return err
 		}
@@ -107,7 +109,7 @@ func (s *SpotAccountClient) TestNewOrder(ctx context.Context, param types.NewOrd
 			return err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return err
@@ -132,15 +134,17 @@ func (s *SpotAccountClient) TestNewOrder(ctx context.Context, param types.NewOrd
 }
 
 func (s *SpotAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.NewOrderResp, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.TRADE,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/order",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/order",
+		Method:  http.MethodPost,
 	}
 
+	st := spotutils.TRADE
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -161,7 +165,7 @@ func (s *SpotAccountClient) NewOrder(ctx context.Context, param types.NewOrderPa
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -182,24 +186,31 @@ func (s *SpotAccountClient) NewOrder(ctx context.Context, param types.NewOrderPa
 		return nil, err
 	}
 
-	var ret types.NewOrderResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.NewOrderAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (s *SpotAccountClient) CancelOrder(ctx context.Context, param types.CancelOrderParam) (*types.OrderInfo, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.TRADE,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/order",
-		Method:       http.MethodDelete,
+	data := &types.NewOrderResp{
+		Http: resp,
+		Body: &body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotAccountClient) CancelOrder(ctx context.Context, param types.CancelOrderParam) (*types.OrderInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/order",
+		Method:  http.MethodDelete,
+	}
+
+	st := spotutils.TRADE
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -220,7 +231,7 @@ func (s *SpotAccountClient) CancelOrder(ctx context.Context, param types.CancelO
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -241,24 +252,31 @@ func (s *SpotAccountClient) CancelOrder(ctx context.Context, param types.CancelO
 		return nil, err
 	}
 
-	var ret types.OrderInfo
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.OrderInfo
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (s *SpotAccountClient) CancelOrdersOnOneSymbol(ctx context.Context, param types.CancelOrdersOnOneSymbolParam) ([]*types.OrderInfo, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.TRADE,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/openOrders",
-		Method:       http.MethodDelete,
+	data := &types.OrderInfoResp{
+		Http: resp,
+		Body: &body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotAccountClient) CancelOrdersOnOneSymbol(ctx context.Context, param types.CancelOrdersOnOneSymbolParam) (*types.CancelOrdersResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/openOrders",
+		Method:  http.MethodDelete,
+	}
+
+	st := spotutils.TRADE
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -279,7 +297,7 @@ func (s *SpotAccountClient) CancelOrdersOnOneSymbol(ctx context.Context, param t
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -300,24 +318,31 @@ func (s *SpotAccountClient) CancelOrdersOnOneSymbol(ctx context.Context, param t
 		return nil, err
 	}
 
-	var ret []*types.OrderInfo
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.OrderInfo
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotAccountClient) QueryOrder(ctx context.Context, param types.QueryOrderParam) (*types.Order, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/order",
-		Method:       http.MethodGet,
+	data := &types.CancelOrdersResp{
+		Http: resp,
+		Body: body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotAccountClient) QueryOrder(ctx context.Context, param types.QueryOrderParam) (*types.QueryOrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/order",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -338,7 +363,7 @@ func (s *SpotAccountClient) QueryOrder(ctx context.Context, param types.QueryOrd
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -359,24 +384,31 @@ func (s *SpotAccountClient) QueryOrder(ctx context.Context, param types.QueryOrd
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (s *SpotAccountClient) GetOpenOrders(ctx context.Context, param types.GetOpenOrdersParam) ([]*types.Order, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/openOrders",
-		Method:       http.MethodGet,
+	data := &types.QueryOrderResp{
+		Http: resp,
+		Body: &body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotAccountClient) GetOpenOrders(ctx context.Context, param types.GetOpenOrdersParam) (*types.GetOpenOrdersResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/openOrders",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -397,7 +429,7 @@ func (s *SpotAccountClient) GetOpenOrders(ctx context.Context, param types.GetOp
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -418,24 +450,31 @@ func (s *SpotAccountClient) GetOpenOrders(ctx context.Context, param types.GetOp
 		return nil, err
 	}
 
-	var ret []*types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) ([]*types.Order, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/allOrders",
-		Method:       http.MethodGet,
+	data := &types.GetOpenOrdersResp{
+		Http: resp,
+		Body: body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) (*types.GetAllOrdersResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/allOrders",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -456,7 +495,7 @@ func (s *SpotAccountClient) GetAllOrders(ctx context.Context, param types.GetAll
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -477,24 +516,31 @@ func (s *SpotAccountClient) GetAllOrders(ctx context.Context, param types.GetAll
 		return nil, err
 	}
 
-	var ret []*types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotAccountClient) GetAccountInfo(ctx context.Context) (*types.AccountInfo, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/account",
-		Method:       http.MethodGet,
+	data := &types.GetAllOrdersResp{
+		Http: resp,
+		Body: body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotAccountClient) GetAccountInfo(ctx context.Context) (*types.GetAccountInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/account",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -512,7 +558,7 @@ func (s *SpotAccountClient) GetAccountInfo(ctx context.Context) (*types.AccountI
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -533,24 +579,31 @@ func (s *SpotAccountClient) GetAccountInfo(ctx context.Context) (*types.AccountI
 		return nil, err
 	}
 
-	var ret types.AccountInfo
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.AccountInfo
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (s *SpotAccountClient) GetTradeList(ctx context.Context, param types.GetTradesParam) ([]*types.Trade, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/api/v3/myTrades",
-		Method:       http.MethodGet,
+	data := &types.GetAccountInfoResp{
+		Http: resp,
+		Body: &body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotAccountClient) GetTradeList(ctx context.Context, param types.GetTradesParam) (*types.GetTradesResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/api/v3/myTrades",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -571,7 +624,7 @@ func (s *SpotAccountClient) GetTradeList(ctx context.Context, param types.GetTra
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -592,10 +645,15 @@ func (s *SpotAccountClient) GetTradeList(ctx context.Context, param types.GetTra
 		return nil, err
 	}
 
-	var ret []*types.Trade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Trade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradesResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }

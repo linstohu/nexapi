@@ -18,7 +18,6 @@
 package spotutils
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -30,6 +29,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/google/go-querystring/query"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type SpotClient struct {
@@ -101,7 +101,10 @@ func (s *SpotClient) GetRecvWindow() int {
 }
 
 func (s *SpotClient) GenHeaders(t SecurityType) (map[string]string, error) {
-	headers := DefaultContentType
+	headers := map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+		"Accept":       "application/json",
+	}
 
 	// SecurityType each endpoint has a security type that determines how you will interact with it
 	// docs: https://binance-docs.github.io/apidocs/spot/en/#endpoint-security-type
@@ -109,7 +112,7 @@ func (s *SpotClient) GenHeaders(t SecurityType) (map[string]string, error) {
 	case TRADE, MARGIN, USER_DATA, USER_STREAM, MARKET_DATA:
 		key := s.GetKey()
 		if key == "" {
-			return nil, fmt.Errorf("a valid API-Key required")
+			return nil, fmt.Errorf("valid API-Key required")
 		}
 
 		headers["X-MBX-APIKEY"] = s.GetKey()
@@ -127,7 +130,7 @@ func (s *SpotClient) NeedSignature(t SecurityType) bool {
 	}
 }
 
-func (s *SpotClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
+func (s *SpotClient) SendHTTPRequest(ctx context.Context, req utils.HTTPRequest) (*utils.ApiResponse, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -174,7 +177,6 @@ func (s *SpotClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]by
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if s.GetDebug() {
 		dump, err := httputil.DumpResponse(resp, true)
@@ -184,12 +186,5 @@ func (s *SpotClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]by
 		s.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
 	}
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned a non-200 status code: [%d] - [%s]", resp.StatusCode, buf.String())
-	}
-
-	return buf.Bytes(), nil
+	return utils.NewApiResponse(&req, resp), nil
 }

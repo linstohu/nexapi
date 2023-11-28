@@ -21,6 +21,8 @@ import (
 	goquery "github.com/google/go-querystring/query"
 )
 
+// NormalizeRequestContent sign endpoint security
+// doc: https://binance-docs.github.io/apidocs/spot/en/#signed-trade-user_data-and-margin-endpoint-security
 func NormalizeRequestContent(query any, body any) (string, error) {
 	var ret string
 

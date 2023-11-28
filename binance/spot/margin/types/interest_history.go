@@ -17,7 +17,10 @@
 
 package types
 
-import "github.com/linstohu/nexapi/binance/utils"
+import (
+	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
+)
 
 type GetInterestHistoryParam struct {
 	Asset          string `url:"asset,omitempty" validate:"omitempty"`
@@ -31,7 +34,12 @@ type GetInterestHistoryParam struct {
 
 type GetInterestHistoryParams struct {
 	GetInterestHistoryParam
-	utils.DefaultParam
+	bnutils.DefaultParam
+}
+
+type GetInterestHistoryResp struct {
+	Http *utils.ApiResponse
+	Body *InterestHistory
 }
 
 type InterestHistory struct {

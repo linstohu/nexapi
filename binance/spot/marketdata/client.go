@@ -26,6 +26,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/binance/spot/marketdata/types"
 	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
+	"github.com/linstohu/nexapi/utils"
 	"github.com/valyala/fastjson"
 )
 
@@ -51,7 +52,8 @@ func NewSpotMarketDataClient(cfg *spotutils.SpotClientCfg) (*SpotMarketDataClien
 }
 
 func (s *SpotMarketDataClient) Ping(ctx context.Context) error {
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ping",
 		Method:  http.MethodGet,
@@ -71,8 +73,9 @@ func (s *SpotMarketDataClient) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (s *SpotMarketDataClient) GetServerTime(ctx context.Context) (*types.ServerTime, error) {
-	req := spotutils.HTTPRequest{
+func (s *SpotMarketDataClient) GetServerTime(ctx context.Context) (*types.ServerTimeResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/time",
 		Method:  http.MethodGet,
@@ -89,16 +92,23 @@ func (s *SpotMarketDataClient) GetServerTime(ctx context.Context) (*types.Server
 		return nil, err
 	}
 
-	var ret types.ServerTime
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ServerTime
+
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.ServerTimeResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetExchangeInfo(ctx context.Context, param types.GetExchangeInfoParam) (*types.ExchangeInfo, error) {
-	req := spotutils.HTTPRequest{
+func (s *SpotMarketDataClient) GetExchangeInfo(ctx context.Context, param types.GetExchangeInfoParam) (*types.GetExchangeInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/exchangeInfo",
 		Method:  http.MethodGet,
@@ -132,21 +142,28 @@ func (s *SpotMarketDataClient) GetExchangeInfo(ctx context.Context, param types.
 		return nil, err
 	}
 
-	var ret types.ExchangeInfo
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ExchangeInfo
+
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetExchangeInfoResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetOrderbook(ctx context.Context, param types.GetOrderbookParams) (*types.Orderbook, error) {
+func (s *SpotMarketDataClient) GetOrderbook(ctx context.Context, param types.GetOrderbookParams) (*types.GetOrderbookResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/depth",
 		Method:  http.MethodGet,
@@ -164,21 +181,28 @@ func (s *SpotMarketDataClient) GetOrderbook(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	var ret types.Orderbook
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Orderbook
+
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetOrderbookResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetRecentTradeList(ctx context.Context, param types.GetTradeParams) ([]*types.Trade, error) {
+func (s *SpotMarketDataClient) GetRecentTradeList(ctx context.Context, param types.GetTradeParams) (*types.GetTradeResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/trades",
 		Method:  http.MethodGet,
@@ -196,21 +220,27 @@ func (s *SpotMarketDataClient) GetRecentTradeList(ctx context.Context, param typ
 		return nil, err
 	}
 
-	var ret []*types.Trade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Trade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradeResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetAggTrades(ctx context.Context, param types.GetAggTradesParam) ([]*types.AggTrade, error) {
+func (s *SpotMarketDataClient) GetAggTrades(ctx context.Context, param types.GetAggTradesParam) (*types.GetAggTradesResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/aggTrades",
 		Method:  http.MethodGet,
@@ -228,21 +258,27 @@ func (s *SpotMarketDataClient) GetAggTrades(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	var ret []*types.AggTrade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.AggTrade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetAggTradesResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetKlines(ctx context.Context, param types.GetKlineParam) ([]*types.Kline, error) {
+func (s *SpotMarketDataClient) GetKlines(ctx context.Context, param types.GetKlineParam) (*types.GetKlineResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/klines",
 		Method:  http.MethodGet,
@@ -260,8 +296,13 @@ func (s *SpotMarketDataClient) GetKlines(ctx context.Context, param types.GetKli
 		return nil, err
 	}
 
+	body, err := resp.ReadBody()
+	if err != nil {
+		return nil, err
+	}
+
 	var p fastjson.Parser
-	js, err := p.ParseBytes(resp)
+	js, err := p.ParseBytes(body)
 	if err != nil {
 		return nil, err
 	}
@@ -297,16 +338,22 @@ func (s *SpotMarketDataClient) GetKlines(ctx context.Context, param types.GetKli
 		})
 	}
 
-	return ret, nil
+	data := &types.GetKlineResp{
+		Http: resp,
+		Body: ret,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetAvgPrice(ctx context.Context, param types.GetAvgPriceParam) (*types.AvgPrice, error) {
+func (s *SpotMarketDataClient) GetAvgPrice(ctx context.Context, param types.GetAvgPriceParam) (*types.GetAvgPriceResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/avgPrice",
 		Method:  http.MethodGet,
@@ -324,21 +371,27 @@ func (s *SpotMarketDataClient) GetAvgPrice(ctx context.Context, param types.GetA
 		return nil, err
 	}
 
-	var ret types.AvgPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.AvgPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetAvgPriceResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetTickerForSymbol(ctx context.Context, param types.GetTickerForSymbolParam) (*types.Ticker, error) {
+func (s *SpotMarketDataClient) GetTickerForSymbol(ctx context.Context, param types.GetTickerForSymbolParam) (*types.GetTickerForSymbolResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/24hr",
 		Method:  http.MethodGet,
@@ -360,21 +413,27 @@ func (s *SpotMarketDataClient) GetTickerForSymbol(ctx context.Context, param typ
 		return nil, err
 	}
 
-	var ret types.Ticker
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Ticker
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetTickerForSymbolResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetTickerForSymbols(ctx context.Context, param types.GetTickerForSymbolsParam) ([]*types.Ticker, error) {
+func (s *SpotMarketDataClient) GetTickerForSymbols(ctx context.Context, param types.GetTickerForSymbolsParam) (*types.GetTickerForSymbolsResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/24hr",
 		Method:  http.MethodGet,
@@ -399,21 +458,27 @@ func (s *SpotMarketDataClient) GetTickerForSymbols(ctx context.Context, param ty
 		return nil, err
 	}
 
-	var ret []*types.Ticker
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Ticker
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTickerForSymbolsResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetTickerPriceForSymbol(ctx context.Context, param types.GetTickerPriceForSymbolParam) (*types.TickerPrice, error) {
+func (s *SpotMarketDataClient) GetTickerPriceForSymbol(ctx context.Context, param types.GetTickerPriceForSymbolParam) (*types.GetTickerPriceForSymbolResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/price",
 		Method:  http.MethodGet,
@@ -435,21 +500,27 @@ func (s *SpotMarketDataClient) GetTickerPriceForSymbol(ctx context.Context, para
 		return nil, err
 	}
 
-	var ret types.TickerPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.TickerPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetTickerPriceForSymbolResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetTickerPriceForSymbols(ctx context.Context, param types.GetTickerPriceForSymbolsParam) ([]*types.TickerPrice, error) {
+func (s *SpotMarketDataClient) GetTickerPriceForSymbols(ctx context.Context, param types.GetTickerPriceForSymbolsParam) (*types.GetTickerPriceForSymbolsResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/price",
 		Method:  http.MethodGet,
@@ -474,21 +545,27 @@ func (s *SpotMarketDataClient) GetTickerPriceForSymbols(ctx context.Context, par
 		return nil, err
 	}
 
-	var ret []*types.TickerPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.TickerPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTickerPriceForSymbolsResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetBookTickerForSymbol(ctx context.Context, param types.GetBookTickerForSymbolParam) (*types.BookTicker, error) {
+func (s *SpotMarketDataClient) GetBookTickerForSymbol(ctx context.Context, param types.GetBookTickerForSymbolParam) (*types.GetBookTickerForSymbolResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/bookTicker",
 		Method:  http.MethodGet,
@@ -510,21 +587,27 @@ func (s *SpotMarketDataClient) GetBookTickerForSymbol(ctx context.Context, param
 		return nil, err
 	}
 
-	var ret types.BookTicker
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.BookTicker
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetBookTickerForSymbolResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (s *SpotMarketDataClient) GetBookTickerForSymbols(ctx context.Context, param types.GetBookTickerForSymbolsParam) ([]*types.BookTicker, error) {
+func (s *SpotMarketDataClient) GetBookTickerForSymbols(ctx context.Context, param types.GetBookTickerForSymbolsParam) (*types.GetBookTickerForSymbolsResp, error) {
 	err := s.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := spotutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v3/ticker/bookTicker",
 		Method:  http.MethodGet,
@@ -549,10 +632,15 @@ func (s *SpotMarketDataClient) GetBookTickerForSymbols(ctx context.Context, para
 		return nil, err
 	}
 
-	var ret []*types.BookTicker
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.BookTicker
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetBookTickerForSymbolsResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }

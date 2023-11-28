@@ -17,7 +17,10 @@
 
 package types
 
-import "github.com/linstohu/nexapi/binance/utils"
+import (
+	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
+)
 
 type GetUserAssetParam struct {
 	Asset            string `url:"asset,omitempty" validate:"omitempty"`
@@ -26,7 +29,12 @@ type GetUserAssetParam struct {
 
 type GetUserAssetParams struct {
 	GetUserAssetParam
-	utils.DefaultParam
+	bnutils.DefaultParam
+}
+
+type GetUserAssetResp struct {
+	Http *utils.ApiResponse
+	Body []*UserAsset
 }
 
 type UserAsset struct {

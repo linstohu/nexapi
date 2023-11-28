@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetCoinInfoResp struct {
+	Http *utils.ApiResponse
+	Body []*CoinInfo
+}
+
 type CoinInfo struct {
 	Coin             string `json:"coin"`
 	DepositAllEnable bool   `json:"depositAllEnable"`

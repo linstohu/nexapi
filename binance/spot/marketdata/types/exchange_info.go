@@ -17,6 +17,8 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetExchangeInfoParam struct {
 	Symbols     []string
 	Permissions []string
@@ -25,6 +27,11 @@ type GetExchangeInfoParam struct {
 type GetExchangeInfoParams struct {
 	Symbols     string `url:"symbols,omitempty" validate:"omitempty"`
 	Permissions string `url:"permissions,omitempty" validate:"omitempty"`
+}
+
+type GetExchangeInfoResp struct {
+	Http *utils.ApiResponse
+	Body *ExchangeInfo
 }
 
 type ExchangeInfo struct {

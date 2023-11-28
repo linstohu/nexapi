@@ -22,7 +22,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
@@ -31,6 +30,7 @@ import (
 	"github.com/linstohu/nexapi/binance/spot/margin/types"
 	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type SpotMarginClient struct {
@@ -77,16 +77,18 @@ func NewSpotMarginClient(cfg *SpotMarginClientCfg) (*SpotMarginClient, error) {
 	}, nil
 }
 
-func (s *SpotMarginClient) GetInterestHistory(ctx context.Context, param types.GetInterestHistoryParam) (*types.InterestHistory, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/margin/interestHistory",
-		Method:       http.MethodGet,
+func (s *SpotMarginClient) GetInterestHistory(ctx context.Context, param types.GetInterestHistoryParam) (*types.GetInterestHistoryResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/margin/interestHistory",
+		Method:  http.MethodGet,
 	}
 
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -107,7 +109,7 @@ func (s *SpotMarginClient) GetInterestHistory(ctx context.Context, param types.G
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -128,10 +130,15 @@ func (s *SpotMarginClient) GetInterestHistory(ctx context.Context, param types.G
 		return nil, err
 	}
 
-	var ret types.InterestHistory
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.InterestHistory
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetInterestHistoryResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }

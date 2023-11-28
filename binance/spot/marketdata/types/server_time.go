@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type ServerTimeResp struct {
+	Http *utils.ApiResponse
+	Body *ServerTime
+}
+
 type ServerTime struct {
 	ServerTime int64 `json:"serverTime"`
 }

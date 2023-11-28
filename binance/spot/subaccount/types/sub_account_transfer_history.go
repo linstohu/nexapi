@@ -17,7 +17,10 @@
 
 package types
 
-import "github.com/linstohu/nexapi/binance/utils"
+import (
+	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
+)
 
 type GetSubAccountTransferHistoryParam struct {
 	Asset     string `url:"asset,omitempty" validate:"omitempty"`
@@ -29,7 +32,12 @@ type GetSubAccountTransferHistoryParam struct {
 
 type GetSubAccountTransferHistoryParams struct {
 	GetSubAccountTransferHistoryParam
-	utils.DefaultParam
+	bnutils.DefaultParam
+}
+
+type GetSubAccountTransferHistoryResp struct {
+	Http *utils.ApiResponse
+	Body []*SubAccountTransferHistory
 }
 
 type SubAccountTransferHistory struct {

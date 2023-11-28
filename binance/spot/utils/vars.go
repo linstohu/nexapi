@@ -32,11 +32,6 @@ var (
 	MARKET_DATA SecurityType = "MARKET_DATA"
 )
 
-var DefaultContentType = map[string]string{
-	"Content-Type": "application/x-www-form-urlencoded",
-	"Accept":       "application/json",
-}
-
 type KlineInterval string
 
 var (

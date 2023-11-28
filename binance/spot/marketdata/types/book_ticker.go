@@ -17,6 +17,8 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetBookTickerForSymbolParam struct {
 	Symbol string `url:"symbol" validate:"required"`
 }
@@ -28,6 +30,16 @@ type GetBookTickerForSymbolsParam struct {
 type BookTickerParams struct {
 	Symbol  string `url:"symbol,omitempty" validate:"omitempty"`
 	Symbols string `url:"symbols,omitempty" validate:"omitempty"`
+}
+
+type GetBookTickerForSymbolResp struct {
+	Http *utils.ApiResponse
+	Body *BookTicker
+}
+
+type GetBookTickerForSymbolsResp struct {
+	Http *utils.ApiResponse
+	Body []*BookTicker
 }
 
 type BookTicker struct {

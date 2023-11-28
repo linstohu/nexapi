@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetApiRestrictionsResp struct {
+	Http *utils.ApiResponse
+	Body *ApiRestrictions
+}
+
 type ApiRestrictions struct {
 	IPRestrict                     bool  `json:"ipRestrict"`
 	CreateTime                     int64 `json:"createTime"`

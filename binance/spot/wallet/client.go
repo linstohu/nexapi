@@ -22,7 +22,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
@@ -31,6 +30,7 @@ import (
 	spotutils "github.com/linstohu/nexapi/binance/spot/utils"
 	"github.com/linstohu/nexapi/binance/spot/wallet/types"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type SpotWalletClient struct {
@@ -77,8 +77,9 @@ func NewSpotWalletClient(cfg *SpotWalletClientCfg) (*SpotWalletClient, error) {
 	}, nil
 }
 
-func (s *SpotWalletClient) GetSystemStatus(ctx context.Context) (*types.SystemStatus, error) {
-	req := spotutils.HTTPRequest{
+func (s *SpotWalletClient) GetSystemStatus(ctx context.Context) (*types.GetSystemStatusResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
 		BaseURL: s.GetBaseURL(),
 		Path:    "/sapi/v1/system/status",
 		Method:  http.MethodGet,
@@ -95,24 +96,31 @@ func (s *SpotWalletClient) GetSystemStatus(ctx context.Context) (*types.SystemSt
 		return nil, err
 	}
 
-	var ret types.SystemStatus
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.SystemStatus
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinInfo, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/capital/config/getall",
-		Method:       http.MethodGet,
+	data := &types.GetSystemStatusResp{
+		Http: resp,
+		Body: &body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) (*types.GetCoinInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/capital/config/getall",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -130,7 +138,7 @@ func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinIn
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -151,24 +159,31 @@ func (s *SpotWalletClient) GetAllCoinsInfo(ctx context.Context) ([]*types.CoinIn
 		return nil, err
 	}
 
-	var ret []*types.CoinInfo
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.CoinInfo
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAssetDetailParam) (map[string]*types.AssetDetail, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/asset/assetDetail",
-		Method:       http.MethodGet,
+	data := &types.GetCoinInfoResp{
+		Http: resp,
+		Body: body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAssetDetailParam) (*types.AssetDetailResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/asset/assetDetail",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +204,7 @@ func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAs
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -210,24 +225,31 @@ func (s *SpotWalletClient) GetAssetDetail(ctx context.Context, param types.GetAs
 		return nil, err
 	}
 
-	ret := make(map[string]*types.AssetDetail)
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	body := make(map[string]*types.AssetDetail)
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTradeFeeParam) ([]*types.TradeFee, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/asset/tradeFee",
-		Method:       http.MethodGet,
+	data := &types.AssetDetailResp{
+		Http: resp,
+		Body: body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTradeFeeParam) (*types.GetTradeFeeResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/asset/tradeFee",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -248,7 +270,7 @@ func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTrade
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -269,24 +291,31 @@ func (s *SpotWalletClient) GetTradeFee(ctx context.Context, param types.GetTrade
 		return nil, err
 	}
 
-	var ret []*types.TradeFee
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.TradeFee
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradeFeeResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
 func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.UniversalTransferParam) (*types.UniversalTransferResp, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/asset/transfer",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/asset/transfer",
+		Method:  http.MethodPost,
 	}
 
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -307,7 +336,7 @@ func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.Un
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -328,24 +357,31 @@ func (s *SpotWalletClient) UniversalTransfer(ctx context.Context, param types.Un
 		return nil, err
 	}
 
-	var ret types.UniversalTransferResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.UniversalTransferAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, param types.GetUniversalTransferHistoryParam) (*types.GetUniversalTransferHistory, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/asset/transfer",
-		Method:       http.MethodGet,
+	data := &types.UniversalTransferResp{
+		Http: resp,
+		Body: &body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, param types.GetUniversalTransferHistoryParam) (*types.GetUniversalTransferHistoryResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/asset/transfer",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -366,7 +402,7 @@ func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, para
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -387,24 +423,31 @@ func (s *SpotWalletClient) GetUniversalTransferHistory(ctx context.Context, para
 		return nil, err
 	}
 
-	var ret types.GetUniversalTransferHistory
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.GetUniversalTransferHistory
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetFundingAssetParam) ([]*types.FundingAsset, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/asset/get-funding-asset",
-		Method:       http.MethodPost,
+	data := &types.GetUniversalTransferHistoryResp{
+		Http: resp,
+		Body: &body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetFundingAssetParam) (*types.GetFundingAssetResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/asset/get-funding-asset",
+		Method:  http.MethodPost,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -425,7 +468,7 @@ func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetF
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -446,24 +489,31 @@ func (s *SpotWalletClient) GetFundingAsset(ctx context.Context, param types.GetF
 		return nil, err
 	}
 
-	var ret []*types.FundingAsset
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.FundingAsset
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUserAssetParam) ([]*types.UserAsset, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v3/asset/getUserAsset",
-		Method:       http.MethodPost,
+	data := &types.GetFundingAssetResp{
+		Http: resp,
+		Body: body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUserAssetParam) (*types.GetUserAssetResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v3/asset/getUserAsset",
+		Method:  http.MethodPost,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -484,7 +534,7 @@ func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUser
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -505,24 +555,31 @@ func (s *SpotWalletClient) GetUserAsset(ctx context.Context, param types.GetUser
 		return nil, err
 	}
 
-	var ret []*types.UserAsset
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.UserAsset
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRestrictions, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/account/apiRestrictions",
-		Method:       http.MethodGet,
+	data := &types.GetUserAssetResp{
+		Http: resp,
+		Body: body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.GetApiRestrictionsResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/account/apiRestrictions",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -540,7 +597,7 @@ func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRe
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -561,24 +618,31 @@ func (s *SpotWalletClient) GetApiRestrictions(ctx context.Context) (*types.ApiRe
 		return nil, err
 	}
 
-	var ret *types.ApiRestrictions
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ApiRestrictions
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotWalletClient) GetWalletBalance(ctx context.Context) ([]*types.Balance, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/asset/wallet/balance",
-		Method:       http.MethodGet,
+	data := &types.GetApiRestrictionsResp{
+		Http: resp,
+		Body: &body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetWalletBalance(ctx context.Context) (*types.GetWalletBalanceResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/asset/wallet/balance",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -596,7 +660,7 @@ func (s *SpotWalletClient) GetWalletBalance(ctx context.Context) ([]*types.Balan
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -617,24 +681,31 @@ func (s *SpotWalletClient) GetWalletBalance(ctx context.Context) ([]*types.Balan
 		return nil, err
 	}
 
-	var ret []*types.Balance
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Balance
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (s *SpotWalletClient) GetEarnAccount(ctx context.Context) (*types.EarnAccount, error) {
-	req := spotutils.HTTPRequest{
-		SecurityType: spotutils.USER_DATA,
-		BaseURL:      s.GetBaseURL(),
-		Path:         "/sapi/v1/simple-earn/account",
-		Method:       http.MethodGet,
+	data := &types.GetWalletBalanceResp{
+		Http: resp,
+		Body: body,
 	}
 
+	return data, nil
+}
+
+func (s *SpotWalletClient) GetEarnAccount(ctx context.Context) (*types.GetEarnAccountResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   s.GetDebug(),
+		BaseURL: s.GetBaseURL(),
+		Path:    "/sapi/v1/simple-earn/account",
+		Method:  http.MethodGet,
+	}
+
+	st := spotutils.USER_DATA
+
 	{
-		headers, err := s.GenHeaders(req.SecurityType)
+		headers, err := s.GenHeaders(st)
 		if err != nil {
 			return nil, err
 		}
@@ -652,7 +723,7 @@ func (s *SpotWalletClient) GetEarnAccount(ctx context.Context) (*types.EarnAccou
 			return nil, err
 		}
 
-		if need := s.NeedSignature(req.SecurityType); need {
+		if need := s.NeedSignature(st); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -673,10 +744,15 @@ func (s *SpotWalletClient) GetEarnAccount(ctx context.Context) (*types.EarnAccou
 		return nil, err
 	}
 
-	var ret types.EarnAccount
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.EarnAccount
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetEarnAccountResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
