@@ -102,3 +102,35 @@ func (t *TradingAccountClient) GetBalance(ctx context.Context, param types.GetBa
 
 	return &ret, nil
 }
+
+func (t *TradingAccountClient) GetPositions(ctx context.Context, param types.GetPositionsParam) (*types.GetPositionsResp, error) {
+	err := t.validate.Struct(param)
+	if err != nil {
+		return nil, err
+	}
+
+	req := okxutils.HTTPRequest{
+		BaseURL: t.GetBaseURL(),
+		Path:    "/api/v5/account/positions",
+		Method:  http.MethodGet,
+		Query:   param,
+	}
+
+	headers, err := t.GenAuthHeaders(req)
+	if err != nil {
+		return nil, err
+	}
+	req.Headers = headers
+
+	resp, err := t.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetPositionsResp
+	if err := json.Unmarshal(resp, &ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
