@@ -20,12 +20,12 @@ package types
 import okxutils "github.com/linstohu/nexapi/okx/utils"
 
 type GetPositionsParam struct {
-	InstType InstrumentType `url:"instType,omitempty" validate:"omitempty,oneof=MARGIN SWAP FUTURES OPTION"`
-	InstId   string         `url:"instId,omitempty"`
-	PosId    string         `url:"posId,omitempty"`
+	InstType PosInstType `url:"instType,omitempty" validate:"omitempty,oneof=MARGIN SWAP FUTURES OPTION"`
+	InstId   string      `url:"instId,omitempty"`
+	PosId    string      `url:"posId,omitempty"`
 }
 
-type InstrumentType = string
+type PosInstType = string
 
 const (
 	Margin  = "MARGIN"

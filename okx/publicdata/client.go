@@ -83,3 +83,30 @@ func (p *PublicDataClient) GetInstruments(ctx context.Context, param types.GetIn
 
 	return &ret, nil
 }
+
+func (p *PublicDataClient) GetMarketTickers(ctx context.Context, param types.GetMarketTickersParam) (*types.GetMarketTickersResp, error) {
+	req := okxutils.HTTPRequest{
+		BaseURL: p.GetBaseURL(),
+		Path:    "/api/v5/market/tickers",
+		Method:  http.MethodGet,
+		Query:   param,
+	}
+
+	headers, err := p.GenPubHeaders()
+	if err != nil {
+		return nil, err
+	}
+	req.Headers = headers
+
+	resp, err := p.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetMarketTickersResp
+	if err := json.Unmarshal(resp, &ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
