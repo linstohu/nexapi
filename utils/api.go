@@ -20,6 +20,8 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -58,6 +60,16 @@ func (r *ApiResponse) ReadBody() ([]byte, error) {
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.ApiRes.Body)
+
+	if r.ApiRes.StatusCode != http.StatusOK {
+		m := fmt.Sprintf("[HTTP]Failure: status code is NOT 200, %s %s, respond code=%d body=%s",
+			r.ApiReq.Method,
+			r.ApiReq.BaseURL+r.ApiReq.Path,
+			r.ApiRes.StatusCode,
+			buf.String(),
+		)
+		return nil, errors.New(m)
+	}
 
 	r.Body = buf.Bytes()
 
