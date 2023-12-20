@@ -25,6 +25,7 @@ type GetAccountInfoResponse struct {
 	Status string        `json:"status"`
 	Data   []AccountInfo `json:"data"`
 }
+
 type AccountInfo struct {
 	Id      int64  `json:"id"`
 	Type    string `json:"type"`

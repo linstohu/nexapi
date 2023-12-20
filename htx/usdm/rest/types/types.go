@@ -15,17 +15,9 @@
  * limitations under the License.
  */
 
-package utils
+package types
 
-var (
-	SpotBaseURL    = "https://api.huobi.pro"
-	SpotAWSBaseURL = "https://api-aws.huobi.pro"
-
-	UsdmBaseURL    = "https://api.hbdm.com"
-	UsdmAWSBaseURL = "https://api.hbdm.vn"
-)
-
-var NIL = "<nil>"
-
-// ApiKeyVersionV2 is v2 api key version
-const ApiKeyVersionV2 = "2"
+type DefaultResponse struct {
+	Status string `json:"status"`
+	Ts     int64  `json:"ts"`
+}

@@ -18,13 +18,9 @@
 package rest
 
 import (
-	"context"
-	"errors"
 	"log/slog"
-	"net/http"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/htx/spot/rest/types"
 	"github.com/linstohu/nexapi/htx/utils"
 )
 
@@ -40,9 +36,9 @@ type SpotClientCfg struct {
 	// Logger
 	Logger *slog.Logger
 
-	BaseURL     string `validate:"required"`
-	Key         string
-	Secret      string
+	BaseURL string `validate:"required"`
+	Key     string
+	Secret  string
 }
 
 func NewSpotClient(cfg *SpotClientCfg) (*SpotClient, error) {
@@ -69,112 +65,4 @@ func NewSpotClient(cfg *SpotClientCfg) (*SpotClient, error) {
 		cli:      cli,
 		validate: validator,
 	}, nil
-}
-
-func (scli *SpotClient) GetAccountInfo(ctx context.Context) (*types.GetAccountInfoResponse, error) {
-	if err := scli.cli.CheckAuth(); err != nil {
-		return nil, err
-	}
-
-	req := utils.HTTPRequest{
-		BaseURL: scli.cli.GetBaseURL(),
-		Path:    "/v1/account/accounts",
-		Method:  http.MethodGet,
-	}
-
-	{
-		headers, err := scli.cli.GetHeaders()
-		if err != nil {
-			return nil, err
-		}
-		req.Headers = headers
-	}
-
-	{
-		query := scli.cli.GenAuthParams()
-
-		signStr, err := scli.cli.NormalizeRequestContent(req, query)
-		if err != nil {
-			return nil, err
-		}
-
-		h := scli.cli.Sign([]byte(signStr))
-		if err != nil {
-			return nil, err
-		}
-
-		query.Signature = h
-
-		req.Query = query
-	}
-
-	resp, err := scli.cli.SendHTTPRequest(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	var ret types.GetAccountInfoResponse
-	if err := resp.ReadJsonBody(&ret); err != nil {
-		return nil, errors.New(resp.Error())
-	}
-
-	return &ret, nil
-}
-
-func (scli *SpotClient) GetAccountValuation(ctx context.Context, param types.GetAccountValuationParam) (*types.GetAccountValuationResp, error) {
-	if err := scli.cli.CheckAuth(); err != nil {
-		return nil, err
-	}
-
-	err := scli.validate.Struct(param)
-	if err != nil {
-		return nil, err
-	}
-
-	req := utils.HTTPRequest{
-		BaseURL: scli.cli.GetBaseURL(),
-		Path:    "/v2/account/valuation",
-		Method:  http.MethodGet,
-	}
-
-	{
-		headers, err := scli.cli.GetHeaders()
-		if err != nil {
-			return nil, err
-		}
-		req.Headers = headers
-	}
-
-	{
-		query := types.GetAccountValuationParams{
-			GetAccountValuationParam: param,
-			DefaultAuthParam:         scli.cli.GenAuthParams(),
-		}
-
-		signStr, err := scli.cli.NormalizeRequestContent(req, query)
-		if err != nil {
-			return nil, err
-		}
-
-		h := scli.cli.Sign([]byte(signStr))
-		if err != nil {
-			return nil, err
-		}
-
-		query.DefaultAuthParam.Signature = h
-
-		req.Query = query
-	}
-
-	resp, err := scli.cli.SendHTTPRequest(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	var ret types.GetAccountValuationResp
-	if err := resp.ReadJsonBody(&ret); err != nil {
-		return nil, errors.New(resp.Error())
-	}
-
-	return &ret, nil
 }

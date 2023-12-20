@@ -16,3 +16,53 @@
  */
 
 package rest
+
+import (
+	"log/slog"
+
+	"github.com/go-playground/validator"
+	"github.com/linstohu/nexapi/htx/utils"
+)
+
+type UsdmClient struct {
+	cli *utils.HTXClient
+
+	// validate struct fields
+	validate *validator.Validate
+}
+
+type UsdmClientCfg struct {
+	Debug bool
+	// Logger
+	Logger *slog.Logger
+
+	BaseURL string `validate:"required"`
+	Key     string
+	Secret  string
+}
+
+func NewUsdmClient(cfg *UsdmClientCfg) (*UsdmClient, error) {
+	validator := validator.New()
+
+	err := validator.Struct(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	cli, err := utils.NewHTXRestClient(&utils.HTXClientCfg{
+		Debug:       cfg.Debug,
+		Logger:      cfg.Logger,
+		BaseURL:     cfg.BaseURL,
+		Key:         cfg.Key,
+		Secret:      cfg.Secret,
+		SignVersion: utils.ApiKeyVersionV2,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &UsdmClient{
+		cli:      cli,
+		validate: validator,
+	}, nil
+}

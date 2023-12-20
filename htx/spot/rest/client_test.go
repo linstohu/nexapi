@@ -29,7 +29,7 @@ import (
 
 func testNewSpotClient(t *testing.T) *SpotClient {
 	cli, err := NewSpotClient(&SpotClientCfg{
-		BaseURL: utils.ProdAWSBaseURL,
+		BaseURL: utils.SpotAWSBaseURL,
 		Key:     os.Getenv("HTX_KEY"),
 		Secret:  os.Getenv("HTX_SECRET"),
 		Debug:   true,

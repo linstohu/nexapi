@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-package utils
+package types
 
-var (
-	SpotBaseURL    = "https://api.huobi.pro"
-	SpotAWSBaseURL = "https://api-aws.huobi.pro"
+type GetAssetValuationParam struct {
+	ValuationAsset string `json:"valuation_asset,omitempty" validate:"omitempty"`
+}
 
-	UsdmBaseURL    = "https://api.hbdm.com"
-	UsdmAWSBaseURL = "https://api.hbdm.vn"
-)
+type GetAssetValuationResp struct {
+	DefaultResponse
+	Data []AssetValuation `json:"data"`
+}
 
-var NIL = "<nil>"
-
-// ApiKeyVersionV2 is v2 api key version
-const ApiKeyVersionV2 = "2"
+type AssetValuation struct {
+	ValuationAsset string `json:"valuation_asset"`
+	Balance        string `json:"balance"`
+}
