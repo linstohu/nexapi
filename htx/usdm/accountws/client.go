@@ -15,16 +15,19 @@
  * limitations under the License.
  */
 
-package marketws
+package accountws
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
-	"math/rand"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -36,12 +39,15 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
-type MarketWsClient struct {
-	baseURL string
+type AccountWsClient struct {
+	host, path string
+	baseURL    string
 	// debug mode
 	debug bool
 	// logger
 	logger *slog.Logger
+
+	key, secret string
 
 	ctx         context.Context
 	conn        *websocket.Conn
@@ -57,22 +63,34 @@ type MarketWsClient struct {
 	emitter *emission.Emitter
 }
 
-type MarketWsClientCfg struct {
-	BaseURL string `validate:"required"`
-	Debug   bool
+type AccountWsClientCfg struct {
+	Debug bool
 	// Logger
-	Logger *slog.Logger
+	Logger  *slog.Logger
+	BaseURL string `validate:"required"`
+	Key     string `validate:"required"`
+	Secret  string `validate:"required"`
 }
 
-func NewMarketWsClient(ctx context.Context, cfg *MarketWsClientCfg) (*MarketWsClient, error) {
+func NewAccountWsClient(ctx context.Context, cfg *AccountWsClientCfg) (*AccountWsClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
 
-	cli := &MarketWsClient{
-		baseURL: cfg.BaseURL,
+	baseURL, err := url.Parse(cfg.BaseURL)
+	if err != nil {
+		return nil, err
+	}
+
+	cli := &AccountWsClient{
 		debug:   cfg.Debug,
 		logger:  cfg.Logger,
+		baseURL: cfg.BaseURL,
+		host:    baseURL.Host,
+		path:    baseURL.Path,
+
+		key:    cfg.Key,
+		secret: cfg.Secret,
 
 		ctx:           ctx,
 		autoReconnect: true,
@@ -85,15 +103,17 @@ func NewMarketWsClient(ctx context.Context, cfg *MarketWsClientCfg) (*MarketWsCl
 		cli.logger = slog.Default()
 	}
 
-	err := cli.start()
+	err = cli.start()
 	if err != nil {
 		return nil, err
 	}
 
+	time.Sleep(100 * time.Millisecond)
+
 	return cli, nil
 }
 
-func (m *MarketWsClient) start() error {
+func (m *AccountWsClient) start() error {
 	m.conn = nil
 	m.setIsConnected(false)
 	m.disconnect = make(chan struct{})
@@ -121,12 +141,14 @@ func (m *MarketWsClient) start() error {
 		go m.reconnect()
 	}
 
+	m.auth()
+
 	go m.readMessages()
 
 	return nil
 }
 
-func (m *MarketWsClient) connect() (*websocket.Conn, *http.Response, error) {
+func (m *AccountWsClient) connect() (*websocket.Conn, *http.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -138,7 +160,7 @@ func (m *MarketWsClient) connect() (*websocket.Conn, *http.Response, error) {
 	return conn, resp, err
 }
 
-func (m *MarketWsClient) reconnect() {
+func (m *AccountWsClient) reconnect() {
 	<-m.disconnect
 
 	m.setIsConnected(false)
@@ -157,7 +179,7 @@ func (m *MarketWsClient) reconnect() {
 }
 
 // close closes the websocket connection
-func (m *MarketWsClient) close() error {
+func (m *AccountWsClient) close() error {
 	close(m.disconnect)
 
 	err := m.conn.Close()
@@ -169,7 +191,7 @@ func (m *MarketWsClient) close() error {
 }
 
 // setIsConnected sets state for isConnected
-func (m *MarketWsClient) setIsConnected(state bool) {
+func (m *AccountWsClient) setIsConnected(state bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -177,14 +199,57 @@ func (m *MarketWsClient) setIsConnected(state bool) {
 }
 
 // IsConnected returns the WebSocket connection state
-func (m *MarketWsClient) IsConnected() bool {
+func (m *AccountWsClient) IsConnected() bool {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
 	return m.isConnected
 }
 
-func (m *MarketWsClient) readMessages() {
+func (m *AccountWsClient) auth() error {
+	parameters := url.Values{}
+
+	parameters.Add("AccessKeyId", m.key)
+	parameters.Add("SignatureMethod", "HmacSHA256")
+	parameters.Add("SignatureVersion", "2")
+
+	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05")
+	parameters.Add("Timestamp", timestamp)
+
+	var sb strings.Builder
+	sb.WriteString(http.MethodGet)
+	sb.WriteString("\n")
+	sb.WriteString(m.host)
+	sb.WriteString("\n")
+	sb.WriteString(m.path)
+	sb.WriteString("\n")
+	sb.WriteString(parameters.Encode())
+
+	hm := hmac.New(sha256.New, []byte(m.secret))
+	hm.Write([]byte(sb.String()))
+	sign := base64.StdEncoding.EncodeToString(hm.Sum(nil))
+
+	msg := AuthRequest{
+		Operation:        "auth",
+		Type:             "api",
+		AccessKeyId:      m.key,
+		SignatureMethod:  "HmacSHA256",
+		SignatureVersion: "2",
+		Timestamp:        timestamp,
+		Signature:        sign,
+	}
+
+	m.sending.Lock()
+	defer m.sending.Unlock()
+
+	if !m.IsConnected() {
+		return errors.New("connection is closed")
+	}
+
+	return m.conn.WriteJSON(msg)
+}
+
+func (m *AccountWsClient) readMessages() {
 	for {
 		select {
 		case <-m.ctx.Done():
@@ -216,7 +281,7 @@ func (m *MarketWsClient) readMessages() {
 					return
 				}
 
-				var msg AnyMessage
+				var msg Message
 
 				err = json.Unmarshal([]byte(message), &msg)
 				if err != nil {
@@ -230,17 +295,32 @@ func (m *MarketWsClient) readMessages() {
 				}
 
 				switch {
-				case msg.Ping != nil:
-					err := m.pong(&PongMessage{
-						Pong: msg.Ping.Ping,
+				case msg.Operation == PING:
+					err := m.pong(&Message{
+						Operation: PONG,
+						Ts:        msg.Ts,
 					})
 					if err != nil {
 						m.logger.Error(fmt.Sprintf("handle ping error: %s", err.Error()))
 					}
-				case msg.Response != nil:
-					// todo
-				case msg.SubscribedMessage != nil:
-					err := m.handle(msg.SubscribedMessage)
+				case msg.Operation == SUB:
+					if msg.ErrCode != 0 {
+						m.logger.Error(fmt.Sprintf("sub websocket error, op: %s, topic: %s, err-code: %v, err-msg: %v", msg.Operation, msg.Topic, msg.ErrCode, msg.ErrMsg))
+					}
+				case msg.Operation == AUTH:
+					if msg.ErrCode != 0 {
+						m.logger.Error(fmt.Sprintf("auth websocket error, op: %s, err-code: %v, err-msg: %v", msg.Operation, msg.ErrCode, msg.ErrMsg))
+
+						if err := m.close(); err != nil {
+							m.logger.Error(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+						}
+
+						return
+					} else {
+						m.logger.Info(fmt.Sprintf("auth websocket success, op: %s, err-code: %v", msg.Operation, msg.ErrCode))
+					}
+				case msg.Operation == "notify":
+					err := m.handle(&msg)
 					if err != nil {
 						m.logger.Error(fmt.Sprintf("handle message error: %s", err.Error()))
 					}
@@ -250,7 +330,7 @@ func (m *MarketWsClient) readMessages() {
 	}
 }
 
-func (m *MarketWsClient) resubscribe() error {
+func (m *AccountWsClient) resubscribe() error {
 	topics := m.subscriptions.Keys()
 
 	if len(topics) == 0 {
@@ -261,9 +341,9 @@ func (m *MarketWsClient) resubscribe() error {
 
 	for _, v := range topics {
 		// do subscription
-		err := m.send(&Request{
-			ID:  fmt.Sprintf("%v", rand.Uint32()),
-			Sub: v,
+		err := m.send(&Message{
+			Operation: SUB,
+			Topic:     v,
 		})
 
 		if err != nil {
@@ -279,16 +359,16 @@ func (m *MarketWsClient) resubscribe() error {
 	return nil
 }
 
-func (m *MarketWsClient) subscribe(topic string) error {
+func (m *AccountWsClient) subscribe(topic string) error {
 	if m.subscriptions.Has(topic) {
 		return nil
 	}
 
 	// do subscription
 
-	err := m.send(&Request{
-		ID:  fmt.Sprintf("%v", rand.Uint32()),
-		Sub: topic,
+	err := m.send(&Message{
+		Operation: SUB,
+		Topic:     topic,
 	})
 
 	if err != nil {
@@ -300,10 +380,10 @@ func (m *MarketWsClient) subscribe(topic string) error {
 	return nil
 }
 
-func (m *MarketWsClient) unsubscribe(topic string) error {
-	err := m.send(&Request{
-		ID:    fmt.Sprintf("%v", rand.Uint32()),
-		UnSub: topic,
+func (m *AccountWsClient) unsubscribe(topic string) error {
+	err := m.send(&Message{
+		Operation: SUB,
+		Topic:     topic,
 	})
 
 	if err != nil {
@@ -315,11 +395,8 @@ func (m *MarketWsClient) unsubscribe(topic string) error {
 	return nil
 }
 
-func (m *MarketWsClient) send(req *Request) error {
+func (m *AccountWsClient) send(req *Message) error {
 	m.sending.Lock()
-
-	// Rate Limit: https://www.htx.com/en-us/opend/newApiPages/?id=662
-	defer time.Sleep(100 * time.Millisecond)
 	defer m.sending.Unlock()
 
 	if !m.IsConnected() {
@@ -329,7 +406,7 @@ func (m *MarketWsClient) send(req *Request) error {
 	return m.conn.WriteJSON(req)
 }
 
-func (m *MarketWsClient) pong(ping *PongMessage) error {
+func (m *AccountWsClient) pong(ping *Message) error {
 	m.sending.Lock()
 
 	// Rate Limit: https://www.htx.com/en-us/opend/newApiPages/?id=662

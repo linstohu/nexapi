@@ -15,4 +15,21 @@
  * limitations under the License.
  */
 
-package websocket
+package accountws
+
+const (
+	SUB  = "sub"
+	PING = "ping"
+	PONG = "pong"
+	AUTH = "auth"
+)
+
+type AuthRequest struct {
+	Operation        string `json:"op,omitempty"`
+	Type             string `json:"type,omitempty"`
+	AccessKeyId      string `json:"AccessKeyId,omitempty"`
+	SignatureMethod  string `json:"SignatureMethod,omitempty"`
+	SignatureVersion string `json:"SignatureVersion,omitempty"`
+	Timestamp        string `json:"Timestamp,omitempty"`
+	Signature        string `json:"Signature,omitempty"`
+}
