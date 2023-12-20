@@ -43,7 +43,6 @@ type SpotClientCfg struct {
 	BaseURL     string `validate:"required"`
 	Key         string
 	Secret      string
-	SignVersion string
 }
 
 func NewSpotClient(cfg *SpotClientCfg) (*SpotClient, error) {

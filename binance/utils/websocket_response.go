@@ -83,9 +83,11 @@ func (m *AnyMessage) UnmarshalJSON(data []byte) error {
 	}
 
 	if v.Exists("stream") {
-		var msg = &SubscribedMessage{
+		msg := &SubscribedMessage{
 			Stream: string(v.GetStringBytes("stream")),
-			Data:   v.Get("data").MarshalTo(nil),
+		}
+		if v.Get("data") != nil {
+			msg.Data = v.Get("data").MarshalTo(nil)
 		}
 
 		m.SubscribedMessage = msg
