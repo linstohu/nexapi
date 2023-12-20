@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package spot
+package rest
 
 import (
 	"context"
 	"os"
 	"testing"
 
-	"github.com/linstohu/nexapi/htx/rest/utils"
+	"github.com/linstohu/nexapi/htx/utils"
 	"github.com/stretchr/testify/assert"
 )
 

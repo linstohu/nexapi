@@ -23,13 +23,13 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/go-playground/validator"
@@ -149,11 +149,11 @@ func (s *KucoinClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (*H
 
 	var body io.Reader
 	if req.Body != nil {
-		formData, err := query.Values(req.Body)
+		jsonBody, err := json.Marshal(req.Body)
 		if err != nil {
 			return nil, err
 		}
-		body = strings.NewReader(formData.Encode())
+		body = bytes.NewReader(jsonBody)
 	}
 
 	url, err := url.Parse(req.BaseURL + req.Path)
@@ -191,7 +191,6 @@ func (s *KucoinClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (*H
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if s.GetDebug() {
 		dump, err := httputil.DumpResponse(resp, true)

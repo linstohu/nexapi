@@ -26,10 +26,6 @@ var (
 	V1DefaultContentType = map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded",
 	}
-
-	V3DefaultContentType = map[string]string{
-		"Content-Type": "application/json",
-	}
 )
 
 const (

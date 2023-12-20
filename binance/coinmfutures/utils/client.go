@@ -102,7 +102,10 @@ func (u *CoinMarginedClient) GetRecvWindow() int {
 }
 
 func (u *CoinMarginedClient) GenHeaders(t usdmutils.SecurityType) (map[string]string, error) {
-	headers := usdmutils.DefaultContentType
+	headers := map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+		"Accept":       "application/json",
+	}
 
 	// SecurityType each endpoint has a security type that determines how you will interact with it
 	// docs: https://binance-docs.github.io/apidocs/delivery/en/#endpoint-security-type

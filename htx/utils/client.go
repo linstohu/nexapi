@@ -196,7 +196,6 @@ func (htx *HTXClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (*HT
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if htx.GetDebug() {
 		dump, err := httputil.DumpResponse(resp, true)

@@ -15,17 +15,4 @@
  * limitations under the License.
  */
 
-package cmutils
-
-var (
-	PortfolioMarginBaseURL = "https://papi.binance.com"
-)
-
-type SecurityType = string
-
-var (
-	NONE        SecurityType = "NONE"
-	TRADE       SecurityType = "TRADE"
-	USER_DATA   SecurityType = "USER_DATA"
-	USER_STREAM SecurityType = "USER_STREAM"
-)
+package websocket

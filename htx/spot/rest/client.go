@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package spot
+package rest
 
 import (
 	"context"
@@ -24,8 +24,8 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
-	"github.com/linstohu/nexapi/htx/rest/spot/types"
-	"github.com/linstohu/nexapi/htx/rest/utils"
+	"github.com/linstohu/nexapi/htx/spot/rest/types"
+	"github.com/linstohu/nexapi/htx/utils"
 )
 
 type SpotClient struct {

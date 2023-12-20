@@ -213,7 +213,9 @@ func (w *WooXRestClient) GenV3APIAuthHeaders(req types.HTTPRequest) (map[string]
 		return nil, fmt.Errorf("key and secret needed when init client")
 	}
 
-	headers := V3DefaultContentType
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
 
 	strBody := ""
 	if req.Body != nil {
