@@ -88,8 +88,7 @@ func (r *HTTPResponse) Error() string {
 		body = []byte(NIL)
 	}
 
-	m := fmt.Sprintf("[Parse]Failure: parse JSON body failed because %s, %s %s with body=%s, respond code=%d body=%s",
-		err.Error(),
+	m := fmt.Sprintf("[Parse]Failure: parse JSON body failed, %s %s with body=%s, respond code=%d body=%s",
 		r.Req.Method,
 		uri,
 		reqBody,

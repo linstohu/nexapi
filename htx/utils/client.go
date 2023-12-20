@@ -24,6 +24,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -97,6 +98,10 @@ func (htx *HTXClient) GetSecret() string {
 	return htx.secret
 }
 
+func (htx *HTXClient) GetSignVersion() string {
+	return htx.signVersion
+}
+
 func (htx *HTXClient) GetHeaders() (map[string]string, error) {
 	return map[string]string{
 		"Content-Type": "application/json",
@@ -104,32 +109,42 @@ func (htx *HTXClient) GetHeaders() (map[string]string, error) {
 	}, nil
 }
 
-func (htx *HTXClient) GenSignatureValues(req HTTPRequest) (url.Values, error) {
+var ErrAuth = errors.New("auth error, you should reinitialize client using key and secret")
+
+func (htx *HTXClient) CheckAuth() error {
+	if htx.GetKey() == "" || htx.GetSecret() == "" || htx.GetSignVersion() == "" {
+		return ErrAuth
+	}
+
+	return nil
+}
+
+func (htx *HTXClient) GenAuthParams() DefaultAuthParam {
+	return DefaultAuthParam{
+		AccessKeyId:      htx.key,
+		SignatureMethod:  "HmacSHA256",
+		SignatureVersion: htx.signVersion,
+		Timestamp:        time.Now().UTC().Format("2006-01-02T15:04:05"),
+	}
+}
+
+func (htx *HTXClient) NormalizeRequestContent(req HTTPRequest, tempQuery any) (string, error) {
+	if req.Method == "" || req.BaseURL == "" || req.Path == "" {
+		return "", fmt.Errorf("gen signature error: method(%s), baseurl(%s) and path(%s) should not be empty",
+			req.Method, req.BaseURL, req.Path)
+	}
+
 	parameters := url.Values{}
 
-	if req.QueryParams != nil {
-		q, err := goquery.Values(req.QueryParams)
+	if tempQuery != nil {
+		q, err := goquery.Values(tempQuery)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		parameters = q
 	}
 
-	parameters.Add("AccessKeyId", htx.key)
-	parameters.Add("SignatureMethod", "HmacSHA256")
-	parameters.Add("SignatureVersion", htx.signVersion)
-	parameters.Add("Timestamp", time.Now().UTC().Format("2006-01-02T15:04:05"))
-
-	return parameters, nil
-}
-
-func (htx *HTXClient) NormalizeRequestContent(req HTTPRequest, parameters url.Values) (string, error) {
-	if req.Method == "" || req.BaseURL == "" || req.Path == "" || parameters.Encode() == "" {
-		return "", fmt.Errorf("gen signature error: method(%s), baseurl(%s), path(%s) and parameters(%s) should not be empty",
-			req.Method, req.BaseURL, req.Path, parameters.Encode())
-	}
-
-	url, err := url.Parse(req.BaseURL + req.Path)
+	urls, err := url.Parse(req.BaseURL + req.Path)
 	if err != nil {
 		return "", err
 	}
@@ -137,7 +152,7 @@ func (htx *HTXClient) NormalizeRequestContent(req HTTPRequest, parameters url.Va
 	var sb strings.Builder
 	sb.WriteString(req.Method)
 	sb.WriteString("\n")
-	sb.WriteString(url.Host)
+	sb.WriteString(urls.Host)
 	sb.WriteString("\n")
 	sb.WriteString(req.Path)
 	sb.WriteString("\n")
@@ -171,7 +186,11 @@ func (htx *HTXClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (*HT
 	}
 
 	if req.Query != nil {
-		url.RawQuery = req.Query.Encode()
+		q, err := goquery.Values(req.Query)
+		if err != nil {
+			return nil, err
+		}
+		url.RawQuery = q.Encode()
 	}
 
 	request, err := http.NewRequestWithContext(ctx, req.Method, url.String(), body)

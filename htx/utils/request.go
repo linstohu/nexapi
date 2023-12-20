@@ -20,16 +20,17 @@ package utils
 import (
 	"encoding/json"
 	"net/url"
+
+	goquery "github.com/google/go-querystring/query"
 )
 
 type HTTPRequest struct {
-	BaseURL     string
-	Path        string
-	Method      string
-	Headers     map[string]string
-	Query       url.Values
-	QueryParams any
-	Body        any
+	BaseURL string
+	Path    string
+	Method  string
+	Headers map[string]string
+	Query   any
+	Body    any
 }
 
 // RequestURI returns the request uri.
@@ -40,7 +41,11 @@ func (h *HTTPRequest) RequestURI() (string, error) {
 	}
 
 	if h.Query != nil {
-		url.RawQuery = h.Query.Encode()
+		q, err := goquery.Values(h.Query)
+		if err != nil {
+			return "", err
+		}
+		url.RawQuery = q.Encode()
 	}
 
 	return url.RequestURI(), nil
@@ -61,4 +66,22 @@ func (h *HTTPRequest) RequestBody() (string, error) {
 	}
 
 	return body, nil
+}
+
+type V1Response struct {
+	Status string `json:"messsage"`
+	Ch     string `json:"ch"`
+}
+
+type V2Response struct {
+	Code    int    `json:"code"`
+	Message string `json:"messsage"`
+}
+
+type DefaultAuthParam struct {
+	AccessKeyId      string `url:"AccessKeyId,omitempty" validate:"omitempty"`
+	SignatureMethod  string `url:"SignatureMethod,omitempty" validate:"omitempty"`
+	SignatureVersion string `url:"SignatureVersion,omitempty" validate:"omitempty"`
+	Timestamp        string `url:"Timestamp,omitempty" validate:"omitempty"`
+	Signature        string `url:"Signature,omitempty" validate:"omitempty"`
 }

@@ -22,6 +22,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/linstohu/nexapi/htx/spot/rest/types"
 	"github.com/linstohu/nexapi/htx/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,10 +43,52 @@ func testNewSpotClient(t *testing.T) *SpotClient {
 	return cli
 }
 
+func TestGetSymbols(t *testing.T) {
+	cli := testNewSpotClient(t)
+
+	_, err := cli.GetSymbols(context.TODO(), types.GetSymbolsParam{})
+
+	assert.Nil(t, err)
+}
+
+func TestGetMergedMarketTicker(t *testing.T) {
+	cli := testNewSpotClient(t)
+
+	_, err := cli.GetMergedMarketTicker(context.TODO(), types.GetMergedMarketTickerParam{
+		Symbol: "btcusdt",
+	})
+
+	assert.Nil(t, err)
+}
+
 func TestGetAccountInfo(t *testing.T) {
 	cli := testNewSpotClient(t)
 
 	_, err := cli.GetAccountInfo(context.TODO())
+
+	assert.Nil(t, err)
+}
+
+func TestGetAccountValuation(t *testing.T) {
+	cli := testNewSpotClient(t)
+
+	_, err := cli.GetAccountValuation(context.TODO(),
+		types.GetAccountValuationParam{},
+	)
+
+	assert.Nil(t, err)
+}
+
+func TestNewOrder(t *testing.T) {
+	cli := testNewSpotClient(t)
+
+	_, err := cli.NewOrder(context.TODO(), types.NewOrderParam{
+		AccountID: "",
+		Symbol:    "usdcusdt",
+		Type:      "buy-limit",
+		Amount:    "12",
+		Price:     "0.9",
+	})
 
 	assert.Nil(t, err)
 }

@@ -17,6 +17,10 @@
 
 package types
 
+import (
+	htxutils "github.com/linstohu/nexapi/htx/utils"
+)
+
 type GetAccountInfoResponse struct {
 	Status string        `json:"status"`
 	Data   []AccountInfo `json:"data"`
@@ -26,4 +30,39 @@ type AccountInfo struct {
 	Type    string `json:"type"`
 	Subtype string `json:"subtype"`
 	State   string `json:"state"`
+}
+
+type GetAccountValuationParam struct {
+	AccountType       string `url:"accountType,omitempty" validate:"omitempty"`
+	ValuationCurrency string `url:"valuationCurrency,omitempty" validate:"omitempty"`
+}
+
+type GetAccountValuationParams struct {
+	GetAccountValuationParam
+	htxutils.DefaultAuthParam
+}
+
+type GetAccountValuationResp struct {
+	htxutils.V2Response
+	Data AccountValue `json:"data"`
+}
+
+type Updated struct {
+	Success bool  `json:"success,omitempty"`
+	Time    int64 `json:"time,omitempty"`
+}
+
+type ProfitAccountBalanceList struct {
+	DistributionType string  `json:"distributionType,omitempty"`
+	Balance          float64 `json:"balance,omitempty"`
+	Success          bool    `json:"success,omitempty"`
+	AccountBalance   string  `json:"accountBalance,omitempty"`
+}
+
+type AccountValue struct {
+	Updated                  Updated                    `json:"updated,omitempty"`
+	TodayProfitRate          string                     `json:"todayProfitRate,omitempty"`
+	TotalBalance             string                     `json:"totalBalance,omitempty"`
+	TodayProfit              string                     `json:"todayProfit,omitempty"`
+	ProfitAccountBalanceList []ProfitAccountBalanceList `json:"profitAccountBalanceList,omitempty"`
 }
