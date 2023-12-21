@@ -21,12 +21,13 @@ NexAPI plans to integrate APIs from well-known cryptocurrency exchanges all arou
 ## Roadmap
 
 - [x] Binance
-- [] Kraken
-- [] KuCoin
-- [] Bybit
-- [] OKX
-- [] Bitfinex
-- [] Gate.io
+- [⍻] Bitfinex
+- [⍻] Bybit
+- [-] Kraken
+- [⍻] KuCoin
+- [⍻] OKX
+- [-] Gate.io
+- [x] HTX
 - [x] MEXC
 - [x] Deribit
 - [x] WOO X
