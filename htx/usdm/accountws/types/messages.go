@@ -102,3 +102,58 @@ type CrossData struct {
 	ContractDetail        []ContractDetail        `json:"contract_detail,omitempty"`
 	FuturesContractDetail []FuturesContractDetail `json:"futures_contract_detail,omitempty"`
 }
+
+type UnifyAccount struct {
+	Op    string             `json:"op,omitempty"`
+	Topic string             `json:"topic,omitempty"`
+	Ts    int64              `json:"ts,omitempty"`
+	Event string             `json:"event,omitempty"`
+	Data  []UnifyAccountData `json:"data,omitempty"`
+	UID   string             `json:"uid,omitempty"`
+}
+
+type CrossSwap struct {
+	Symbol            string  `json:"symbol,omitempty"`
+	ContractCode      string  `json:"contract_code,omitempty"`
+	MarginMode        string  `json:"margin_mode,omitempty"`
+	MarginAvailable   float64 `json:"margin_available,omitempty"`
+	LeverRate         float64 `json:"lever_rate,omitempty"`
+	ContractType      string  `json:"contract_type,omitempty"`
+	BusinessType      string  `json:"business_type,omitempty"`
+	CrossMaxAvailable float64 `json:"cross_max_available,omitempty"`
+}
+
+type CrossFuture struct {
+	Symbol            string  `json:"symbol,omitempty"`
+	ContractCode      string  `json:"contract_code,omitempty"`
+	MarginMode        string  `json:"margin_mode,omitempty"`
+	MarginAvailable   float64 `json:"margin_available,omitempty"`
+	LeverRate         float64 `json:"lever_rate,omitempty"`
+	ContractType      string  `json:"contract_type,omitempty"`
+	BusinessType      string  `json:"business_type,omitempty"`
+	CrossMaxAvailable float64 `json:"cross_max_available,omitempty"`
+}
+
+type IsolatedSwap struct {
+	Symbol            string  `json:"symbol,omitempty"`
+	ContractCode      string  `json:"contract_code,omitempty"`
+	MarginMode        string  `json:"margin_mode,omitempty"`
+	MarginAvailable   float64 `json:"margin_available,omitempty"`
+	WithdrawAvailable float64 `json:"withdraw_available,omitempty"`
+	LeverRate         int     `json:"lever_rate,omitempty"`
+	PositionMode      string  `json:"position_mode,omitempty"`
+}
+
+type UnifyAccountData struct {
+	MarginAsset       string         `json:"margin_asset,omitempty"`
+	MarginStatic      float64        `json:"margin_static,omitempty"`
+	CrossMarginStatic float64        `json:"cross_margin_static,omitempty"`
+	MarginBalance     float64        `json:"margin_balance,omitempty"`
+	CrossProfitUnreal float64        `json:"cross_profit_unreal,omitempty"`
+	MarginFrozen      float64        `json:"margin_frozen,omitempty"`
+	WithdrawAvailable float64        `json:"withdraw_available,omitempty"`
+	CrossRiskRate     float64        `json:"cross_risk_rate,omitempty"`
+	CrossSwap         []CrossSwap    `json:"cross_swap,omitempty"`
+	CrossFuture       []CrossFuture  `json:"cross_future,omitempty"`
+	IsolatedSwap      []IsolatedSwap `json:"isolated_swap,omitempty"`
+}

@@ -36,3 +36,7 @@ func (m *AccountWsClient) GetCrossAccountUpdateTopic(marginAccount string) (stri
 
 	return fmt.Sprintf("accounts_cross.%s", marginAccount), nil
 }
+
+func (m *AccountWsClient) GetUnifyAccountUpdateTopic() (string, error) {
+	return "accounts_unify.USDT", nil
+}

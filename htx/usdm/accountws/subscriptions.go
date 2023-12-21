@@ -53,6 +53,18 @@ func (m *AccountWsClient) handle(msg *Message) error {
 			return err
 		}
 		m.GetListeners(msg.Topic, &data)
+	case strings.HasPrefix(msg.Topic, "accounts_unify"):
+		var data types.UnifyAccount
+		err := json.Unmarshal(msg.Raw, &data)
+		if err != nil {
+			return err
+		}
+		// since the topic in sub is different from the topic returned in ws channel
+		topic, err := m.GetUnifyAccountUpdateTopic()
+		if err != nil {
+			return err
+		}
+		m.GetListeners(topic, &data)
 	default:
 		return fmt.Errorf("unknown message, topic: %s", msg.Topic)
 	}

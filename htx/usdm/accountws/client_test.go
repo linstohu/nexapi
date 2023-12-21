@@ -65,3 +65,27 @@ func TestSubscribeAccountUpdate(t *testing.T) {
 
 	select {}
 }
+
+func TestSubscribeUnifyAccountUpdate(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	cli := testNewAccountWsClient(ctx, t, GlobalOrderWsBaseURL)
+
+	topic, err := cli.GetUnifyAccountUpdateTopic()
+	assert.Nil(t, err)
+
+	cli.AddListener(topic, func(e any) {
+		acc, ok := e.(*types.UnifyAccount)
+		if !ok {
+			return
+		}
+
+		fmt.Printf("Topic: %s, Data: %+v\n",
+			topic, acc.Data)
+	})
+
+	cli.Subscribe(topic)
+
+	select {}
+}
