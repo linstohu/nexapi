@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package spotutils
+package utils
 
 import (
 	"context"

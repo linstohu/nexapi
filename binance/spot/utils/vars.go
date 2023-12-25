@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package spotutils
+package utils
 
 var (
 	BaseURL = "https://api.binance.com"

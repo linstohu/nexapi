@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package cmutils
+package utils
 
 var (
 	PortfolioMarginBaseURL = "https://papi.binance.com"

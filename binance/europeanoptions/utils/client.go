@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package eoutils
+package utils
 
 import (
 	"bytes"

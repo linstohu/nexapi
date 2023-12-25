@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package eoutils
+package utils
 
 var (
 	OptionsBaseURL = "https://eapi.binance.com"

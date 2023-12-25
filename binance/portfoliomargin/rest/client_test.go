@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package pmrest
+package rest
 
 import (
 	"context"

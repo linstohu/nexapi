@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package umutils
+package utils
 
 var (
 	USDMarginedBaseURL = "https://fapi.binance.com"
