@@ -24,18 +24,18 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/mexc/contract/marketdata/types"
-	ctutils "github.com/linstohu/nexapi/mexc/contract/utils"
+	"github.com/linstohu/nexapi/mexc/contract/utils"
 )
 
 type ContractMarketDataClient struct {
-	*ctutils.ContractClient
+	*utils.ContractClient
 
 	// validate struct fields
 	validate *validator.Validate
 }
 
-func NewContractMarketDataClient(cfg *ctutils.ContractClientCfg) (*ContractMarketDataClient, error) {
-	cli, err := ctutils.NewContractClient(cfg)
+func NewContractMarketDataClient(cfg *utils.ContractClientCfg) (*ContractMarketDataClient, error) {
+	cli, err := utils.NewContractClient(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func NewContractMarketDataClient(cfg *ctutils.ContractClientCfg) (*ContractMarke
 }
 
 func (s *ContractMarketDataClient) GetServerTime(ctx context.Context) (*types.ServerTime, error) {
-	req := ctutils.HTTPRequest{
+	req := utils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v1/contract/ping",
 		Method:  http.MethodGet,
@@ -75,7 +75,7 @@ func (s *ContractMarketDataClient) GetServerTime(ctx context.Context) (*types.Se
 }
 
 func (s *ContractMarketDataClient) GetContractDetails(ctx context.Context, param types.GetContractDetailsParams) (*types.GetContractDetailsResp, error) {
-	req := ctutils.HTTPRequest{
+	req := utils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v1/contract/detail",
 		Method:  http.MethodGet,
@@ -107,7 +107,7 @@ func (s *ContractMarketDataClient) GetTickerForSymbol(ctx context.Context, param
 		return nil, err
 	}
 
-	req := ctutils.HTTPRequest{
+	req := utils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v1/contract/ticker",
 		Method:  http.MethodGet,
@@ -138,7 +138,7 @@ func (s *ContractMarketDataClient) GetTickerForSymbol(ctx context.Context, param
 }
 
 func (s *ContractMarketDataClient) GetTickerForAllSymbols(ctx context.Context) (*types.GetAllTickersResp, error) {
-	req := ctutils.HTTPRequest{
+	req := utils.HTTPRequest{
 		BaseURL: s.GetBaseURL(),
 		Path:    "/api/v1/contract/ticker",
 		Method:  http.MethodGet,

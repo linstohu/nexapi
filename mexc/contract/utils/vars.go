@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package ctutils
+package utils
 
 var (
 	BaseURL = "https://contract.mexc.com"

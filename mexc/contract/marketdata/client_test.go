@@ -22,13 +22,13 @@ import (
 	"testing"
 
 	"github.com/linstohu/nexapi/mexc/contract/marketdata/types"
-	ctutils "github.com/linstohu/nexapi/mexc/contract/utils"
+	"github.com/linstohu/nexapi/mexc/contract/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testNewContractMarketDataClient(t *testing.T) *ContractMarketDataClient {
-	cli, err := NewContractMarketDataClient(&ctutils.ContractClientCfg{
-		BaseURL: ctutils.BaseURL,
+	cli, err := NewContractMarketDataClient(&utils.ContractClientCfg{
+		BaseURL: utils.BaseURL,
 		Debug:   true,
 	})
 

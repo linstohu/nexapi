@@ -22,13 +22,13 @@ import (
 	"os"
 	"testing"
 
-	ctutils "github.com/linstohu/nexapi/mexc/contract/utils"
+	"github.com/linstohu/nexapi/mexc/contract/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testNewAccountClient(t *testing.T) *ContractAccountClient {
-	cli, err := NewContractAccountClient(&ctutils.ContractClientCfg{
-		BaseURL: ctutils.BaseURL,
+	cli, err := NewContractAccountClient(&utils.ContractClientCfg{
+		BaseURL: utils.BaseURL,
 		Key:     os.Getenv("MEXC_KEY"),
 		Secret:  os.Getenv("MEXC_SECRET"),
 		Debug:   true,

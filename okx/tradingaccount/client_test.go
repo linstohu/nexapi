@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package publicdata
+package tradingaccount
 
 import (
 	"context"
@@ -23,14 +23,14 @@ import (
 	"testing"
 
 	"github.com/linstohu/nexapi/okx/tradingaccount/types"
-	okxutils "github.com/linstohu/nexapi/okx/utils"
+	"github.com/linstohu/nexapi/okx/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func testNewTradingAccountClient(t *testing.T) *TradingAccountClient {
 	cli, err := NewTradingAccountClient(&TradingAccountClientCfg{
 		Debug:      true,
-		BaseURL:    okxutils.RestURL,
+		BaseURL:    utils.RestURL,
 		Key:        os.Getenv("OKX_KEY"),
 		Secret:     os.Getenv("OKX_SECRET"),
 		Passphrase: os.Getenv("OKX_PASS"),

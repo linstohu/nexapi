@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package okxutils
+package utils
 
 type Response struct {
 	Code    string `json:"code"`

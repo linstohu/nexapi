@@ -25,11 +25,11 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/mexc/contract/account/types"
-	ctutils "github.com/linstohu/nexapi/mexc/contract/utils"
+	"github.com/linstohu/nexapi/mexc/contract/utils"
 )
 
 type ContractAccountClient struct {
-	*ctutils.ContractClient
+	*utils.ContractClient
 
 	// validate struct fields
 	validate *validator.Validate
@@ -46,7 +46,7 @@ type ContractAccountClientCfg struct {
 	RecvWindow int
 }
 
-func NewContractAccountClient(cfg *ctutils.ContractClientCfg) (*ContractAccountClient, error) {
+func NewContractAccountClient(cfg *utils.ContractClientCfg) (*ContractAccountClient, error) {
 	validator := validator.New()
 
 	err := validator.Struct(cfg)
@@ -54,7 +54,7 @@ func NewContractAccountClient(cfg *ctutils.ContractClientCfg) (*ContractAccountC
 		return nil, err
 	}
 
-	cli, err := ctutils.NewContractClient(&ctutils.ContractClientCfg{
+	cli, err := utils.NewContractClient(&utils.ContractClientCfg{
 		Debug:      cfg.Debug,
 		Logger:     cfg.Logger,
 		BaseURL:    cfg.BaseURL,
@@ -73,7 +73,7 @@ func NewContractAccountClient(cfg *ctutils.ContractClientCfg) (*ContractAccountC
 }
 
 func (c *ContractAccountClient) GetAccountAsset(ctx context.Context) (*types.GetAccountAsset, error) {
-	req := ctutils.HTTPRequest{
+	req := utils.HTTPRequest{
 		BaseURL: c.GetBaseURL(),
 		Path:    "/api/v1/private/account/assets",
 		Method:  http.MethodGet,
@@ -106,7 +106,7 @@ func (c *ContractAccountClient) GetOpenPositions(ctx context.Context, param type
 		return nil, err
 	}
 
-	req := ctutils.HTTPRequest{
+	req := utils.HTTPRequest{
 		BaseURL: c.GetBaseURL(),
 		Path:    "/api/v1/private/position/open_positions",
 		Method:  http.MethodGet,
@@ -140,7 +140,7 @@ func (c *ContractAccountClient) GetPositionLeverage(ctx context.Context, param t
 		return nil, err
 	}
 
-	req := ctutils.HTTPRequest{
+	req := utils.HTTPRequest{
 		BaseURL: c.GetBaseURL(),
 		Path:    "/api/v1/private/position/leverage",
 		Method:  http.MethodGet,
@@ -174,7 +174,7 @@ func (c *ContractAccountClient) SetPositionLeverage(ctx context.Context, param t
 		return nil, err
 	}
 
-	req := ctutils.HTTPRequest{
+	req := utils.HTTPRequest{
 		BaseURL: c.GetBaseURL(),
 		Path:    "/api/v1/private/position/change_leverage",
 		Method:  http.MethodPost,

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package okxutils
+package utils
 
 var (
 	RestURL      = "https://www.okx.com"

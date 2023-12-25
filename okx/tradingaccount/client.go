@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package publicdata
+package tradingaccount
 
 import (
 	"context"
