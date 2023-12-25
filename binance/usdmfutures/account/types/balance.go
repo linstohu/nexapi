@@ -17,6 +17,8 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type Balance struct {
 	AccountAlias       string `json:"accountAlias"`
 	Asset              string `json:"asset"`
@@ -27,4 +29,9 @@ type Balance struct {
 	MaxWithdrawAmount  string `json:"maxWithdrawAmount"`
 	MarginAvailable    bool   `json:"marginAvailable"`
 	UpdateTime         int64  `json:"updateTime"`
+}
+
+type GetBalanceResp struct {
+	Http *utils.ApiResponse
+	Body []*Balance
 }

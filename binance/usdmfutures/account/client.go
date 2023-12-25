@@ -22,7 +22,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
@@ -31,6 +30,7 @@ import (
 	"github.com/linstohu/nexapi/binance/usdmfutures/account/types"
 	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type UsdMFuturesAccountClient struct {
@@ -77,15 +77,18 @@ func NewUsdMFuturesAccountClient(cfg *umutils.USDMarginedClientCfg) (*UsdMFuture
 	}, nil
 }
 
-func (u *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param types.ChangePositionModeParam) (*types.Response, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/positionSide/dual",
-		Method:       http.MethodPost,
+func (u *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param types.ChangePositionModeParam) (*types.DefaultResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/positionSide/dual",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +109,7 @@ func (u *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -127,23 +130,31 @@ func (u *UsdMFuturesAccountClient) ChangePositionMode(ctx context.Context, param
 		return nil, err
 	}
 
-	var ret types.Response
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Response
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.DefaultResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (u *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.GetCurrentPositionModeResp, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/positionSide/dual",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/positionSide/dual",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -161,7 +172,7 @@ func (u *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -182,23 +193,31 @@ func (u *UsdMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.
 		return nil, err
 	}
 
-	var ret types.GetCurrentPositionModeResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.GetCurrentPositionModeAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetCurrentPositionModeResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) ChangeMultiAssetsMode(ctx context.Context, param types.ChangeMultiAssetsModeParam) (*types.Response, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/multiAssetsMargin",
-		Method:       http.MethodPost,
+func (u *UsdMFuturesAccountClient) ChangeMultiAssetsMode(ctx context.Context, param types.ChangeMultiAssetsModeParam) (*types.DefaultResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/multiAssetsMargin",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -219,7 +238,7 @@ func (u *UsdMFuturesAccountClient) ChangeMultiAssetsMode(ctx context.Context, pa
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -240,23 +259,31 @@ func (u *UsdMFuturesAccountClient) ChangeMultiAssetsMode(ctx context.Context, pa
 		return nil, err
 	}
 
-	var ret types.Response
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Response
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.DefaultResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (u *UsdMFuturesAccountClient) GetMultiAssetsMode(ctx context.Context) (*types.GetCurrentMultiAssetsModeResp, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/multiAssetsMargin",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/multiAssetsMargin",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -274,7 +301,7 @@ func (u *UsdMFuturesAccountClient) GetMultiAssetsMode(ctx context.Context) (*typ
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -295,23 +322,31 @@ func (u *UsdMFuturesAccountClient) GetMultiAssetsMode(ctx context.Context) (*typ
 		return nil, err
 	}
 
-	var ret types.GetCurrentMultiAssetsModeResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.GetCurrentMultiAssetsModeAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetCurrentMultiAssetsModeResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.Order, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/order",
-		Method:       http.MethodPost,
+func (u *UsdMFuturesAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.OrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/order",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -332,7 +367,7 @@ func (u *UsdMFuturesAccountClient) NewOrder(ctx context.Context, param types.New
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -353,23 +388,31 @@ func (u *UsdMFuturesAccountClient) NewOrder(ctx context.Context, param types.New
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) QueryOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/order",
-		Method:       http.MethodGet,
+func (u *UsdMFuturesAccountClient) QueryOrder(ctx context.Context, param types.GetOrderParam) (*types.OrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/order",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -390,7 +433,7 @@ func (u *UsdMFuturesAccountClient) QueryOrder(ctx context.Context, param types.G
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -411,23 +454,31 @@ func (u *UsdMFuturesAccountClient) QueryOrder(ctx context.Context, param types.G
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/openOrder",
-		Method:       http.MethodGet,
+func (u *UsdMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param types.GetOrderParam) (*types.OrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/openOrder",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -448,7 +499,7 @@ func (u *UsdMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param typ
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -469,23 +520,31 @@ func (u *UsdMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param typ
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param types.GetAllOpenOrdersParam) ([]*types.Order, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/openOrders",
-		Method:       http.MethodGet,
+func (u *UsdMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param types.GetAllOpenOrdersParam) (*types.OrdersResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/openOrders",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -506,7 +565,7 @@ func (u *UsdMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -527,23 +586,31 @@ func (u *UsdMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param
 		return nil, err
 	}
 
-	var ret []*types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.OrdersResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) CancelOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/order",
-		Method:       http.MethodDelete,
+func (u *UsdMFuturesAccountClient) CancelOrder(ctx context.Context, param types.GetOrderParam) (*types.OrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/order",
+		Method:  http.MethodDelete,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -564,7 +631,7 @@ func (u *UsdMFuturesAccountClient) CancelOrder(ctx context.Context, param types.
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -585,23 +652,31 @@ func (u *UsdMFuturesAccountClient) CancelOrder(ctx context.Context, param types.
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (u *UsdMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, param types.CancelAllOpenOrdersParam) error {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/allOpenOrders",
-		Method:       http.MethodDelete,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/allOpenOrders",
+		Method:  http.MethodDelete,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return err
 		}
@@ -622,7 +697,7 @@ func (u *UsdMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, para
 			return err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return err
@@ -646,15 +721,18 @@ func (u *UsdMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, para
 	return nil
 }
 
-func (u *UsdMFuturesAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) ([]*types.Order, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/allOrders",
-		Method:       http.MethodGet,
+func (u *UsdMFuturesAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) (*types.OrdersResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/allOrders",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -675,7 +753,7 @@ func (u *UsdMFuturesAccountClient) GetAllOrders(ctx context.Context, param types
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -696,23 +774,31 @@ func (u *UsdMFuturesAccountClient) GetAllOrders(ctx context.Context, param types
 		return nil, err
 	}
 
-	var ret []*types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.OrdersResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Balance, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v2/balance",
-		Method:       http.MethodGet,
+func (u *UsdMFuturesAccountClient) GetBalance(ctx context.Context) (*types.GetBalanceResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v2/balance",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -730,7 +816,7 @@ func (u *UsdMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Bal
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -751,23 +837,31 @@ func (u *UsdMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Bal
 		return nil, err
 	}
 
-	var ret []*types.Balance
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Balance
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetBalanceResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*types.Account, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v2/account",
-		Method:       http.MethodGet,
+func (u *UsdMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*types.GetAccountInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v2/account",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -785,7 +879,7 @@ func (u *UsdMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -806,23 +900,31 @@ func (u *UsdMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*
 		return nil, err
 	}
 
-	var ret types.Account
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Account
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetAccountInfoResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (u *UsdMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, param types.ChangeLeverageParam) (*types.ChangeLeverageResp, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/leverage",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/leverage",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -843,7 +945,7 @@ func (u *UsdMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, pa
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -864,23 +966,31 @@ func (u *UsdMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, pa
 		return nil, err
 	}
 
-	var ret types.ChangeLeverageResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ChangeLeverageAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.ChangeLeverageResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (u *UsdMFuturesAccountClient) ChangeMarginType(ctx context.Context, param types.ChangeMarginTypeParam) error {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/marginType",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/marginType",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return err
 		}
@@ -901,7 +1011,7 @@ func (u *UsdMFuturesAccountClient) ChangeMarginType(ctx context.Context, param t
 			return err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return err
@@ -926,14 +1036,17 @@ func (u *UsdMFuturesAccountClient) ChangeMarginType(ctx context.Context, param t
 }
 
 func (u *UsdMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Context, param types.ModifyIsolatedPositionMarginParam) (*types.ModifyIsolatedPositionMarginResp, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/positionMargin",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/positionMargin",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -954,7 +1067,7 @@ func (u *UsdMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Cont
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -975,23 +1088,31 @@ func (u *UsdMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Cont
 		return nil, err
 	}
 
-	var ret types.ModifyIsolatedPositionMarginResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ModifyIsolatedPositionMarginAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.ModifyIsolatedPositionMarginResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetPositionInformation(ctx context.Context, param types.GetPositionParam) ([]*types.Position, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v2/positionRisk",
-		Method:       http.MethodGet,
+func (u *UsdMFuturesAccountClient) GetPositionInformation(ctx context.Context, param types.GetPositionParam) (*types.GetPositionResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v2/positionRisk",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -1012,7 +1133,7 @@ func (u *UsdMFuturesAccountClient) GetPositionInformation(ctx context.Context, p
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -1033,23 +1154,31 @@ func (u *UsdMFuturesAccountClient) GetPositionInformation(ctx context.Context, p
 		return nil, err
 	}
 
-	var ret []*types.Position
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Position
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetPositionResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *UsdMFuturesAccountClient) GetAccountTradeList(ctx context.Context, param types.GetTradeListParam) ([]*types.Trade, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/userTrades",
-		Method:       http.MethodGet,
+func (u *UsdMFuturesAccountClient) GetAccountTradeList(ctx context.Context, param types.GetTradeListParam) (*types.GetTradeListResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/userTrades",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := u.GenHeaders(req.SecurityType)
+		headers, err := u.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -1070,7 +1199,7 @@ func (u *UsdMFuturesAccountClient) GetAccountTradeList(ctx context.Context, para
 			return nil, err
 		}
 
-		if need := u.NeedSignature(req.SecurityType); need {
+		if need := u.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -1091,10 +1220,15 @@ func (u *UsdMFuturesAccountClient) GetAccountTradeList(ctx context.Context, para
 		return nil, err
 	}
 
-	var ret []*types.Trade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Trade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradeListResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }

@@ -19,6 +19,7 @@ package types
 
 import (
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type GetTradeListParam struct {
@@ -33,6 +34,11 @@ type GetTradeListParam struct {
 type GetTradeListParams struct {
 	GetTradeListParam
 	bnutils.DefaultParam
+}
+
+type GetTradeListResp struct {
+	Http *utils.ApiResponse
+	Body []*Trade
 }
 
 type Trade struct {

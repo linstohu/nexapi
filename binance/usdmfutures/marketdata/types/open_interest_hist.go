@@ -17,12 +17,19 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetOpenInterestHistParam struct {
 	Symbol    string `url:"symbol" validate:"required"`
 	Period    string `url:"period" validate:"required,oneof=5m 15m 30m 1h 2h 4h 6h 12h 1d"`
 	StartTime int64  `url:"startTime,omitempty" validate:"omitempty"`
 	EndTime   int64  `url:"endTime,omitempty" validate:"omitempty"`
 	Limit     int    `url:"limit,omitempty" validate:"omitempty,max=500"`
+}
+
+type GetOpenInterestHistResp struct {
+	Http *utils.ApiResponse
+	Body []*OpenInterestHist
 }
 
 type OpenInterestHist struct {

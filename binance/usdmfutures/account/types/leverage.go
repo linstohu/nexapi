@@ -19,6 +19,7 @@ package types
 
 import (
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type ChangeLeverageParam struct {
@@ -32,6 +33,11 @@ type ChangeLeverageParams struct {
 }
 
 type ChangeLeverageResp struct {
+	Http *utils.ApiResponse
+	Body *ChangeLeverageAPIResp
+}
+
+type ChangeLeverageAPIResp struct {
 	Leverage         int    `json:"leverage"`
 	MaxNotionalValue string `json:"maxNotionalValue"`
 	Symbol           string `json:"symbol"`

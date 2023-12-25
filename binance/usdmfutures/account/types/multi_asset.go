@@ -19,6 +19,7 @@ package types
 
 import (
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type ChangeMultiAssetsModeParam struct {
@@ -31,5 +32,10 @@ type ChangeMultiAssetsModeParams struct {
 }
 
 type GetCurrentMultiAssetsModeResp struct {
+	Http *utils.ApiResponse
+	Body *GetCurrentMultiAssetsModeAPIResp
+}
+
+type GetCurrentMultiAssetsModeAPIResp struct {
 	MultiAssetsMargin bool `json:"multiAssetsMargin"`
 }

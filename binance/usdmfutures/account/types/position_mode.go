@@ -19,6 +19,7 @@ package types
 
 import (
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type ChangePositionModeParam struct {
@@ -31,5 +32,10 @@ type ChangePositionModeParams struct {
 }
 
 type GetCurrentPositionModeResp struct {
+	Http *utils.ApiResponse
+	Body *GetCurrentPositionModeAPIResp
+}
+
+type GetCurrentPositionModeAPIResp struct {
 	DualSidePosition bool `json:"dualSidePosition"`
 }

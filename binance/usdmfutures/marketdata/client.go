@@ -19,7 +19,6 @@ package marketdata
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -27,6 +26,7 @@ import (
 	spottypes "github.com/linstohu/nexapi/binance/spot/marketdata/types"
 	"github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
 	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	"github.com/linstohu/nexapi/utils"
 	"github.com/valyala/fastjson"
 )
 
@@ -52,14 +52,14 @@ func NewUSDMFuturesMarketDataClient(cfg *umutils.USDMarginedClientCfg) (*USDMFut
 }
 
 func (u *USDMFuturesMarketDataClient) Ping(ctx context.Context) error {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/ping",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/ping",
+		Method:  http.MethodGet,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return err
 	}
@@ -73,15 +73,15 @@ func (u *USDMFuturesMarketDataClient) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetServerTime(ctx context.Context) (*spottypes.ServerTime, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/time",
-		Method:       http.MethodGet,
+func (u *USDMFuturesMarketDataClient) GetServerTime(ctx context.Context) (*spottypes.ServerTimeResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/time",
+		Method:  http.MethodGet,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -92,23 +92,28 @@ func (u *USDMFuturesMarketDataClient) GetServerTime(ctx context.Context) (*spott
 		return nil, err
 	}
 
-	var ret spottypes.ServerTime
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body spottypes.ServerTime
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (u *USDMFuturesMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.ExchangeInfo, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/exchangeInfo",
-		Method:       http.MethodGet,
+	data := &spottypes.ServerTimeResp{
+		Http: resp,
+		Body: &body,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	return data, nil
+}
+
+func (u *USDMFuturesMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.GetExchangeInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/exchangeInfo",
+		Method:  http.MethodGet,
+	}
+
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -119,29 +124,35 @@ func (u *USDMFuturesMarketDataClient) GetExchangeInfo(ctx context.Context) (*typ
 		return nil, err
 	}
 
-	var ret types.ExchangeInfo
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ExchangeInfo
+
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetExchangeInfoResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetOrderbook(ctx context.Context, param types.GetOrderbookParams) (*types.Orderbook, error) {
+func (u *USDMFuturesMarketDataClient) GetOrderbook(ctx context.Context, param types.GetOrderbookParams) (*types.GetOrderbookResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/depth",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/depth",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -152,29 +163,35 @@ func (u *USDMFuturesMarketDataClient) GetOrderbook(ctx context.Context, param ty
 		return nil, err
 	}
 
-	var ret types.Orderbook
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Orderbook
+
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetOrderbookResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetRecentTradeList(ctx context.Context, param types.GetTradeParams) ([]*types.Trade, error) {
+func (u *USDMFuturesMarketDataClient) GetRecentTradeList(ctx context.Context, param types.GetTradeParams) (*types.GetTradeResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/trades",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/trades",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -185,29 +202,34 @@ func (u *USDMFuturesMarketDataClient) GetRecentTradeList(ctx context.Context, pa
 		return nil, err
 	}
 
-	var ret []*types.Trade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Trade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradeResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetAggTrades(ctx context.Context, param types.GetAggTradesParam) ([]*types.AggTrade, error) {
+func (u *USDMFuturesMarketDataClient) GetAggTrades(ctx context.Context, param types.GetAggTradesParam) (*types.GetAggTradesResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/aggTrades",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/aggTrades",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -218,41 +240,51 @@ func (u *USDMFuturesMarketDataClient) GetAggTrades(ctx context.Context, param ty
 		return nil, err
 	}
 
-	var ret []*types.AggTrade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.AggTrade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetAggTradesResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetKlines(ctx context.Context, param types.GetKlineParam) ([]*spottypes.Kline, error) {
+func (u *USDMFuturesMarketDataClient) GetKlines(ctx context.Context, param types.GetKlineParam) (*spottypes.GetKlineResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/klines",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/klines",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
 	req.Headers = headers
 
 	resp, err := u.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := resp.ReadBody()
 	if err != nil {
 		return nil, err
 	}
 
 	var p fastjson.Parser
-	js, err := p.ParseBytes(resp)
+	js, err := p.ParseBytes(body)
 	if err != nil {
 		return nil, err
 	}
@@ -288,24 +320,29 @@ func (u *USDMFuturesMarketDataClient) GetKlines(ctx context.Context, param types
 		})
 	}
 
-	return ret, nil
+	data := &spottypes.GetKlineResp{
+		Http: resp,
+		Body: ret,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetMarkPriceForSymbol(ctx context.Context, param types.GetMarkPriceParam) (*types.MarkPrice, error) {
+func (u *USDMFuturesMarketDataClient) GetMarkPriceForSymbol(ctx context.Context, param types.GetMarkPriceParam) (*types.GetMarkPriceResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/premiumIndex",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/premiumIndex",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -316,23 +353,29 @@ func (u *USDMFuturesMarketDataClient) GetMarkPriceForSymbol(ctx context.Context,
 		return nil, err
 	}
 
-	var ret *types.MarkPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.MarkPrice
+
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (u *USDMFuturesMarketDataClient) GetMarkPriceForAllSymbols(ctx context.Context) ([]*types.MarkPrice, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/premiumIndex",
-		Method:       http.MethodGet,
+	data := &types.GetMarkPriceResp{
+		Http: resp,
+		Body: &body,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	return data, nil
+}
+
+func (u *USDMFuturesMarketDataClient) GetMarkPriceForAllSymbols(ctx context.Context) (*types.GetMarkPriceForAllSymbolsResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/premiumIndex",
+		Method:  http.MethodGet,
+	}
+
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -343,29 +386,34 @@ func (u *USDMFuturesMarketDataClient) GetMarkPriceForAllSymbols(ctx context.Cont
 		return nil, err
 	}
 
-	var ret []*types.MarkPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.MarkPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetMarkPriceForAllSymbolsResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetFundingRateHistory(ctx context.Context, param types.GetFundingRateParam) ([]*types.FundingRate, error) {
+func (u *USDMFuturesMarketDataClient) GetFundingRateHistory(ctx context.Context, param types.GetFundingRateParam) (*types.GetFundingRateResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/fundingRate",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/fundingRate",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -376,29 +424,34 @@ func (u *USDMFuturesMarketDataClient) GetFundingRateHistory(ctx context.Context,
 		return nil, err
 	}
 
-	var ret []*types.FundingRate
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.FundingRate
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetFundingRateResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetTickerPriceForSymbol(ctx context.Context, param types.GetTickerPriceParam) (*types.TickerPrice, error) {
+func (u *USDMFuturesMarketDataClient) GetTickerPriceForSymbol(ctx context.Context, param types.GetTickerPriceParam) (*types.GetTickerPriceForSymbolResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/ticker/price",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/ticker/price",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -409,23 +462,28 @@ func (u *USDMFuturesMarketDataClient) GetTickerPriceForSymbol(ctx context.Contex
 		return nil, err
 	}
 
-	var ret *types.TickerPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.TickerPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (u *USDMFuturesMarketDataClient) GetTickerPriceForAllSymbols(ctx context.Context) ([]*types.TickerPrice, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/ticker/price",
-		Method:       http.MethodGet,
+	data := &types.GetTickerPriceForSymbolResp{
+		Http: resp,
+		Body: &body,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	return data, nil
+}
+
+func (u *USDMFuturesMarketDataClient) GetTickerPriceForAllSymbols(ctx context.Context) (*types.GetTickerPriceForSymbolsResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/ticker/price",
+		Method:  http.MethodGet,
+	}
+
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -436,29 +494,34 @@ func (u *USDMFuturesMarketDataClient) GetTickerPriceForAllSymbols(ctx context.Co
 		return nil, err
 	}
 
-	var ret []*types.TickerPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.TickerPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTickerPriceForSymbolsResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetBookTickerForSymbol(ctx context.Context, param types.GetBookTickerForSymbolParam) (*types.BookTicker, error) {
+func (u *USDMFuturesMarketDataClient) GetBookTickerForSymbol(ctx context.Context, param types.GetBookTickerForSymbolParam) (*types.GetBookTickerForSymbolResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/ticker/bookTicker",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/ticker/bookTicker",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -469,23 +532,28 @@ func (u *USDMFuturesMarketDataClient) GetBookTickerForSymbol(ctx context.Context
 		return nil, err
 	}
 
-	var ret *types.BookTicker
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.BookTicker
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
-}
-
-func (u *USDMFuturesMarketDataClient) GetBookTickerForAllSymbols(ctx context.Context) ([]*types.BookTicker, error) {
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/fapi/v1/ticker/bookTicker",
-		Method:       http.MethodGet,
+	data := &types.GetBookTickerForSymbolResp{
+		Http: resp,
+		Body: &body,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	return data, nil
+}
+
+func (u *USDMFuturesMarketDataClient) GetBookTickerForAllSymbols(ctx context.Context) (*types.GetBookTickerForSymbolsResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/fapi/v1/ticker/bookTicker",
+		Method:  http.MethodGet,
+	}
+
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -496,29 +564,34 @@ func (u *USDMFuturesMarketDataClient) GetBookTickerForAllSymbols(ctx context.Con
 		return nil, err
 	}
 
-	var ret []*types.BookTicker
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.BookTicker
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetBookTickerForSymbolsResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (u *USDMFuturesMarketDataClient) GetOpenInterestHistory(ctx context.Context, param types.GetOpenInterestHistParam) ([]*types.OpenInterestHist, error) {
+func (u *USDMFuturesMarketDataClient) GetOpenInterestHistory(ctx context.Context, param types.GetOpenInterestHistParam) (*types.GetOpenInterestHistResp, error) {
 	err := u.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := umutils.HTTPRequest{
-		SecurityType: umutils.NONE,
-		BaseURL:      u.GetBaseURL(),
-		Path:         "/futures/data/openInterestHist",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   u.GetDebug(),
+		BaseURL: u.GetBaseURL(),
+		Path:    "/futures/data/openInterestHist",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := u.GenHeaders(req.SecurityType)
+	headers, err := u.GenHeaders(umutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -529,10 +602,15 @@ func (u *USDMFuturesMarketDataClient) GetOpenInterestHistory(ctx context.Context
 		return nil, err
 	}
 
-	var ret []*types.OpenInterestHist
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.OpenInterestHist
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetOpenInterestHistResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }

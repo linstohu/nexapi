@@ -17,12 +17,19 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetAggTradesParam struct {
 	Symbol    string `url:"symbol" validate:"required"`
 	FromID    string `url:"fromId,omitempty" validate:"omitempty"`
 	StartTime int64  `url:"startTime,omitempty" validate:"omitempty"`
 	EndTime   int64  `url:"endTime,omitempty" validate:"omitempty"`
 	Limit     int    `url:"limit,omitempty" validate:"omitempty,max=1000"`
+}
+
+type GetAggTradesResp struct {
+	Http *utils.ApiResponse
+	Body []*AggTrade
 }
 
 type AggTrade struct {

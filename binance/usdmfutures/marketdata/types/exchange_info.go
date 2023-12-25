@@ -19,7 +19,13 @@ package types
 
 import (
 	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	"github.com/linstohu/nexapi/utils"
 )
+
+type GetExchangeInfoResp struct {
+	Http *utils.ApiResponse
+	Body *ExchangeInfo
+}
 
 type ExchangeInfo struct {
 	Timezone    string `json:"timezone"`

@@ -17,9 +17,18 @@
 
 package types
 
+import (
+	"github.com/linstohu/nexapi/utils"
+)
+
 type GetOrderbookParams struct {
 	Symbol string `url:"symbol" validate:"required"`
 	Limit  int    `url:"limit,omitempty" validate:"omitempty,oneof=5 10 20 50 100 500 1000"`
+}
+
+type GetOrderbookResp struct {
+	Http *utils.ApiResponse
+	Body *Orderbook
 }
 
 type Orderbook struct {

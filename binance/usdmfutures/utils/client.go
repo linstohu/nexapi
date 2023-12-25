@@ -30,6 +30,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/google/go-querystring/query"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type USDMarginedClient struct {
@@ -131,7 +132,7 @@ func (u *USDMarginedClient) NeedSignature(t SecurityType) bool {
 	}
 }
 
-func (u *USDMarginedClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
+func (u *USDMarginedClient) SendHTTPRequest(ctx context.Context, req utils.HTTPRequest) (*utils.ApiResponse, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -177,7 +178,6 @@ func (u *USDMarginedClient) SendHTTPRequest(ctx context.Context, req HTTPRequest
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if u.GetDebug() {
 		dump, err := httputil.DumpResponse(resp, true)
@@ -194,5 +194,5 @@ func (u *USDMarginedClient) SendHTTPRequest(ctx context.Context, req HTTPRequest
 		return nil, fmt.Errorf("API returned a non-200 status code: [%d] - [%s]", resp.StatusCode, buf.String())
 	}
 
-	return buf.Bytes(), nil
+	return utils.NewApiResponse(&req, resp), nil
 }

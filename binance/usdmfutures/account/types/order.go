@@ -20,6 +20,7 @@ package types
 import (
 	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type Order struct {
@@ -67,6 +68,16 @@ type NewOrderParam struct {
 type NewOrderParams struct {
 	NewOrderParam
 	bnutils.DefaultParam
+}
+
+type OrderResp struct {
+	Http *utils.ApiResponse
+	Body *Order
+}
+
+type OrdersResp struct {
+	Http *utils.ApiResponse
+	Body []*Order
 }
 
 type GetOrderParam struct {

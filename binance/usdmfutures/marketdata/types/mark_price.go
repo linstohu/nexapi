@@ -17,8 +17,20 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetMarkPriceParam struct {
 	Symbol string `url:"symbol" validate:"required"`
+}
+
+type GetMarkPriceResp struct {
+	Http *utils.ApiResponse
+	Body *MarkPrice
+}
+
+type GetMarkPriceForAllSymbolsResp struct {
+	Http *utils.ApiResponse
+	Body []*MarkPrice
 }
 
 type MarkPrice struct {

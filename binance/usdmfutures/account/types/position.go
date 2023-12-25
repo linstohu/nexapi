@@ -19,6 +19,7 @@ package types
 
 import (
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type GetPositionParam struct {
@@ -28,6 +29,11 @@ type GetPositionParam struct {
 type GetPositionParams struct {
 	GetPositionParam
 	bnutils.DefaultParam
+}
+
+type GetPositionResp struct {
+	Http *utils.ApiResponse
+	Body []*Position
 }
 
 type Position struct {
