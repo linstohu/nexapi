@@ -17,9 +17,16 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetTradeParams struct {
 	Symbol string `url:"symbol" validate:"required"`
 	Limit  int    `url:"limit,omitempty" validate:"omitempty,max=500"`
+}
+
+type GetTradeResp struct {
+	Http *utils.ApiResponse
+	Body []*Trade
 }
 
 type Trade struct {

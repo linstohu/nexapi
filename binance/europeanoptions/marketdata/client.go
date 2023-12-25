@@ -19,7 +19,6 @@ package marketdata
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-playground/validator"
@@ -28,6 +27,7 @@ import (
 	spottypes "github.com/linstohu/nexapi/binance/spot/marketdata/types"
 	usdmtypes "github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type OptionsMarketDataClient struct {
@@ -52,14 +52,14 @@ func NewOptionsMarketDataClient(cfg *eoutils.OptionsClientCfg) (*OptionsMarketDa
 }
 
 func (o *OptionsMarketDataClient) Ping(ctx context.Context) error {
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/ping",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/ping",
+		Method:  http.MethodGet,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return err
 	}
@@ -73,15 +73,15 @@ func (o *OptionsMarketDataClient) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (o *OptionsMarketDataClient) GetServerTime(ctx context.Context) (*spottypes.ServerTime, error) {
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/time",
-		Method:       http.MethodGet,
+func (o *OptionsMarketDataClient) GetServerTime(ctx context.Context) (*spottypes.ServerTimeResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/time",
+		Method:  http.MethodGet,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -92,23 +92,28 @@ func (o *OptionsMarketDataClient) GetServerTime(ctx context.Context) (*spottypes
 		return nil, err
 	}
 
-	var ret spottypes.ServerTime
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body spottypes.ServerTime
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
-}
-
-func (o *OptionsMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.ExchangeInfo, error) {
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/exchangeInfo",
-		Method:       http.MethodGet,
+	data := &spottypes.ServerTimeResp{
+		Http: resp,
+		Body: &body,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	return data, nil
+}
+
+func (o *OptionsMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.GetExchangeInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/exchangeInfo",
+		Method:  http.MethodGet,
+	}
+
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -119,29 +124,35 @@ func (o *OptionsMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.E
 		return nil, err
 	}
 
-	var ret types.ExchangeInfo
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ExchangeInfo
+
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetExchangeInfoResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsMarketDataClient) GetOrderbook(ctx context.Context, param types.GetOrderbookParams) (*types.Orderbook, error) {
+func (o *OptionsMarketDataClient) GetOrderbook(ctx context.Context, param types.GetOrderbookParams) (*types.GetOrderbookResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/depth",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/depth",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -152,29 +163,35 @@ func (o *OptionsMarketDataClient) GetOrderbook(ctx context.Context, param types.
 		return nil, err
 	}
 
-	var ret types.Orderbook
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Orderbook
+
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetOrderbookResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsMarketDataClient) GetRecentTradesList(ctx context.Context, param types.GetTradeParams) ([]*types.Trade, error) {
+func (o *OptionsMarketDataClient) GetRecentTradesList(ctx context.Context, param types.GetTradeParams) (*types.GetTradeResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/trades",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/trades",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -185,29 +202,34 @@ func (o *OptionsMarketDataClient) GetRecentTradesList(ctx context.Context, param
 		return nil, err
 	}
 
-	var ret []*types.Trade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Trade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradeResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsMarketDataClient) GetKlines(ctx context.Context, param usdmtypes.GetKlineParam) ([]*types.Kline, error) {
+func (o *OptionsMarketDataClient) GetKlines(ctx context.Context, param usdmtypes.GetKlineParam) (*types.GetKlineResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/klines",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/klines",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -218,29 +240,34 @@ func (o *OptionsMarketDataClient) GetKlines(ctx context.Context, param usdmtypes
 		return nil, err
 	}
 
-	var ret []*types.Kline
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Kline
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetKlineResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsMarketDataClient) GetMarkPrice(ctx context.Context, param types.GetMarkPriceParam) ([]*types.MarkPrice, error) {
+func (o *OptionsMarketDataClient) GetMarkPrice(ctx context.Context, param types.GetMarkPriceParam) (*types.GetMarkPriceResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/mark",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/mark",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -251,29 +278,34 @@ func (o *OptionsMarketDataClient) GetMarkPrice(ctx context.Context, param types.
 		return nil, err
 	}
 
-	var ret []*types.MarkPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.MarkPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetMarkPriceResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsMarketDataClient) GetTickerPrice(ctx context.Context, param types.GetTickerPriceParam) ([]*types.TickerPrice, error) {
+func (o *OptionsMarketDataClient) GetTickerPrice(ctx context.Context, param types.GetTickerPriceParam) (*types.GetTickerPriceResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/ticker",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/ticker",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -284,29 +316,34 @@ func (o *OptionsMarketDataClient) GetTickerPrice(ctx context.Context, param type
 		return nil, err
 	}
 
-	var ret []*types.TickerPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.TickerPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTickerPriceResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsMarketDataClient) GetUnderlyingIndexPrice(ctx context.Context, param types.GetUnderlyingIndexPriceParams) (*types.UnderlyingIndexPrice, error) {
+func (o *OptionsMarketDataClient) GetUnderlyingIndexPrice(ctx context.Context, param types.GetUnderlyingIndexPriceParams) (*types.GetUnderlyingIndexPriceResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/index",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/index",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -317,29 +354,34 @@ func (o *OptionsMarketDataClient) GetUnderlyingIndexPrice(ctx context.Context, p
 		return nil, err
 	}
 
-	var ret types.UnderlyingIndexPrice
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.UnderlyingIndexPrice
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetUnderlyingIndexPriceResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsMarketDataClient) GetOpenInterest(ctx context.Context, param types.GetOpenInterestParam) ([]*types.OpenInterest, error) {
+func (o *OptionsMarketDataClient) GetOpenInterest(ctx context.Context, param types.GetOpenInterestParam) (*types.GetOpenInterestResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.NONE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/openInterest",
-		Method:       http.MethodGet,
-		Query:        param,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/openInterest",
+		Method:  http.MethodGet,
+		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(req.SecurityType)
+	headers, err := o.GenHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -350,10 +392,15 @@ func (o *OptionsMarketDataClient) GetOpenInterest(ctx context.Context, param typ
 		return nil, err
 	}
 
-	var ret []*types.OpenInterest
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.OpenInterest
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetOpenInterestResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }

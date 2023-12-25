@@ -20,7 +20,18 @@ package types
 import (
 	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
+
+type OrderResp struct {
+	Http *utils.ApiResponse
+	Body *Order
+}
+
+type OrdersResp struct {
+	Http *utils.ApiResponse
+	Body []*Order
+}
 
 type Order struct {
 	OrderID       int64  `json:"orderId"`

@@ -17,8 +17,15 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetUnderlyingIndexPriceParams struct {
 	Underlying string `url:"underlying" validate:"required"`
+}
+
+type GetUnderlyingIndexPriceResp struct {
+	Http *utils.ApiResponse
+	Body *UnderlyingIndexPrice
 }
 
 type UnderlyingIndexPrice struct {

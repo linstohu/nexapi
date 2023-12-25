@@ -22,7 +22,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
@@ -32,6 +31,7 @@ import (
 	cmutils "github.com/linstohu/nexapi/binance/coinmfutures/utils"
 	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type CoinMFuturesAccountClient struct {
@@ -78,15 +78,18 @@ func NewCoinMFuturesAccountClient(cfg *cmutils.CoinMarginedClientCfg) (*CoinMFut
 	}, nil
 }
 
-func (c *CoinMFuturesAccountClient) ChangePositionMode(ctx context.Context, param types.ChangePositionModeParam) (*types.Response, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/positionSide/dual",
-		Method:       http.MethodPost,
+func (c *CoinMFuturesAccountClient) ChangePositionMode(ctx context.Context, param types.ChangePositionModeParam) (*types.DefaultResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/positionSide/dual",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -107,7 +110,7 @@ func (c *CoinMFuturesAccountClient) ChangePositionMode(ctx context.Context, para
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -128,23 +131,31 @@ func (c *CoinMFuturesAccountClient) ChangePositionMode(ctx context.Context, para
 		return nil, err
 	}
 
-	var ret types.Response
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Response
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.DefaultResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (c *CoinMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types.GetCurrentPositionModeResp, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/positionSide/dual",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/positionSide/dual",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -162,7 +173,7 @@ func (c *CoinMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -183,23 +194,31 @@ func (c *CoinMFuturesAccountClient) GetPositionMode(ctx context.Context) (*types
 		return nil, err
 	}
 
-	var ret types.GetCurrentPositionModeResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.GetCurrentPositionModeAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetCurrentPositionModeResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.Order, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/order",
-		Method:       http.MethodPost,
+func (c *CoinMFuturesAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.OrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/order",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -220,7 +239,7 @@ func (c *CoinMFuturesAccountClient) NewOrder(ctx context.Context, param types.Ne
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -241,23 +260,31 @@ func (c *CoinMFuturesAccountClient) NewOrder(ctx context.Context, param types.Ne
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) QueryOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/order",
-		Method:       http.MethodGet,
+func (c *CoinMFuturesAccountClient) QueryOrder(ctx context.Context, param types.GetOrderParam) (*types.OrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/order",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -278,7 +305,7 @@ func (c *CoinMFuturesAccountClient) QueryOrder(ctx context.Context, param types.
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -299,23 +326,31 @@ func (c *CoinMFuturesAccountClient) QueryOrder(ctx context.Context, param types.
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/openOrder",
-		Method:       http.MethodGet,
+func (c *CoinMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param types.GetOrderParam) (*types.OrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/openOrder",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -336,7 +371,7 @@ func (c *CoinMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param ty
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -357,23 +392,31 @@ func (c *CoinMFuturesAccountClient) QueryOpenOrder(ctx context.Context, param ty
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param types.GetAllOpenOrdersParam) ([]*types.Order, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/openOrders",
-		Method:       http.MethodGet,
+func (c *CoinMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, param types.GetAllOpenOrdersParam) (*types.OrdersResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/openOrders",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -394,7 +437,7 @@ func (c *CoinMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, para
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -415,23 +458,31 @@ func (c *CoinMFuturesAccountClient) QueryAllOpenOrders(ctx context.Context, para
 		return nil, err
 	}
 
-	var ret []*types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.OrdersResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) CancelOrder(ctx context.Context, param types.GetOrderParam) (*types.Order, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/order",
-		Method:       http.MethodDelete,
+func (c *CoinMFuturesAccountClient) CancelOrder(ctx context.Context, param types.GetOrderParam) (*types.OrderResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/order",
+		Method:  http.MethodDelete,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -452,7 +503,7 @@ func (c *CoinMFuturesAccountClient) CancelOrder(ctx context.Context, param types
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -473,23 +524,31 @@ func (c *CoinMFuturesAccountClient) CancelOrder(ctx context.Context, param types
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (c *CoinMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, param types.CancelAllOpenOrdersParam) error {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/allOpenOrders",
-		Method:       http.MethodDelete,
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/allOpenOrders",
+		Method:  http.MethodDelete,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return err
 		}
@@ -510,7 +569,7 @@ func (c *CoinMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, par
 			return err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return err
@@ -534,15 +593,18 @@ func (c *CoinMFuturesAccountClient) CancelAllOpenOrders(ctx context.Context, par
 	return nil
 }
 
-func (c *CoinMFuturesAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) ([]*types.Order, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/allOrders",
-		Method:       http.MethodGet,
+func (c *CoinMFuturesAccountClient) GetAllOrders(ctx context.Context, param types.GetAllOrdersParam) (*types.OrdersResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/allOrders",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -563,7 +625,7 @@ func (c *CoinMFuturesAccountClient) GetAllOrders(ctx context.Context, param type
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -584,23 +646,31 @@ func (c *CoinMFuturesAccountClient) GetAllOrders(ctx context.Context, param type
 		return nil, err
 	}
 
-	var ret []*types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.OrdersResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Balance, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/balance",
-		Method:       http.MethodGet,
+func (c *CoinMFuturesAccountClient) GetBalance(ctx context.Context) (*types.GetBalanceResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/balance",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -618,7 +688,7 @@ func (c *CoinMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Ba
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -639,23 +709,31 @@ func (c *CoinMFuturesAccountClient) GetBalance(ctx context.Context) ([]*types.Ba
 		return nil, err
 	}
 
-	var ret []*types.Balance
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Balance
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetBalanceResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*types.Account, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/account",
-		Method:       http.MethodGet,
+func (c *CoinMFuturesAccountClient) GetAccountInformation(ctx context.Context) (*types.GetAccountInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/account",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -673,7 +751,7 @@ func (c *CoinMFuturesAccountClient) GetAccountInformation(ctx context.Context) (
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -694,23 +772,31 @@ func (c *CoinMFuturesAccountClient) GetAccountInformation(ctx context.Context) (
 		return nil, err
 	}
 
-	var ret types.Account
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Account
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetAccountInfoResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (c *CoinMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, param types.ChangeLeverageParam) (*types.ChangeLeverageResp, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/leverage",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/leverage",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -731,7 +817,7 @@ func (c *CoinMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, p
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -752,23 +838,31 @@ func (c *CoinMFuturesAccountClient) ChangeInitialLeverage(ctx context.Context, p
 		return nil, err
 	}
 
-	var ret types.ChangeLeverageResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ChangeLeverageAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.ChangeLeverageResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (c *CoinMFuturesAccountClient) ChangeMarginType(ctx context.Context, param types.ChangeMarginTypeParam) error {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/marginType",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/marginType",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return err
 		}
@@ -789,7 +883,7 @@ func (c *CoinMFuturesAccountClient) ChangeMarginType(ctx context.Context, param 
 			return err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return err
@@ -814,14 +908,17 @@ func (c *CoinMFuturesAccountClient) ChangeMarginType(ctx context.Context, param 
 }
 
 func (c *CoinMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Context, param types.ModifyIsolatedPositionMarginParam) (*types.ModifyIsolatedPositionMarginResp, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.TRADE,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/positionMargin",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/positionMargin",
+		Method:  http.MethodPost,
 	}
+
+	securityType := umutils.TRADE
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -842,7 +939,7 @@ func (c *CoinMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Con
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(nil, body)
 			if err != nil {
 				return nil, err
@@ -863,23 +960,31 @@ func (c *CoinMFuturesAccountClient) ModifyIsolatedPositionMargin(ctx context.Con
 		return nil, err
 	}
 
-	var ret types.ModifyIsolatedPositionMarginResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.ModifyIsolatedPositionMarginAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.ModifyIsolatedPositionMarginResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) GetPositionInformation(ctx context.Context, param types.GetPositionParam) ([]*types.Position, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/positionRisk",
-		Method:       http.MethodGet,
+func (c *CoinMFuturesAccountClient) GetPositionInformation(ctx context.Context, param types.GetPositionParam) (*types.GetPositionResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/positionRisk",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -900,7 +1005,7 @@ func (c *CoinMFuturesAccountClient) GetPositionInformation(ctx context.Context, 
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -921,23 +1026,31 @@ func (c *CoinMFuturesAccountClient) GetPositionInformation(ctx context.Context, 
 		return nil, err
 	}
 
-	var ret []*types.Position
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Position
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetPositionResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (c *CoinMFuturesAccountClient) GetAccountTradeList(ctx context.Context, param types.GetTradeListParam) ([]*types.Trade, error) {
-	req := cmutils.HTTPRequest{
-		SecurityType: umutils.USER_DATA,
-		BaseURL:      c.GetBaseURL(),
-		Path:         "/dapi/v1/userTrades",
-		Method:       http.MethodGet,
+func (c *CoinMFuturesAccountClient) GetAccountTradeList(ctx context.Context, param types.GetTradeListParam) (*types.GetTradeListResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   c.GetDebug(),
+		BaseURL: c.GetBaseURL(),
+		Path:    "/dapi/v1/userTrades",
+		Method:  http.MethodGet,
 	}
+
+	securityType := umutils.USER_DATA
+
 	{
-		headers, err := c.GenHeaders(req.SecurityType)
+		headers, err := c.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -958,7 +1071,7 @@ func (c *CoinMFuturesAccountClient) GetAccountTradeList(ctx context.Context, par
 			return nil, err
 		}
 
-		if need := c.NeedSignature(req.SecurityType); need {
+		if need := c.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -979,10 +1092,15 @@ func (c *CoinMFuturesAccountClient) GetAccountTradeList(ctx context.Context, par
 		return nil, err
 	}
 
-	var ret []*types.Trade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Trade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradeListResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }

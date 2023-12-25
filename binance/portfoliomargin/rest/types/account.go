@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetAccountInfoResp struct {
+	Http *utils.ApiResponse
+	Body *Account
+}
+
 type Account struct {
 	UniMMR                   string `json:"uniMMR"`
 	AccountEquity            string `json:"accountEquity"`

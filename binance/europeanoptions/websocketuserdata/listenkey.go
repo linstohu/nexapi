@@ -19,13 +19,13 @@ package websocketuserdata
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator"
 	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type httpAuthClient struct {
@@ -67,18 +67,26 @@ func newHttpAuthClient(cfg *httpAuthClientCfg) (*httpAuthClient, error) {
 }
 
 type listenKeyResp struct {
+	Http *utils.ApiResponse
+	Body *listenKeyAPIResp
+}
+
+type listenKeyAPIResp struct {
 	ListenKey string `json:"listenKey,omitempty"`
 }
 
 func (h *httpAuthClient) genListenKey(ctx context.Context) (*listenKeyResp, error) {
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.USER_STREAM,
-		BaseURL:      h.GetBaseURL(),
-		Path:         "/eapi/v1/listenKey",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   h.GetDebug(),
+		BaseURL: h.GetBaseURL(),
+		Path:    "/eapi/v1/listenKey",
+		Method:  http.MethodPost,
 	}
+
+	securityType := usdmutils.USER_STREAM
+
 	{
-		headers, err := h.GenHeaders(req.SecurityType)
+		headers, err := h.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -90,23 +98,31 @@ func (h *httpAuthClient) genListenKey(ctx context.Context) (*listenKeyResp, erro
 		return nil, err
 	}
 
-	var ret listenKeyResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body listenKeyAPIResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &listenKeyResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (h *httpAuthClient) updateListenKey(ctx context.Context) error {
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.USER_STREAM,
-		BaseURL:      h.GetBaseURL(),
-		Path:         "/eapi/v1/listenKey",
-		Method:       http.MethodPut,
+	req := utils.HTTPRequest{
+		Debug:   h.GetDebug(),
+		BaseURL: h.GetBaseURL(),
+		Path:    "/eapi/v1/listenKey",
+		Method:  http.MethodPut,
 	}
+
+	securityType := usdmutils.USER_STREAM
+
 	{
-		headers, err := h.GenHeaders(req.SecurityType)
+		headers, err := h.GenHeaders(securityType)
 		if err != nil {
 			return err
 		}

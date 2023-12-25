@@ -33,7 +33,8 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/google/go-querystring/query"
-	"github.com/linstohu/nexapi/bitfinex/utils"
+	bitutils "github.com/linstohu/nexapi/bitfinex/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type BitfinexAuthClient struct {
@@ -41,7 +42,7 @@ type BitfinexAuthClient struct {
 	debug bool
 	// logger
 	logger *slog.Logger
-	nonce  utils.NonceGenerator
+	nonce  bitutils.NonceGenerator
 
 	baseURL     string
 	key, secret string
@@ -67,7 +68,7 @@ func NewBitfinexClient(cfg *BitfinexClientCfg) (*BitfinexAuthClient, error) {
 	cli := BitfinexAuthClient{
 		debug:   cfg.Debug,
 		logger:  cfg.Logger,
-		nonce:   utils.NewEpochNonceGenerator(),
+		nonce:   bitutils.NewEpochNonceGenerator(),
 		baseURL: cfg.BaseURL,
 		key:     cfg.Key,
 		secret:  cfg.Secret,
@@ -97,7 +98,7 @@ func (b *BitfinexAuthClient) GetBaseURL() string {
 	return b.baseURL
 }
 
-func (b *BitfinexAuthClient) GenHeaders(req HTTPRequest) (map[string]string, error) {
+func (b *BitfinexAuthClient) GenHeaders(req utils.HTTPRequest) (map[string]string, error) {
 	headers := map[string]string{
 		"Content-Type": "application/json",
 		"Accept":       "application/json",
@@ -127,7 +128,7 @@ func (b *BitfinexAuthClient) GenHeaders(req HTTPRequest) (map[string]string, err
 	return headers, nil
 }
 
-func (b *BitfinexAuthClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
+func (b *BitfinexAuthClient) SendHTTPRequest(ctx context.Context, req utils.HTTPRequest) (*utils.ApiResponse, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -173,7 +174,6 @@ func (b *BitfinexAuthClient) SendHTTPRequest(ctx context.Context, req HTTPReques
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if b.GetDebug() {
 		dump, err := httputil.DumpResponse(resp, true)
@@ -190,5 +190,5 @@ func (b *BitfinexAuthClient) SendHTTPRequest(ctx context.Context, req HTTPReques
 		return nil, fmt.Errorf("API returned a non-200 status code: [%d] - [%s]", resp.StatusCode, buf.String())
 	}
 
-	return buf.Bytes(), nil
+	return utils.NewApiResponse(&req, resp), nil
 }

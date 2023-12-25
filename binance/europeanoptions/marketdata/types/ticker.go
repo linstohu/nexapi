@@ -17,8 +17,15 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetTickerPriceParam struct {
 	Symbol string `url:"symbol,omitempty" validate:"omitempty"`
+}
+
+type GetTickerPriceResp struct {
+	Http *utils.ApiResponse
+	Body []*TickerPrice
 }
 
 type TickerPrice struct {

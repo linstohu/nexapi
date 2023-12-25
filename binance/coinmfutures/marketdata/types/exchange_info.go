@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetExchangeInfoResp struct {
+	Http *utils.ApiResponse
+	Body *ExchangeInfo
+}
+
 type ExchangeInfo struct {
 	Timezone   string `json:"timezone"`
 	ServerTime int64  `json:"serverTime"`

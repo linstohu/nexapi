@@ -19,10 +19,16 @@ package types
 
 import (
 	cmutils "github.com/linstohu/nexapi/binance/coinmfutures/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type GetOpenInterestParam struct {
 	Symbol string `url:"symbol" validate:"required"`
+}
+
+type GetOpenInterestResp struct {
+	Http *utils.ApiResponse
+	Body *OpenInterest
 }
 
 type OpenInterest struct {
@@ -40,6 +46,11 @@ type GetOpenInterestHistParam struct {
 	StartTime    int64                `url:"startTime,omitempty" validate:"omitempty"`
 	EndTime      int64                `url:"endTime,omitempty" validate:"omitempty"`
 	Limit        int                  `url:"limit,omitempty" validate:"omitempty,max=500"`
+}
+
+type GetOpenInterestHistResp struct {
+	Http *utils.ApiResponse
+	Body []*OpenInterestHist
 }
 
 type OpenInterestHist struct {

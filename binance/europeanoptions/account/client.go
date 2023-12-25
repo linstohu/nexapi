@@ -22,7 +22,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -33,6 +32,7 @@ import (
 	eoutils "github.com/linstohu/nexapi/binance/europeanoptions/utils"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type OptionsAccountClient struct {
@@ -79,15 +79,18 @@ func NewOptionsAccountClient(cfg *eoutils.OptionsClientCfg) (*OptionsAccountClie
 	}, nil
 }
 
-func (o *OptionsAccountClient) GetAccountInfo(ctx context.Context) (*types.AccountInfo, error) {
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/account",
-		Method:       http.MethodGet,
+func (o *OptionsAccountClient) GetAccountInfo(ctx context.Context) (*types.GetAccountInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/account",
+		Method:  http.MethodGet,
 	}
+
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +108,7 @@ func (o *OptionsAccountClient) GetAccountInfo(ctx context.Context) (*types.Accou
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -126,29 +129,36 @@ func (o *OptionsAccountClient) GetAccountInfo(ctx context.Context) (*types.Accou
 		return nil, err
 	}
 
-	var ret types.AccountInfo
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.AccountInfo
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetAccountInfoResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.Order, error) {
+func (o *OptionsAccountClient) NewOrder(ctx context.Context, param types.NewOrderParam) (*types.OrderResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/order",
-		Method:       http.MethodPost,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/order",
+		Method:  http.MethodPost,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -169,7 +179,7 @@ func (o *OptionsAccountClient) NewOrder(ctx context.Context, param types.NewOrde
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -190,15 +200,20 @@ func (o *OptionsAccountClient) NewOrder(ctx context.Context, param types.NewOrde
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsAccountClient) GetSingleOrder(ctx context.Context, param types.GetSingleOrderParam) (*types.Order, error) {
+func (o *OptionsAccountClient) GetSingleOrder(ctx context.Context, param types.GetSingleOrderParam) (*types.OrderResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
@@ -208,15 +223,17 @@ func (o *OptionsAccountClient) GetSingleOrder(ctx context.Context, param types.G
 		return nil, fmt.Errorf("either orderId or clientOrderId must be sent")
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/order",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/order",
+		Method:  http.MethodGet,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -237,7 +254,7 @@ func (o *OptionsAccountClient) GetSingleOrder(ctx context.Context, param types.G
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -258,15 +275,20 @@ func (o *OptionsAccountClient) GetSingleOrder(ctx context.Context, param types.G
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsAccountClient) CancelOrder(ctx context.Context, param types.CancelOrderParam) (*types.Order, error) {
+func (o *OptionsAccountClient) CancelOrder(ctx context.Context, param types.CancelOrderParam) (*types.OrderResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
@@ -276,15 +298,17 @@ func (o *OptionsAccountClient) CancelOrder(ctx context.Context, param types.Canc
 		return nil, fmt.Errorf("either orderId or clientOrderId must be sent")
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/order",
-		Method:       http.MethodDelete,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/order",
+		Method:  http.MethodDelete,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -305,7 +329,7 @@ func (o *OptionsAccountClient) CancelOrder(ctx context.Context, param types.Canc
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -326,12 +350,17 @@ func (o *OptionsAccountClient) CancelOrder(ctx context.Context, param types.Canc
 		return nil, err
 	}
 
-	var ret types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.OrderResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
 func (o *OptionsAccountClient) CancelAllOrdersBySymbol(ctx context.Context, param types.CancelAllOrdersParam) error {
@@ -340,15 +369,17 @@ func (o *OptionsAccountClient) CancelAllOrdersBySymbol(ctx context.Context, para
 		return err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/allOpenOrders",
-		Method:       http.MethodDelete,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/allOpenOrders",
+		Method:  http.MethodDelete,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return err
 		}
@@ -369,7 +400,7 @@ func (o *OptionsAccountClient) CancelAllOrdersBySymbol(ctx context.Context, para
 			return err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return err
@@ -399,15 +430,17 @@ func (o *OptionsAccountClient) CancelAllOrdersByUnderlying(ctx context.Context, 
 		return err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/allOpenOrdersByUnderlying",
-		Method:       http.MethodDelete,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/allOpenOrdersByUnderlying",
+		Method:  http.MethodDelete,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return err
 		}
@@ -428,7 +461,7 @@ func (o *OptionsAccountClient) CancelAllOrdersByUnderlying(ctx context.Context, 
 			return err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return err
@@ -452,21 +485,23 @@ func (o *OptionsAccountClient) CancelAllOrdersByUnderlying(ctx context.Context, 
 	return nil
 }
 
-func (o *OptionsAccountClient) GetOpenOrders(ctx context.Context, param types.GetCurrentOpenOrdersParam) ([]*types.Order, error) {
+func (o *OptionsAccountClient) GetOpenOrders(ctx context.Context, param types.GetCurrentOpenOrdersParam) (*types.OrdersResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/openOrders",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/openOrders",
+		Method:  http.MethodGet,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -487,7 +522,7 @@ func (o *OptionsAccountClient) GetOpenOrders(ctx context.Context, param types.Ge
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -508,29 +543,36 @@ func (o *OptionsAccountClient) GetOpenOrders(ctx context.Context, param types.Ge
 		return nil, err
 	}
 
-	var ret []*types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.OrdersResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsAccountClient) GetOrderHistory(ctx context.Context, param types.GetOrderHistoryParam) ([]*types.Order, error) {
+func (o *OptionsAccountClient) GetOrderHistory(ctx context.Context, param types.GetOrderHistoryParam) (*types.OrdersResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/historyOrders",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/historyOrders",
+		Method:  http.MethodGet,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -551,7 +593,7 @@ func (o *OptionsAccountClient) GetOrderHistory(ctx context.Context, param types.
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -572,29 +614,36 @@ func (o *OptionsAccountClient) GetOrderHistory(ctx context.Context, param types.
 		return nil, err
 	}
 
-	var ret []*types.Order
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Order
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.OrdersResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsAccountClient) GetPositionInfo(ctx context.Context, param types.GetPositionInfoParam) ([]*types.Position, error) {
+func (o *OptionsAccountClient) GetPositionInfo(ctx context.Context, param types.GetPositionInfoParam) (*types.GetPositionInfoResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/position",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/position",
+		Method:  http.MethodGet,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -615,7 +664,7 @@ func (o *OptionsAccountClient) GetPositionInfo(ctx context.Context, param types.
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -636,29 +685,36 @@ func (o *OptionsAccountClient) GetPositionInfo(ctx context.Context, param types.
 		return nil, err
 	}
 
-	var ret []*types.Position
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Position
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetPositionInfoResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsAccountClient) GetTradeList(ctx context.Context, param types.GetTradeListParam) ([]*types.UserTrade, error) {
+func (o *OptionsAccountClient) GetTradeList(ctx context.Context, param types.GetTradeListParam) (*types.GetTradeListResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/userTrades",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/userTrades",
+		Method:  http.MethodGet,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -679,7 +735,7 @@ func (o *OptionsAccountClient) GetTradeList(ctx context.Context, param types.Get
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -700,29 +756,36 @@ func (o *OptionsAccountClient) GetTradeList(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	var ret []*types.UserTrade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.UserTrade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradeListResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsAccountClient) GetExerciseRecord(ctx context.Context, param types.GetExerciseRecordParam) ([]*types.UserTrade, error) {
+func (o *OptionsAccountClient) GetExerciseRecord(ctx context.Context, param types.GetExerciseRecordParam) (*types.GetTradeListResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/exerciseRecord",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/exerciseRecord",
+		Method:  http.MethodGet,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -743,7 +806,7 @@ func (o *OptionsAccountClient) GetExerciseRecord(ctx context.Context, param type
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -764,29 +827,36 @@ func (o *OptionsAccountClient) GetExerciseRecord(ctx context.Context, param type
 		return nil, err
 	}
 
-	var ret []*types.UserTrade
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.UserTrade
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetTradeListResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (o *OptionsAccountClient) GetFundingFlow(ctx context.Context, param types.GetFundingFlowParam) ([]*types.FundingFlow, error) {
+func (o *OptionsAccountClient) GetFundingFlow(ctx context.Context, param types.GetFundingFlowParam) (*types.GetFundingFlowResp, error) {
 	err := o.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := eoutils.HTTPRequest{
-		SecurityType: usdmutils.TRADE,
-		BaseURL:      o.GetBaseURL(),
-		Path:         "/eapi/v1/bill",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   o.GetDebug(),
+		BaseURL: o.GetBaseURL(),
+		Path:    "/eapi/v1/bill",
+		Method:  http.MethodGet,
 	}
 
+	securityType := usdmutils.TRADE
+
 	{
-		headers, err := o.GenHeaders(req.SecurityType)
+		headers, err := o.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -807,7 +877,7 @@ func (o *OptionsAccountClient) GetFundingFlow(ctx context.Context, param types.G
 			return nil, err
 		}
 
-		if need := o.NeedSignature(req.SecurityType); need {
+		if need := o.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -828,10 +898,15 @@ func (o *OptionsAccountClient) GetFundingFlow(ctx context.Context, param types.G
 		return nil, err
 	}
 
-	var ret []*types.FundingFlow
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.FundingFlow
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetFundingFlowResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }

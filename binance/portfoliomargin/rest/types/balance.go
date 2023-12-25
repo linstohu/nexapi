@@ -19,6 +19,7 @@ package types
 
 import (
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type GetBalanceParam struct {
@@ -30,6 +31,11 @@ type GetBalanceParams struct {
 	bnutils.DefaultParam
 }
 
+type GetBalanceResp struct {
+	Http *utils.ApiResponse
+	Body *Balance
+}
+
 type GetAllBalanceParam struct {
 	Asset string `url:"asset"`
 }
@@ -37,6 +43,11 @@ type GetAllBalanceParam struct {
 type GetAllBalanceParams struct {
 	GetAllBalanceParam
 	bnutils.DefaultParam
+}
+
+type GetAllBalanceResp struct {
+	Http *utils.ApiResponse
+	Body []*Balance
 }
 
 type Balance struct {

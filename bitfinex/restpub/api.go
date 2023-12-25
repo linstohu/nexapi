@@ -22,6 +22,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
+	"github.com/linstohu/nexapi/utils"
 )
 
 var (
@@ -50,7 +51,8 @@ func NewRestPubClient(cfg *BitfinexClientCfg) (*RestPubClient, error) {
 }
 
 func (r *RestPubClient) PlatformStatus(ctx context.Context) error {
-	req := HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   r.GetDebug(),
 		BaseURL: r.GetBaseURL(),
 		Path:    "/v2/platform/status",
 		Method:  http.MethodGet,

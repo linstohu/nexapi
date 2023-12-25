@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type DefaultResp struct {
+	Http *utils.ApiResponse
+	Body *Response
+}
+
 type Response struct {
 	Code    int    `json:"code"`
 	Message string `json:"msg"`

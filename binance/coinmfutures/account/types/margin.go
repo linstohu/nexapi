@@ -20,6 +20,7 @@ package types
 import (
 	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type ChangeMarginTypeParam struct {
@@ -45,6 +46,11 @@ type ModifyIsolatedPositionMarginParams struct {
 }
 
 type ModifyIsolatedPositionMarginResp struct {
+	Http *utils.ApiResponse
+	Body *ModifyIsolatedPositionMarginAPIResp
+}
+
+type ModifyIsolatedPositionMarginAPIResp struct {
 	Amount float64 `json:"amount"`
 	Code   int     `json:"code"`
 	Msg    string  `json:"msg"`

@@ -22,6 +22,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
+	"github.com/linstohu/nexapi/utils"
 )
 
 var (
@@ -50,7 +51,8 @@ func NewRestAuthClient(cfg *BitfinexClientCfg) (*RestAuthClient, error) {
 }
 
 func (r *RestAuthClient) GetWallets(ctx context.Context) error {
-	req := HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   r.GetDebug(),
 		BaseURL: r.GetBaseURL(),
 		Path:    "/v2/auth/r/wallets",
 		Method:  http.MethodPost,

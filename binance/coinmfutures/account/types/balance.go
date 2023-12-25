@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetBalanceResp struct {
+	Http *utils.ApiResponse
+	Body []*Balance
+}
+
 type Balance struct {
 	AccountAlias       string `json:"accountAlias"`
 	Asset              string `json:"asset"`

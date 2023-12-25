@@ -34,6 +34,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/google/go-querystring/query"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type OKXRestClient struct {
@@ -103,7 +104,7 @@ func (o *OKXRestClient) GetPassphrase() string {
 	return o.passphrase
 }
 
-func (o *OKXRestClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
+func (o *OKXRestClient) SendHTTPRequest(ctx context.Context, req utils.HTTPRequest) (*utils.ApiResponse, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -148,7 +149,6 @@ func (o *OKXRestClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if o.debug {
 		dump, err := httputil.DumpResponse(resp, true)
@@ -165,7 +165,7 @@ func (o *OKXRestClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([
 		return nil, fmt.Errorf("API returned a non-200 status code: [%d] - [%s]", resp.StatusCode, buf.String())
 	}
 
-	return buf.Bytes(), nil
+	return utils.NewApiResponse(&req, resp), nil
 }
 
 func (o *OKXRestClient) GenPubHeaders() (map[string]string, error) {
@@ -175,7 +175,7 @@ func (o *OKXRestClient) GenPubHeaders() (map[string]string, error) {
 	}, nil
 }
 
-func (o *OKXRestClient) GenAuthHeaders(req HTTPRequest) (map[string]string, error) {
+func (o *OKXRestClient) GenAuthHeaders(req utils.HTTPRequest) (map[string]string, error) {
 	if o.key == "" || o.secret == "" || o.passphrase == "" {
 		return nil, fmt.Errorf("key, secret and passphrase needed when init client")
 	}

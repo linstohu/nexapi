@@ -99,7 +99,8 @@ func TestGetMarkPrice(t *testing.T) {
 		Symbol: "ETHUSD_PERP",
 	})
 	assert.Nil(t, err)
-	assert.Equal(t, 1, len(resp))
+
+	assert.Equal(t, 1, len(resp.Body))
 
 	_, err = cli.GetMarkPrice(context.TODO(), types.GetMarkPriceParam{})
 	assert.Nil(t, err)

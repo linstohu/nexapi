@@ -165,7 +165,11 @@ func (o *OptionsUserDataStreamClient) genListenKey() (string, error) {
 		return "", err
 	}
 
-	return resp.ListenKey, nil
+	if resp.Body == nil {
+		return "", fmt.Errorf("unknown error")
+	}
+
+	return resp.Body.ListenKey, nil
 }
 
 func (o *OptionsUserDataStreamClient) updateListenKey() error {

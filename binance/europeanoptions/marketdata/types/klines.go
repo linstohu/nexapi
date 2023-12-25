@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetKlineResp struct {
+	Http *utils.ApiResponse
+	Body []*Kline
+}
+
 type Kline struct {
 	Open        string `json:"open"`
 	High        string `json:"high"`

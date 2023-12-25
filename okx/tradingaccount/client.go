@@ -19,13 +19,13 @@ package publicdata
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/okx/tradingaccount/types"
 	okxutils "github.com/linstohu/nexapi/okx/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type TradingAccountClient struct {
@@ -77,7 +77,8 @@ func (t *TradingAccountClient) GetBalance(ctx context.Context, param types.GetBa
 		return nil, err
 	}
 
-	req := okxutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   t.GetDebug(),
 		BaseURL: t.GetBaseURL(),
 		Path:    "/api/v5/account/balance",
 		Method:  http.MethodGet,
@@ -95,12 +96,12 @@ func (t *TradingAccountClient) GetBalance(ctx context.Context, param types.GetBa
 		return nil, err
 	}
 
-	var ret types.GetBalanceResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.GetBalanceResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	return &body, nil
 }
 
 func (t *TradingAccountClient) GetPositions(ctx context.Context, param types.GetPositionsParam) (*types.GetPositionsResp, error) {
@@ -109,7 +110,8 @@ func (t *TradingAccountClient) GetPositions(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	req := okxutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   t.GetDebug(),
 		BaseURL: t.GetBaseURL(),
 		Path:    "/api/v5/account/positions",
 		Method:  http.MethodGet,
@@ -127,10 +129,10 @@ func (t *TradingAccountClient) GetPositions(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	var ret types.GetPositionsResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.GetPositionsResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	return &body, nil
 }

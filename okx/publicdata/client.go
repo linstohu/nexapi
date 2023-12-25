@@ -19,12 +19,12 @@ package publicdata
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-playground/validator"
 	"github.com/linstohu/nexapi/okx/publicdata/types"
 	okxutils "github.com/linstohu/nexapi/okx/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type PublicDataClient struct {
@@ -58,7 +58,8 @@ func NewPublicDataClient(cfg *okxutils.OKXRestClientCfg) (*PublicDataClient, err
 }
 
 func (p *PublicDataClient) GetInstruments(ctx context.Context, param types.GetInstrumentsParam) (*types.Instruments, error) {
-	req := okxutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   p.GetDebug(),
 		BaseURL: p.GetBaseURL(),
 		Path:    "/api/v5/public/instruments",
 		Method:  http.MethodGet,
@@ -76,16 +77,17 @@ func (p *PublicDataClient) GetInstruments(ctx context.Context, param types.GetIn
 		return nil, err
 	}
 
-	var ret types.Instruments
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Instruments
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	return &body, nil
 }
 
 func (p *PublicDataClient) GetMarketTickers(ctx context.Context, param types.GetMarketTickersParam) (*types.GetMarketTickersResp, error) {
-	req := okxutils.HTTPRequest{
+	req := utils.HTTPRequest{
+		Debug:   p.GetDebug(),
 		BaseURL: p.GetBaseURL(),
 		Path:    "/api/v5/market/tickers",
 		Method:  http.MethodGet,
@@ -103,10 +105,10 @@ func (p *PublicDataClient) GetMarketTickers(ctx context.Context, param types.Get
 		return nil, err
 	}
 
-	var ret types.GetMarketTickersResp
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.GetMarketTickersResp
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	return &body, nil
 }

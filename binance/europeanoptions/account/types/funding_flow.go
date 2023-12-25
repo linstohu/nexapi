@@ -19,6 +19,7 @@ package types
 
 import (
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type GetFundingFlowParam struct {
@@ -32,6 +33,11 @@ type GetFundingFlowParam struct {
 type GetFundingFlowParams struct {
 	GetFundingFlowParam
 	bnutils.DefaultParam
+}
+
+type GetFundingFlowResp struct {
+	Http *utils.ApiResponse
+	Body []*FundingFlow
 }
 
 type FundingFlow struct {

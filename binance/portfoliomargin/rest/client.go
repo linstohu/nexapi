@@ -22,7 +22,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
@@ -31,6 +30,7 @@ import (
 	"github.com/linstohu/nexapi/binance/portfoliomargin/rest/types"
 	pmutils "github.com/linstohu/nexapi/binance/portfoliomargin/utils"
 	bnutils "github.com/linstohu/nexapi/binance/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type PortfolioMarginAccountClient struct {
@@ -77,20 +77,23 @@ func NewPortfolioMarginAccountClient(cfg *pmutils.PortfolioMarginClientCfg) (*Po
 	}, nil
 }
 
-func (p *PortfolioMarginAccountClient) GetAssetBalance(ctx context.Context, param types.GetBalanceParam) (*types.Balance, error) {
+func (p *PortfolioMarginAccountClient) GetAssetBalance(ctx context.Context, param types.GetBalanceParam) (*types.GetBalanceResp, error) {
 	err := p.validate.Struct(param)
 	if err != nil {
 		return nil, err
 	}
 
-	req := pmutils.HTTPRequest{
-		SecurityType: pmutils.USER_DATA,
-		BaseURL:      p.GetBaseURL(),
-		Path:         "/papi/v1/balance",
-		Method:       http.MethodGet,
+	req := utils.HTTPRequest{
+		Debug:   p.GetDebug(),
+		BaseURL: p.GetBaseURL(),
+		Path:    "/papi/v1/balance",
+		Method:  http.MethodGet,
 	}
+
+	securityType := pmutils.USER_DATA
+
 	{
-		headers, err := p.GenHeaders(req.SecurityType)
+		headers, err := p.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +114,7 @@ func (p *PortfolioMarginAccountClient) GetAssetBalance(ctx context.Context, para
 			return nil, err
 		}
 
-		if need := p.NeedSignature(req.SecurityType); need {
+		if need := p.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -132,23 +135,31 @@ func (p *PortfolioMarginAccountClient) GetAssetBalance(ctx context.Context, para
 		return nil, err
 	}
 
-	var ret types.Balance
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Balance
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetBalanceResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }
 
-func (p *PortfolioMarginAccountClient) GetBalance(ctx context.Context) ([]*types.Balance, error) {
-	req := pmutils.HTTPRequest{
-		SecurityType: pmutils.USER_DATA,
-		BaseURL:      p.GetBaseURL(),
-		Path:         "/papi/v1/balance",
-		Method:       http.MethodGet,
+func (p *PortfolioMarginAccountClient) GetBalance(ctx context.Context) (*types.GetAllBalanceResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   p.GetDebug(),
+		BaseURL: p.GetBaseURL(),
+		Path:    "/papi/v1/balance",
+		Method:  http.MethodGet,
 	}
+
+	securityType := pmutils.USER_DATA
+
 	{
-		headers, err := p.GenHeaders(req.SecurityType)
+		headers, err := p.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -168,7 +179,7 @@ func (p *PortfolioMarginAccountClient) GetBalance(ctx context.Context) ([]*types
 			return nil, err
 		}
 
-		if need := p.NeedSignature(req.SecurityType); need {
+		if need := p.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -189,23 +200,31 @@ func (p *PortfolioMarginAccountClient) GetBalance(ctx context.Context) ([]*types
 		return nil, err
 	}
 
-	var ret []*types.Balance
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body []*types.Balance
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	data := &types.GetAllBalanceResp{
+		Http: resp,
+		Body: body,
+	}
+
+	return data, nil
 }
 
-func (p *PortfolioMarginAccountClient) GetAccountInformation(ctx context.Context) (*types.Account, error) {
-	req := pmutils.HTTPRequest{
-		SecurityType: pmutils.USER_DATA,
-		BaseURL:      p.GetBaseURL(),
-		Path:         "/papi/v1/account",
-		Method:       http.MethodGet,
+func (p *PortfolioMarginAccountClient) GetAccountInformation(ctx context.Context) (*types.GetAccountInfoResp, error) {
+	req := utils.HTTPRequest{
+		Debug:   p.GetDebug(),
+		BaseURL: p.GetBaseURL(),
+		Path:    "/papi/v1/account",
+		Method:  http.MethodGet,
 	}
+
+	securityType := pmutils.USER_DATA
+
 	{
-		headers, err := p.GenHeaders(req.SecurityType)
+		headers, err := p.GenHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -223,7 +242,7 @@ func (p *PortfolioMarginAccountClient) GetAccountInformation(ctx context.Context
 			return nil, err
 		}
 
-		if need := p.NeedSignature(req.SecurityType); need {
+		if need := p.NeedSignature(securityType); need {
 			signString, err := bnutils.NormalizeRequestContent(query, nil)
 			if err != nil {
 				return nil, err
@@ -244,10 +263,15 @@ func (p *PortfolioMarginAccountClient) GetAccountInformation(ctx context.Context
 		return nil, err
 	}
 
-	var ret types.Account
-	if err := json.Unmarshal(resp, &ret); err != nil {
+	var body types.Account
+	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
 
-	return &ret, nil
+	data := &types.GetAccountInfoResp{
+		Http: resp,
+		Body: &body,
+	}
+
+	return data, nil
 }

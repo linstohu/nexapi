@@ -17,9 +17,16 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
 type GetOpenInterestParam struct {
 	UnderlyingAsset string `url:"underlyingAsset" validate:"required"`
 	Expiration      string `url:"expiration" validate:"required"`
+}
+
+type GetOpenInterestResp struct {
+	Http *utils.ApiResponse
+	Body []*OpenInterest
 }
 
 type OpenInterest struct {

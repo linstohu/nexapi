@@ -31,6 +31,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/google/go-querystring/query"
 	usdmutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type CoinMarginedClient struct {
@@ -132,7 +133,7 @@ func (u *CoinMarginedClient) NeedSignature(t usdmutils.SecurityType) bool {
 	}
 }
 
-func (u *CoinMarginedClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
+func (u *CoinMarginedClient) SendHTTPRequest(ctx context.Context, req utils.HTTPRequest) (*utils.ApiResponse, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -179,7 +180,6 @@ func (u *CoinMarginedClient) SendHTTPRequest(ctx context.Context, req HTTPReques
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if u.GetDebug() {
 		dump, err := httputil.DumpResponse(resp, true)
@@ -196,5 +196,5 @@ func (u *CoinMarginedClient) SendHTTPRequest(ctx context.Context, req HTTPReques
 		return nil, fmt.Errorf("API returned a non-200 status code: [%d] - [%s]", resp.StatusCode, buf.String())
 	}
 
-	return buf.Bytes(), nil
+	return utils.NewApiResponse(&req, resp), nil
 }

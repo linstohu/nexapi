@@ -30,6 +30,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/google/go-querystring/query"
+	"github.com/linstohu/nexapi/utils"
 )
 
 type BitfinexClient struct {
@@ -71,15 +72,6 @@ func NewBitfinexClient(cfg *BitfinexClientCfg) (*BitfinexClient, error) {
 	return &cli, nil
 }
 
-type HTTPRequest struct {
-	BaseURL string
-	Path    string
-	Method  string
-	Headers map[string]string
-	Query   any
-	Body    any
-}
-
 func (b *BitfinexClient) GetDebug() bool {
 	return b.debug
 }
@@ -88,7 +80,7 @@ func (b *BitfinexClient) GetBaseURL() string {
 	return b.baseURL
 }
 
-func (b *BitfinexClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) ([]byte, error) {
+func (b *BitfinexClient) SendHTTPRequest(ctx context.Context, req utils.HTTPRequest) (*utils.ApiResponse, error) {
 	client := http.Client{}
 
 	var body io.Reader
@@ -134,7 +126,6 @@ func (b *BitfinexClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if b.GetDebug() {
 		dump, err := httputil.DumpResponse(resp, true)
@@ -151,5 +142,5 @@ func (b *BitfinexClient) SendHTTPRequest(ctx context.Context, req HTTPRequest) (
 		return nil, fmt.Errorf("API returned a non-200 status code: [%d] - [%s]", resp.StatusCode, buf.String())
 	}
 
-	return buf.Bytes(), nil
+	return utils.NewApiResponse(&req, resp), nil
 }

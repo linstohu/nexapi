@@ -17,6 +17,13 @@
 
 package types
 
+import "github.com/linstohu/nexapi/utils"
+
+type GetAccountInfoResp struct {
+	Http *utils.ApiResponse
+	Body *AccountInfo
+}
+
 type AccountInfo struct {
 	Asset []struct {
 		Asset         string `json:"asset"`
