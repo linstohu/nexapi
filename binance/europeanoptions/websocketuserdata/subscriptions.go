@@ -34,7 +34,7 @@ func (o *OptionsUserDataStreamClient) handle(origind []byte) error {
 	eventType := string(pb.GetStringBytes("e"))
 
 	if o.debug {
-		o.logger.Info(fmt.Sprintf("subscribed message, event-type: %s", eventType))
+		o.logger.Info(fmt.Sprintf("%s: subscribed message, event-type: %s", logPrefix, eventType))
 	}
 
 	switch eventType {

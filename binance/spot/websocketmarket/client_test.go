@@ -15,21 +15,23 @@
  * limitations under the License.
  */
 
-package websocketmarket
+package websocketmarket_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
+	"time"
 
+	spotws "github.com/linstohu/nexapi/binance/spot/websocketmarket"
 	"github.com/linstohu/nexapi/binance/spot/websocketmarket/types"
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewSpotMarketStreamClient(ctx context.Context, t *testing.T) *SpotMarketStreamClient {
-	cli, err := NewSpotMarketStreamClient(ctx, &SpotMarketStreamCfg{
-		BaseURL: SpotMarketStreamBaseURL,
-		Debug:   true,
+func testNewSpotMarketStreamClient(t *testing.T) *spotws.SpotMarketStreamClient {
+	cli, err := spotws.NewSpotMarketStreamClient(&spotws.SpotMarketStreamCfg{
+		Debug:         false,
+		BaseURL:       spotws.SpotMarketStreamBaseURL,
+		AutoReconnect: true,
 	})
 
 	if err != nil {
@@ -40,10 +42,9 @@ func testNewSpotMarketStreamClient(ctx context.Context, t *testing.T) *SpotMarke
 }
 
 func TestSubscribeAggTrade(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewSpotMarketStreamClient(ctx, t)
+	cli := testNewSpotMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetAggTradeTopic("btcusdt")
 	assert.Nil(t, err)
@@ -59,6 +60,10 @@ func TestSubscribeAggTrade(t *testing.T) {
 	})
 
 	cli.Subscribe([]string{topic})
+
+	time.Sleep(10 * time.Second)
+
+	cli.Close()
 
 	select {}
 }

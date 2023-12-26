@@ -18,18 +18,18 @@
 package websocketuserdata
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"testing"
 )
 
-func testNewUserDataStreamClient(ctx context.Context, t *testing.T) *OptionsUserDataStreamClient {
-	cli, err := NewUserDataStreamClient(ctx, &OptionsUserDataStreamCfg{
-		BaseURL: OptionsUserDataStreamBaseURL,
-		Key:     os.Getenv("BINANCE_KEY"),
-		Secret:  os.Getenv("BINANCE_SECRET"),
-		Debug:   true,
+func testNewUserDataStreamClient(t *testing.T) *OptionsUserDataStreamClient {
+	cli, err := NewUserDataStreamClient(&OptionsUserDataStreamCfg{
+		Debug:         true,
+		BaseURL:       OptionsUserDataStreamBaseURL,
+		AutoReconnect: true,
+		Key:           os.Getenv("BINANCE_KEY"),
+		Secret:        os.Getenv("BINANCE_SECRET"),
 	})
 
 	if err != nil {
@@ -40,10 +40,7 @@ func testNewUserDataStreamClient(ctx context.Context, t *testing.T) *OptionsUser
 }
 
 func TestSubscribeAccountData(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewUserDataStreamClient(ctx, t)
+	cli := testNewUserDataStreamClient(t)
 
 	topic := cli.GenAccountDataTopic()
 
@@ -68,10 +65,7 @@ func TestSubscribeAccountData(t *testing.T) {
 }
 
 func TestSubscribeOrderUpdate(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewUserDataStreamClient(ctx, t)
+	cli := testNewUserDataStreamClient(t)
 
 	topic := cli.GenOrderUpdateTopic()
 

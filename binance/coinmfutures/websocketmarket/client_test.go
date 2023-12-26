@@ -15,22 +15,23 @@
  * limitations under the License.
  */
 
-package websocketmarket
+package websocketmarket_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
+	coinmws "github.com/linstohu/nexapi/binance/coinmfutures/websocketmarket"
 	spottypes "github.com/linstohu/nexapi/binance/spot/websocketmarket/types"
 	usdmtypes "github.com/linstohu/nexapi/binance/usdmfutures/websocketmarket/types"
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewMarketStreamClient(ctx context.Context, t *testing.T) *CoinMarginedMarketStreamClient {
-	cli, err := NewMarketStreamClient(ctx, &CoinMarginedMarketStreamCfg{
-		BaseURL: CoinMarginedMarketStreamBaseURL,
-		Debug:   true,
+func testNewMarketStreamClient(t *testing.T) *coinmws.CoinMarginedMarketStreamClient {
+	cli, err := coinmws.NewMarketStreamClient(&coinmws.CoinMarginedMarketStreamCfg{
+		Debug:         false,
+		BaseURL:       coinmws.CoinMarginedMarketStreamBaseURL,
+		AutoReconnect: true,
 	})
 
 	if err != nil {
@@ -41,10 +42,9 @@ func testNewMarketStreamClient(ctx context.Context, t *testing.T) *CoinMarginedM
 }
 
 func TestSubscribeAggTrade(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetAggTradeTopic("btcusd_perp")
 	assert.Nil(t, err)
@@ -65,19 +65,18 @@ func TestSubscribeAggTrade(t *testing.T) {
 }
 
 func TestSubscribeIndexPrice(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
-	cli := testNewMarketStreamClient(ctx, t)
-
-	topic, err := cli.GetIndexPriceTopic(&IndexPriceTopicParam{
+	topic, err := cli.GetIndexPriceTopic(&coinmws.IndexPriceTopicParam{
 		Pair:        "btcusd",
 		UpdateSpeed: "1s",
 	})
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		indexPrice, ok := e.(*IndexPrice)
+		indexPrice, ok := e.(*coinmws.IndexPrice)
 		if !ok {
 			return
 		}
@@ -92,19 +91,18 @@ func TestSubscribeIndexPrice(t *testing.T) {
 }
 
 func TestSubscribeMarkPrice(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
-	cli := testNewMarketStreamClient(ctx, t)
-
-	topic, err := cli.GetMarketPriceTopic(&MarkPriceTopicParam{
+	topic, err := cli.GetMarketPriceTopic(&coinmws.MarkPriceTopicParam{
 		Symbol:      "btcusd_perp",
 		UpdateSpeed: "1s",
 	})
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		markprice, ok := e.(*MarkPrice)
+		markprice, ok := e.(*coinmws.MarkPrice)
 		if !ok {
 			return
 		}
@@ -119,19 +117,18 @@ func TestSubscribeMarkPrice(t *testing.T) {
 }
 
 func TestSubscribePairMarkPrice(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
-	cli := testNewMarketStreamClient(ctx, t)
-
-	topic, err := cli.GetPairMarketPriceTopic(&PairMarkPriceTopicParam{
+	topic, err := cli.GetPairMarketPriceTopic(&coinmws.PairMarkPriceTopicParam{
 		Pair:        "btcusd",
 		UpdateSpeed: "1s",
 	})
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		markprices, ok := e.([]*MarkPrice)
+		markprices, ok := e.([]*coinmws.MarkPrice)
 		if !ok {
 			return
 		}
@@ -149,12 +146,11 @@ func TestSubscribePairMarkPrice(t *testing.T) {
 }
 
 func TestSubscribeKline(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
-	cli := testNewMarketStreamClient(ctx, t)
-
-	topic, err := cli.GetKlineTopic(&KlineTopicParam{
+	topic, err := cli.GetKlineTopic(&coinmws.KlineTopicParam{
 		Symbol:   "btcusd_perp",
 		Interval: "1m",
 	})
@@ -176,16 +172,15 @@ func TestSubscribeKline(t *testing.T) {
 }
 
 func TestSubscribeMiniTicker(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetMiniTickerTopic("btcusd_perp")
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		ticker, ok := e.(*MiniTicker)
+		ticker, ok := e.(*coinmws.MiniTicker)
 		if !ok {
 			return
 		}
@@ -200,16 +195,15 @@ func TestSubscribeMiniTicker(t *testing.T) {
 }
 
 func TestSubscribeAllMiniTicker(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetAllMarketMiniTickersTopic()
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		tickers, ok := e.([]*MiniTicker)
+		tickers, ok := e.([]*coinmws.MiniTicker)
 		if !ok {
 			return
 		}
@@ -226,16 +220,15 @@ func TestSubscribeAllMiniTicker(t *testing.T) {
 }
 
 func TestSubscribeTicker(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetTickerTopic("btcusd_perp")
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		ticker, ok := e.(*Ticker)
+		ticker, ok := e.(*coinmws.Ticker)
 		if !ok {
 			return
 		}
@@ -250,16 +243,15 @@ func TestSubscribeTicker(t *testing.T) {
 }
 
 func TestSubscribeAllTicker(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetAllMarketTickersTopic()
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		tickers, ok := e.([]*Ticker)
+		tickers, ok := e.([]*coinmws.Ticker)
 		if !ok {
 			return
 		}
@@ -276,16 +268,15 @@ func TestSubscribeAllTicker(t *testing.T) {
 }
 
 func TestSubscribeBookTicker(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetBookTickerTopic("btcusd_perp")
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		book, ok := e.(*BookTicker)
+		book, ok := e.(*coinmws.BookTicker)
 		if !ok {
 			return
 		}
@@ -300,16 +291,15 @@ func TestSubscribeBookTicker(t *testing.T) {
 }
 
 func TestSubscribeAllBookTickers(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetAllBookTickersTopic()
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		book, ok := e.(*BookTicker)
+		book, ok := e.(*coinmws.BookTicker)
 		if !ok {
 			return
 		}
@@ -324,16 +314,15 @@ func TestSubscribeAllBookTickers(t *testing.T) {
 }
 
 func TestSubscribeLiquidationOrder(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetLiquidationOrderTopic("btcusd_perp")
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		order, ok := e.(*LiquidationOrder)
+		order, ok := e.(*coinmws.LiquidationOrder)
 		if !ok {
 			return
 		}
@@ -348,16 +337,15 @@ func TestSubscribeLiquidationOrder(t *testing.T) {
 }
 
 func TestSubscribeAllLiquidationOrders(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
 	topic, err := cli.GetAllLiquidationOrdersTopic()
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		order, ok := e.(*LiquidationOrder)
+		order, ok := e.(*coinmws.LiquidationOrder)
 		if !ok {
 			return
 		}
@@ -372,12 +360,11 @@ func TestSubscribeAllLiquidationOrders(t *testing.T) {
 }
 
 func TestSubscribeBookDepth(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
-	cli := testNewMarketStreamClient(ctx, t)
-
-	topic, err := cli.GetBookDepthTopic(&BookDepthTopicParam{
+	topic, err := cli.GetBookDepthTopic(&coinmws.BookDepthTopicParam{
 		Symbol:      "btcusd_perp",
 		Level:       5,
 		UpdateSpeed: "500ms",
@@ -385,7 +372,7 @@ func TestSubscribeBookDepth(t *testing.T) {
 	assert.Nil(t, err)
 
 	cli.AddListener(topic, func(e any) {
-		book, ok := e.(*OrderbookDepth)
+		book, ok := e.(*coinmws.OrderbookDepth)
 		if !ok {
 			return
 		}
@@ -400,12 +387,11 @@ func TestSubscribeBookDepth(t *testing.T) {
 }
 
 func TestSubscribeBookDiffDepth(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
+	cli := testNewMarketStreamClient(t)
+	err := cli.Open()
+	assert.Nil(t, err)
 
-	cli := testNewMarketStreamClient(ctx, t)
-
-	topic, err := cli.GetBookDiffDepthTopic(&BookDiffDepthTopicParam{
+	topic, err := cli.GetBookDiffDepthTopic(&coinmws.BookDiffDepthTopicParam{
 		Symbol:      "btcusd_perp",
 		UpdateSpeed: "500ms",
 	})
@@ -414,7 +400,7 @@ func TestSubscribeBookDiffDepth(t *testing.T) {
 	fmt.Println(topic)
 
 	cli.AddListener(topic, func(e any) {
-		book, ok := e.(*OrderbookDepth)
+		book, ok := e.(*coinmws.OrderbookDepth)
 		if !ok {
 			return
 		}

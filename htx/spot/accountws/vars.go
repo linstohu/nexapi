@@ -23,5 +23,9 @@ const (
 )
 
 const (
+	logPrefix = "htx::spot::accountws"
+)
+
+const (
 	MaxTryTimes = 5
 )

@@ -26,6 +26,10 @@ var (
 )
 
 const (
+	logPrefix = "woox::websocket"
+)
+
+const (
 	MaxTryTimes = 5
 )
 

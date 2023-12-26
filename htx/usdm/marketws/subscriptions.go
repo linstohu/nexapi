@@ -35,7 +35,7 @@ func (m *MarketWsClient) UnSubscribe(topic string) error {
 
 func (m *MarketWsClient) handle(msg *SubscribedMessage) error {
 	if m.debug {
-		m.logger.Info(fmt.Sprintf("subscribed message, channel: %s", msg.Channel))
+		m.logger.Info(fmt.Sprintf("%s: subscribed message, channel: %s", logPrefix, msg.Channel))
 	}
 
 	switch {

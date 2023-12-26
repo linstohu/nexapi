@@ -22,6 +22,10 @@ const (
 )
 
 const (
+	logPrefix = "htx::usdm::accountws"
+)
+
+const (
 	MaxTryTimes = 5
 
 	TimerIntervalSecond = 5

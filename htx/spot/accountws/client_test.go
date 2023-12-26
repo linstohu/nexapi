@@ -18,7 +18,6 @@
 package accountws
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -27,12 +26,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewAccountWsClient(ctx context.Context, t *testing.T, url string) *AccountWsClient {
-	cli, err := NewAccountWsClient(ctx, &AccountWsClientCfg{
-		BaseURL: url,
-		Debug:   true,
-		Key:     os.Getenv("HTX_KEY"),
-		Secret:  os.Getenv("HTX_SECRET"),
+func testNewAccountWsClient(t *testing.T, url string) *AccountWsClient {
+	cli, err := NewAccountWsClient(&AccountWsClientCfg{
+		Debug:         true,
+		BaseURL:       url,
+		AutoReconnect: true,
+		Key:           os.Getenv("HTX_KEY"),
+		Secret:        os.Getenv("HTX_SECRET"),
 	})
 
 	if err != nil {
@@ -43,10 +43,7 @@ func testNewAccountWsClient(ctx context.Context, t *testing.T, url string) *Acco
 }
 
 func TestSubscribeAccountUpdate(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewAccountWsClient(ctx, t, GlobalWsBaseURL)
+	cli := testNewAccountWsClient(t, GlobalWsBaseURL)
 
 	topic, err := cli.GetAccountUpdateTopic(&AccountUpdateTopicParam{
 		Mode: 2,

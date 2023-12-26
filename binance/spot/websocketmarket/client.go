@@ -41,7 +41,9 @@ type SpotMarketStreamClient struct {
 	// logger
 	logger *slog.Logger
 
-	ctx         context.Context
+	stopCtx context.Context
+	cancel  context.CancelFunc
+
 	conn        *websocket.Conn
 	mu          sync.RWMutex
 	isConnected bool
@@ -56,13 +58,14 @@ type SpotMarketStreamClient struct {
 }
 
 type SpotMarketStreamCfg struct {
-	BaseURL string `validate:"required"`
-	Debug   bool
-	// Logger
+	Debug         bool
+	BaseURL       string `validate:"required"`
+	AutoReconnect bool   `validate:"required"`
+
 	Logger *slog.Logger
 }
 
-func NewSpotMarketStreamClient(ctx context.Context, cfg *SpotMarketStreamCfg) (*SpotMarketStreamClient, error) {
+func NewSpotMarketStreamClient(cfg *SpotMarketStreamCfg) (*SpotMarketStreamClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
@@ -72,8 +75,7 @@ func NewSpotMarketStreamClient(ctx context.Context, cfg *SpotMarketStreamCfg) (*
 		debug:   cfg.Debug,
 		logger:  cfg.Logger,
 
-		ctx:           ctx,
-		autoReconnect: true,
+		autoReconnect: cfg.AutoReconnect,
 
 		subscriptions: cmap.New[struct{}](),
 		emitter:       emission.NewEmitter(),
@@ -83,12 +85,33 @@ func NewSpotMarketStreamClient(ctx context.Context, cfg *SpotMarketStreamCfg) (*
 		cli.logger = slog.Default()
 	}
 
-	err := cli.start()
-	if err != nil {
-		return nil, err
+	return cli, nil
+}
+
+func (m *SpotMarketStreamClient) Open() error {
+	if m.stopCtx != nil {
+		return fmt.Errorf("%s: ws is already open", logPrefix)
 	}
 
-	return cli, nil
+	m.stopCtx, m.cancel = context.WithCancel(context.Background())
+
+	err := m.start()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SpotMarketStreamClient) Close() error {
+	if m.stopCtx == nil {
+		return fmt.Errorf("%s: ws is not open", logPrefix)
+	}
+
+	m.cancel()
+	m.stopCtx = nil
+
+	return nil
 }
 
 func (m *SpotMarketStreamClient) start() error {
@@ -99,7 +122,7 @@ func (m *SpotMarketStreamClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := m.connect()
 		if err != nil {
-			m.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
+			m.logger.Info(fmt.Sprintf("%s: connect error, times(%v), error: %s", logPrefix, i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -110,6 +133,8 @@ func (m *SpotMarketStreamClient) start() error {
 	if m.conn == nil {
 		return errors.New("connect failed")
 	}
+
+	m.logger.Info(fmt.Sprintf("%s: connect success, base_url: %s", logPrefix, m.baseURL))
 
 	m.setIsConnected(true)
 
@@ -141,15 +166,14 @@ func (m *SpotMarketStreamClient) reconnect() {
 
 	m.setIsConnected(false)
 
-	m.logger.Info("disconnect, then reconnect...")
-
 	time.Sleep(1 * time.Second)
 
 	select {
-	case <-m.ctx.Done():
-		m.logger.Info(fmt.Sprintf("never reconnect, %s", m.ctx.Err()))
+	case <-m.stopCtx.Done():
+		m.logger.Info(fmt.Sprintf("%s: reconnection exits", logPrefix))
 		return
 	default:
+		m.logger.Info(fmt.Sprintf("%s: try to reconnect...", logPrefix))
 		m.start()
 	}
 }
@@ -185,24 +209,28 @@ func (m *SpotMarketStreamClient) IsConnected() bool {
 func (m *SpotMarketStreamClient) readMessages() {
 	for {
 		select {
-		case <-m.ctx.Done():
-			m.logger.Info(fmt.Sprintf("context done, error: %s", m.ctx.Err().Error()))
+		case <-m.stopCtx.Done():
+			m.logger.Info(fmt.Sprintf("%s: ready to close...", logPrefix))
 
 			if err := m.close(); err != nil {
-				m.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+				m.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+				return
 			}
 
+			m.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 			return
 		default:
 			var msg utils.AnyMessage
 			err := m.conn.ReadJSON(&msg)
 			if err != nil {
-				m.logger.Info(fmt.Sprintf("read object error, %s", err))
+				m.logger.Info(fmt.Sprintf("%s: read message error, %s", logPrefix, err))
 
 				if err := m.close(); err != nil {
-					m.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+					m.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+					return
 				}
 
+				m.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 				return
 			}
 
@@ -212,7 +240,7 @@ func (m *SpotMarketStreamClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := m.handle(msg.SubscribedMessage)
 				if err != nil {
-					m.logger.Info(fmt.Sprintf("handle message error: %s", err.Error()))
+					m.logger.Info(fmt.Sprintf("%s: handle message error: %s", logPrefix, err.Error()))
 				}
 			}
 		}

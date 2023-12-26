@@ -42,7 +42,9 @@ type WooXWebsocketClient struct {
 	// logger
 	logger *slog.Logger
 
-	ctx         context.Context
+	stopCtx context.Context
+	cancel  context.CancelFunc
+
 	conn        *websocket.Conn
 	mu          sync.RWMutex
 	isConnected bool
@@ -58,30 +60,34 @@ type WooXWebsocketClient struct {
 }
 
 type WooXWebsocketCfg struct {
+	Debug         bool
 	BaseURL       string `validate:"required"`
+	AutoReconnect bool   `validate:"required"`
+
 	Key           string
 	Secret        string
 	ApplicationID string `validate:"required"`
-	Debug         bool
+
 	// Logger
 	Logger *slog.Logger
 }
 
-func NewWooXWebsocketClient(ctx context.Context, cfg *WooXWebsocketCfg) (*WooXWebsocketClient, error) {
+func NewWooXWebsocketClient(cfg *WooXWebsocketCfg) (*WooXWebsocketClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
 
 	cli := &WooXWebsocketClient{
-		baseURL:       cfg.BaseURL,
+		debug:   cfg.Debug,
+		baseURL: cfg.BaseURL,
+
 		key:           cfg.Key,
 		secret:        cfg.Secret,
 		applicationID: cfg.ApplicationID,
-		debug:         cfg.Debug,
-		logger:        cfg.Logger,
 
-		ctx:           ctx,
-		autoReconnect: true,
+		logger: cfg.Logger,
+
+		autoReconnect: cfg.AutoReconnect,
 
 		subscriptions: cmap.New[struct{}](),
 		emitter:       emission.NewEmitter(),
@@ -91,12 +97,33 @@ func NewWooXWebsocketClient(ctx context.Context, cfg *WooXWebsocketCfg) (*WooXWe
 		cli.logger = slog.Default()
 	}
 
-	err := cli.start()
-	if err != nil {
-		return nil, err
+	return cli, nil
+}
+
+func (w *WooXWebsocketClient) Open() error {
+	if w.stopCtx != nil {
+		return fmt.Errorf("%s: ws is already open", logPrefix)
 	}
 
-	return cli, nil
+	w.stopCtx, w.cancel = context.WithCancel(context.Background())
+
+	err := w.start()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (w *WooXWebsocketClient) Close() error {
+	if w.stopCtx == nil {
+		return fmt.Errorf("%s: ws is not open", logPrefix)
+	}
+
+	w.cancel()
+	w.stopCtx = nil
+
+	return nil
 }
 
 func (w *WooXWebsocketClient) start() error {
@@ -108,7 +135,7 @@ func (w *WooXWebsocketClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := w.connect()
 		if err != nil {
-			w.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
+			w.logger.Info(fmt.Sprintf("%s: connect error, times(%v), error: %s", logPrefix, i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -119,6 +146,8 @@ func (w *WooXWebsocketClient) start() error {
 	if w.conn == nil {
 		return errors.New("connect failed")
 	}
+
+	w.logger.Info(fmt.Sprintf("%s: connect success, base_url: %s", logPrefix, w.baseURL))
 
 	w.setIsConnected(true)
 
@@ -152,17 +181,16 @@ func (w *WooXWebsocketClient) reconnect() {
 
 	w.setIsConnected(false)
 
-	w.logger.Info("disconnect, then reconnect...")
-
 	close(w.heartCancel)
 
 	time.Sleep(1 * time.Second)
 
 	select {
-	case <-w.ctx.Done():
-		w.logger.Info(fmt.Sprintf("never reconnect, %s", w.ctx.Err()))
+	case <-w.stopCtx.Done():
+		w.logger.Info(fmt.Sprintf("%s: reconnection exits", logPrefix))
 		return
 	default:
+		w.logger.Info(fmt.Sprintf("%s: try to reconnect...", logPrefix))
 		w.start()
 	}
 }
@@ -213,23 +241,29 @@ func (w *WooXWebsocketClient) heartbeat() {
 func (w *WooXWebsocketClient) readMessages() {
 	for {
 		select {
-		case <-w.ctx.Done():
-			w.logger.Info(fmt.Sprintf("context done, error: %s", w.ctx.Err().Error()))
+		case <-w.stopCtx.Done():
+			w.logger.Info(fmt.Sprintf("%s: ready to close...", logPrefix))
 
 			if err := w.close(); err != nil {
-				w.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+				w.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+				return
 			}
 
+			w.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 			return
 		default:
 			var msg types.AnyMessage
 			err := w.conn.ReadJSON(&msg)
 			if err != nil {
-				w.logger.Info(fmt.Sprintf("read object error, %s", err))
+				w.logger.Info(fmt.Sprintf("%s: read message error, %s", logPrefix, err))
+				w.logger.Info(fmt.Sprintf("%s: ready to close...", logPrefix))
 
 				if err := w.close(); err != nil {
-					w.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+					w.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+					return
 				}
+
+				w.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 
 				return
 			}
@@ -240,7 +274,7 @@ func (w *WooXWebsocketClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := w.handle(msg.SubscribedMessage)
 				if err != nil {
-					w.logger.Info(fmt.Sprintf("handle message error: %s", err.Error()))
+					w.logger.Info(fmt.Sprintf("%s: handle message error: %s", logPrefix, err.Error()))
 				}
 			}
 		}

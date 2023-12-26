@@ -18,7 +18,6 @@
 package marketws
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -27,10 +26,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewMarketWsClient(ctx context.Context, t *testing.T, url string) *MarketWsClient {
-	cli, err := NewMarketWsClient(ctx, &MarketWsClientCfg{
-		BaseURL: url,
-		Debug:   true,
+func testNewMarketWsClient(t *testing.T, url string) *MarketWsClient {
+	cli, err := NewMarketWsClient(&MarketWsClientCfg{
+		Debug:         true,
+		BaseURL:       url,
+		AutoReconnect: true,
 	})
 
 	if err != nil {
@@ -41,10 +41,7 @@ func testNewMarketWsClient(ctx context.Context, t *testing.T, url string) *Marke
 }
 
 func TestSubscribeKline(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketWsClient(ctx, t, GlobalWsBaseURL)
+	cli := testNewMarketWsClient(t, GlobalWsBaseURL)
 
 	topic, err := cli.GetKlineTopic(&KlineTopicParam{
 		Symbol:   "btcusdt",
@@ -68,10 +65,7 @@ func TestSubscribeKline(t *testing.T) {
 }
 
 func TestSubscribeMBPUpdateDepth(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketWsClient(ctx, t, MBPWsBaseURL)
+	cli := testNewMarketWsClient(t, MBPWsBaseURL)
 
 	topic, err := cli.GetMBPDepthUpdateTopic(&MBPDepthUpdateTopicParam{
 		Symbol: "btcusdt",
@@ -100,10 +94,7 @@ func TestSubscribeMBPUpdateDepth(t *testing.T) {
 }
 
 func TestSubscribeMBPRefreshDepth(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketWsClient(ctx, t, GlobalWsBaseURL)
+	cli := testNewMarketWsClient(t, GlobalWsBaseURL)
 
 	topic, err := cli.GetMBPRefreshDepthTopic(&MBPDepthRefreshTopicParam{
 		Symbol: "btcusdt",

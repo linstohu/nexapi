@@ -18,7 +18,6 @@
 package marketws
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -27,8 +26,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewMarketWsClient(ctx context.Context, t *testing.T, url string) *MarketWsClient {
-	cli, err := NewMarketWsClient(ctx, &MarketWsClientCfg{
+func testNewMarketWsClient(t *testing.T, url string) *MarketWsClient {
+	cli, err := NewMarketWsClient(&MarketWsClientCfg{
 		BaseURL: url,
 		Debug:   true,
 	})
@@ -41,10 +40,7 @@ func testNewMarketWsClient(ctx context.Context, t *testing.T, url string) *Marke
 }
 
 func TestSubscribeKline(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketWsClient(ctx, t, GlobalMarketWsBaseURL)
+	cli := testNewMarketWsClient(t, GlobalMarketWsBaseURL)
 
 	topic, err := cli.GetKlineTopic(&KlineTopicParam{
 		ContractCode: "BTC-USDT",
@@ -68,10 +64,7 @@ func TestSubscribeKline(t *testing.T) {
 }
 
 func TestSubscribeDepth(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketWsClient(ctx, t, GlobalMarketWsBaseURL)
+	cli := testNewMarketWsClient(t, GlobalMarketWsBaseURL)
 
 	topic, err := cli.GetDepthTopic(&DepthTopicParam{
 		ContractCode: "BTC-USDT",

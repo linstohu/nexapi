@@ -18,17 +18,17 @@
 package websocketmarket
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewMarketStreamClient(ctx context.Context, t *testing.T) *OptionsMarketStreamClient {
-	cli, err := NewMarketStreamClient(ctx, &OptionsMarketStreamCfg{
-		BaseURL: OptionsMarketStreamBaseURL,
-		Debug:   true,
+func testNewMarketStreamClient(t *testing.T) *OptionsMarketStreamClient {
+	cli, err := NewMarketStreamClient(&OptionsMarketStreamCfg{
+		Debug:         true,
+		BaseURL:       OptionsMarketStreamBaseURL,
+		AutoReconnect: true,
 	})
 
 	if err != nil {
@@ -39,10 +39,7 @@ func testNewMarketStreamClient(ctx context.Context, t *testing.T) *OptionsMarket
 }
 
 func TestSubscribeTrade(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.GetTradeTopic("ETH")
 	assert.Nil(t, err)
@@ -63,10 +60,7 @@ func TestSubscribeTrade(t *testing.T) {
 }
 
 func TestSubscribeIndexPrice(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.GetIndexPriceTopic("ETHUSDT")
 	assert.Nil(t, err)
@@ -87,10 +81,7 @@ func TestSubscribeIndexPrice(t *testing.T) {
 }
 
 func TestSubscribeMarkPrice(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.GetMarkPriceTopic("ETH")
 	assert.Nil(t, err)
@@ -113,10 +104,7 @@ func TestSubscribeMarkPrice(t *testing.T) {
 }
 
 func TestSubscribeKline(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.GetKlineTopic(&KlineTopicParam{
 		Symbol:   "ETH-230525-1825-C",
@@ -140,10 +128,7 @@ func TestSubscribeKline(t *testing.T) {
 }
 
 func TestSubscribe24HourTicker(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.Get24HourTickerTopic("ETH-230525-1825-C")
 	assert.Nil(t, err)
@@ -164,10 +149,7 @@ func TestSubscribe24HourTicker(t *testing.T) {
 }
 
 func TestSubscribeUnderlying24HourTicker(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.Get24HourTickerByUnderlyingAndexpirationTopic("ETH", "230525")
 	assert.Nil(t, err)
@@ -190,10 +172,7 @@ func TestSubscribeUnderlying24HourTicker(t *testing.T) {
 }
 
 func TestSubscribeOpenInterest(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.GetOpenInterestTopic("BTC", "230525")
 	assert.Nil(t, err)
@@ -216,10 +195,7 @@ func TestSubscribeOpenInterest(t *testing.T) {
 }
 
 func TestSubscribeOrderbook(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.GetBookDepthTopic(&BookDepthTopicParam{
 		Symbol:      "BTC-230602-25000-P",
@@ -244,10 +220,7 @@ func TestSubscribeOrderbook(t *testing.T) {
 }
 
 func TestSubscribeDiffOrderbook(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewMarketStreamClient(ctx, t)
+	cli := testNewMarketStreamClient(t)
 
 	topic, err := cli.GetBookDiffDepthTopic("BTC-230602-25000-P")
 	assert.Nil(t, err)
