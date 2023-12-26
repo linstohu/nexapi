@@ -28,65 +28,75 @@ It is intended to be used by coders, developers, technically-skilled traders, da
 #### Example 1: REST API
 
 ```go
+
 package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"log/slog"
 
-	bnUsdmMarket "github.com/linstohu/nexapi/binance/usdmfutures/marketdata"
-	umtypes "github.com/linstohu/nexapi/binance/usdmfutures/marketdata/types"
-	umutils "github.com/linstohu/nexapi/binance/usdmfutures/utils"
+	bnspotmd "github.com/linstohu/nexapi/binance/spot/marketdata"
+	bnspottypes "github.com/linstohu/nexapi/binance/spot/marketdata/types"
+	bnspotutils "github.com/linstohu/nexapi/binance/spot/utils"
 )
 
 func main() {
-	cli, err := bnUsdmMarket.NewUSDMFuturesMarketDataClient(&umutils.USDMarginedClientCfg{
-		Debug:   false,
-		Logger:  slog.Default(),
-		BaseURL: umutils.USDMarginedBaseURL,
+	cli, err := bnspotmd.NewSpotMarketDataClient(&bnspotutils.SpotClientCfg{
+		Debug:   true,
+		BaseURL: bnspotutils.BaseURL,
 	})
-
 	if err != nil {
 		panic(err)
 	}
 
-	trades, err := cli.GetRecentTradeList(context.TODO(), umtypes.GetTradeParams{
+	orderbook, err := cli.GetOrderbook(context.TODO(), bnspottypes.GetOrderbookParams{
 		Symbol: "BTCUSDT",
-		Limit:  10,
+		Limit:  5,
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	for i, v := range trades {
-		fmt.Printf("Index-%v, %+v\n", i, v)
+	limit := orderbook.Http.ApiRes.Header.Get("X-Mbx-Used-Weight-1m")
+
+	fmt.Printf("Current used request weight: %v\n", limit)
+
+	bytes, err := json.MarshalIndent(orderbook.Body, "", "\t")
+	if err != nil {
+		panic(err)
 	}
+
+	fmt.Println(string(bytes))
 }
+
 ```
 
-#### Example 2: Websocket API
+#### Example 2: Websocket
 
 ```go
 
 package main
 
 import (
-	"context"
 	"fmt"
-	"log/slog"
+	"time"
 
-	bnUsdmWsMarket "github.com/linstohu/nexapi/binance/usdmfutures/websocketmarket"
-	bnUsdmWsTypes "github.com/linstohu/nexapi/binance/usdmfutures/websocketmarket/types"
+	spotws "github.com/linstohu/nexapi/binance/spot/websocketmarket"
+	"github.com/linstohu/nexapi/binance/spot/websocketmarket/types"
 )
 
 func main() {
-	cli, err := bnUsdmWsMarket.NewMarketStreamClient(context.TODO(), &bnUsdmWsMarket.USDMarginedMarketStreamCfg{
-		Debug:   false,
-		Logger:  slog.Default(),
-		BaseURL: bnUsdmWsMarket.USDMarginedMarketStreamBaseURL,
+	cli, err := spotws.NewSpotMarketStreamClient(&spotws.SpotMarketStreamCfg{
+		Debug:         true,
+		BaseURL:       spotws.SpotMarketStreamBaseURL,
+		AutoReconnect: true,
 	})
+	if err != nil {
+		panic(err)
+	}
 
+	err = cli.Open()
 	if err != nil {
 		panic(err)
 	}
@@ -97,7 +107,7 @@ func main() {
 	}
 
 	cli.AddListener(topic, func(e any) {
-		trade, ok := e.(*bnUsdmWsTypes.AggregateTrade)
+		trade, ok := e.(*types.AggregateTrade)
 		if !ok {
 			return
 		}
@@ -107,6 +117,10 @@ func main() {
 	})
 
 	cli.Subscribe([]string{topic})
+
+	time.Sleep(20 * time.Second)
+
+	cli.Close()
 
 	select {}
 }
