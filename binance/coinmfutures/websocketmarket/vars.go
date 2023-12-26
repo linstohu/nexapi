@@ -23,6 +23,10 @@ var (
 )
 
 const (
+	logPrefix = "binance::coinm::websocketmarket"
+)
+
+const (
 	MaxTryTimes = 5
 )
 

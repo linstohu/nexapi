@@ -43,7 +43,9 @@ type MarketWsClient struct {
 	// logger
 	logger *slog.Logger
 
-	ctx         context.Context
+	stopCtx context.Context
+	cancel  context.CancelFunc
+
 	conn        *websocket.Conn
 	mu          sync.RWMutex
 	isConnected bool
@@ -58,13 +60,14 @@ type MarketWsClient struct {
 }
 
 type MarketWsClientCfg struct {
-	BaseURL string `validate:"required"`
-	Debug   bool
+	Debug         bool
+	BaseURL       string `validate:"required"`
+	AutoReconnect bool   `validate:"required"`
 	// Logger
 	Logger *slog.Logger
 }
 
-func NewMarketWsClient(ctx context.Context, cfg *MarketWsClientCfg) (*MarketWsClient, error) {
+func NewMarketWsClient(cfg *MarketWsClientCfg) (*MarketWsClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
@@ -74,8 +77,7 @@ func NewMarketWsClient(ctx context.Context, cfg *MarketWsClientCfg) (*MarketWsCl
 		debug:   cfg.Debug,
 		logger:  cfg.Logger,
 
-		ctx:           ctx,
-		autoReconnect: true,
+		autoReconnect: cfg.AutoReconnect,
 
 		subscriptions: cmap.New[struct{}](),
 		emitter:       emission.NewEmitter(),
@@ -85,12 +87,33 @@ func NewMarketWsClient(ctx context.Context, cfg *MarketWsClientCfg) (*MarketWsCl
 		cli.logger = slog.Default()
 	}
 
-	err := cli.start()
-	if err != nil {
-		return nil, err
+	return cli, nil
+}
+
+func (m *MarketWsClient) Open() error {
+	if m.stopCtx != nil {
+		return fmt.Errorf("%s: ws is already open", logPrefix)
 	}
 
-	return cli, nil
+	m.stopCtx, m.cancel = context.WithCancel(context.Background())
+
+	err := m.start()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *MarketWsClient) Close() error {
+	if m.stopCtx == nil {
+		return fmt.Errorf("%s: ws is not open", logPrefix)
+	}
+
+	m.cancel()
+	m.stopCtx = nil
+
+	return nil
 }
 
 func (m *MarketWsClient) start() error {
@@ -101,7 +124,7 @@ func (m *MarketWsClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := m.connect()
 		if err != nil {
-			m.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
+			m.logger.Info(fmt.Sprintf("%s: connect error, times(%v), error: %s", logPrefix, i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -112,6 +135,8 @@ func (m *MarketWsClient) start() error {
 	if m.conn == nil {
 		return errors.New("connect failed")
 	}
+
+	m.logger.Info(fmt.Sprintf("%s: connect success, base_url: %s", logPrefix, m.baseURL))
 
 	m.setIsConnected(true)
 
@@ -143,15 +168,14 @@ func (m *MarketWsClient) reconnect() {
 
 	m.setIsConnected(false)
 
-	m.logger.Info("disconnect, then reconnect...")
-
 	time.Sleep(1 * time.Second)
 
 	select {
-	case <-m.ctx.Done():
-		m.logger.Info(fmt.Sprintf("never reconnect, %s", m.ctx.Err()))
+	case <-m.stopCtx.Done():
+		m.logger.Info(fmt.Sprintf("%s: reconnection exits", logPrefix))
 		return
 	default:
+		m.logger.Info(fmt.Sprintf("%s: try to reconnect...", logPrefix))
 		m.start()
 	}
 }
@@ -187,18 +211,20 @@ func (m *MarketWsClient) IsConnected() bool {
 func (m *MarketWsClient) readMessages() {
 	for {
 		select {
-		case <-m.ctx.Done():
-			m.logger.Info(fmt.Sprintf("context done, error: %s", m.ctx.Err().Error()))
+		case <-m.stopCtx.Done():
+			m.logger.Info(fmt.Sprintf("%s: ready to close...", logPrefix))
 
 			if err := m.close(); err != nil {
-				m.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+				m.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+				return
 			}
 
+			m.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 			return
 		default:
 			msgType, buf, err := m.conn.ReadMessage()
 			if err != nil {
-				m.logger.Error(fmt.Sprintf("read message error, %s", err))
+				m.logger.Info(fmt.Sprintf("%s: read message error, %s", logPrefix, err))
 				time.Sleep(TimerIntervalSecond * time.Second)
 				continue
 			}
@@ -207,12 +233,15 @@ func (m *MarketWsClient) readMessages() {
 			if msgType == websocket.BinaryMessage {
 				message, err := htxutils.GZipDecompress(buf)
 				if err != nil {
-					m.logger.Error(fmt.Sprintf("ungzip data error: %s", err))
+					m.logger.Info(fmt.Sprintf("%s: ungzip data error: %s", logPrefix, err))
+					m.logger.Info(fmt.Sprintf("%s: ready to close...", logPrefix))
 
 					if err := m.close(); err != nil {
-						m.logger.Error(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+						m.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+						return
 					}
 
+					m.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 					return
 				}
 
@@ -220,12 +249,15 @@ func (m *MarketWsClient) readMessages() {
 
 				err = json.Unmarshal([]byte(message), &msg)
 				if err != nil {
-					m.logger.Error(fmt.Sprintf("read object error, %s", err))
+					m.logger.Info(fmt.Sprintf("%s: read object error, %s", logPrefix, err))
+					m.logger.Info(fmt.Sprintf("%s: ready to close...", logPrefix))
 
 					if err := m.close(); err != nil {
-						m.logger.Error(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+						m.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+						return
 					}
 
+					m.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 					return
 				}
 
@@ -235,14 +267,14 @@ func (m *MarketWsClient) readMessages() {
 						Pong: msg.Ping.Ping,
 					})
 					if err != nil {
-						m.logger.Error(fmt.Sprintf("handle ping error: %s", err.Error()))
+						m.logger.Error(fmt.Sprintf("%s: handle ping error: %s", logPrefix, err.Error()))
 					}
 				case msg.Response != nil:
 					// todo
 				case msg.SubscribedMessage != nil:
 					err := m.handle(msg.SubscribedMessage)
 					if err != nil {
-						m.logger.Error(fmt.Sprintf("handle message error: %s", err.Error()))
+						m.logger.Error(fmt.Sprintf("%s: handle message error: %s", logPrefix, err.Error()))
 					}
 				}
 			}

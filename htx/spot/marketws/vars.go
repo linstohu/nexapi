@@ -26,6 +26,10 @@ const (
 )
 
 const (
+	logPrefix = "htx::spot::marketws"
+)
+
+const (
 	MaxTryTimes = 5
 
 	TimerIntervalSecond = 5

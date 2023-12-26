@@ -18,7 +18,6 @@
 package websocket
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -28,13 +27,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testNewWooXWebsocketClient(ctx context.Context, t *testing.T) *WooXWebsocketClient {
-	cli, err := NewWooXWebsocketClient(ctx, &WooXWebsocketCfg{
+func testNewWooXWebsocketClient(t *testing.T) *WooXWebsocketClient {
+	cli, err := NewWooXWebsocketClient(&WooXWebsocketCfg{
+		Debug:         true,
 		BaseURL:       TestNetPublicBaseURL,
+		AutoReconnect: true,
 		Key:           os.Getenv("WOOX_KEY"),
 		Secret:        os.Getenv("WOOX_SECRET"),
 		ApplicationID: os.Getenv("WOOX_APP_ID"), // required
-		Debug:         true,
 	})
 
 	if err != nil {
@@ -45,10 +45,7 @@ func testNewWooXWebsocketClient(ctx context.Context, t *testing.T) *WooXWebsocke
 }
 
 func TestWooXWebsocketClientConnection(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	err := cli.Subscribe([]string{"SPOT_WOO_USDT@orderbook"})
 	assert.Nil(t, err)
@@ -57,10 +54,7 @@ func TestWooXWebsocketClientConnection(t *testing.T) {
 }
 
 func TestSubscribeOrderbook(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetOrderbookTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
@@ -93,10 +87,7 @@ func TestSubscribeOrderbook(t *testing.T) {
 }
 
 func TestSubscribeTrade(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetTradeTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
@@ -121,10 +112,7 @@ func TestSubscribeTrade(t *testing.T) {
 }
 
 func TestSubscribeTickerForSymbol(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetTickerTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
@@ -149,10 +137,7 @@ func TestSubscribeTickerForSymbol(t *testing.T) {
 }
 
 func TestSubscribeTickers(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetAllTickersTopic()
 	assert.Nil(t, err)
@@ -179,10 +164,7 @@ func TestSubscribeTickers(t *testing.T) {
 }
 
 func TestSubscribeBBOForSymbol(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetBboTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
@@ -207,10 +189,7 @@ func TestSubscribeBBOForSymbol(t *testing.T) {
 }
 
 func TestSubscribeBBOs(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetAllBbosTopic()
 	assert.Nil(t, err)
@@ -237,10 +216,7 @@ func TestSubscribeBBOs(t *testing.T) {
 }
 
 func TestSubscribeKline(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetKlineTopic(&KlineTopicParam{
 		Symbol: "PERP_BTC_USDT",
@@ -268,10 +244,7 @@ func TestSubscribeKline(t *testing.T) {
 }
 
 func TestSubscribeIndexPrice(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetIndexPriceTopic("SPOT_ETH_USDT")
 	assert.Nil(t, err)
@@ -295,10 +268,7 @@ func TestSubscribeIndexPrice(t *testing.T) {
 }
 
 func TestSubscribeMarkPrice(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetMarkPriceTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
@@ -322,10 +292,7 @@ func TestSubscribeMarkPrice(t *testing.T) {
 }
 
 func TestSubscribeAllMarkPrice(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetMarkPricesTopic()
 	assert.Nil(t, err)
@@ -351,10 +318,7 @@ func TestSubscribeAllMarkPrice(t *testing.T) {
 }
 
 func TestSubscribeOpenInterest(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetOpenInterestTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)
@@ -378,10 +342,7 @@ func TestSubscribeOpenInterest(t *testing.T) {
 }
 
 func TestSubscribeEstFundingRate(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
-	cli := testNewWooXWebsocketClient(ctx, t)
+	cli := testNewWooXWebsocketClient(t)
 
 	topic, err := cli.GetEstFundingRateTopic("PERP_BTC_USDT")
 	assert.Nil(t, err)

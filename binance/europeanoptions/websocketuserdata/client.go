@@ -41,7 +41,9 @@ type OptionsUserDataStreamClient struct {
 	baseURL     string
 	key, secret string
 
-	ctx         context.Context
+	stopCtx context.Context
+	cancel  context.CancelFunc
+
 	conn        *websocket.Conn
 	mu          sync.RWMutex
 	isConnected bool
@@ -58,12 +60,13 @@ type OptionsUserDataStreamCfg struct {
 	// Logger
 	Logger *slog.Logger
 
-	BaseURL string `validate:"required"`
-	Key     string `validate:"required"`
-	Secret  string `validate:"required"`
+	BaseURL       string `validate:"required"`
+	Key           string `validate:"required"`
+	Secret        string `validate:"required"`
+	AutoReconnect bool   `validate:"required"`
 }
 
-func NewUserDataStreamClient(ctx context.Context, cfg *OptionsUserDataStreamCfg) (*OptionsUserDataStreamClient, error) {
+func NewUserDataStreamClient(cfg *OptionsUserDataStreamCfg) (*OptionsUserDataStreamClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
@@ -76,8 +79,7 @@ func NewUserDataStreamClient(ctx context.Context, cfg *OptionsUserDataStreamCfg)
 		key:     cfg.Key,
 		secret:  cfg.Secret,
 
-		ctx:           ctx,
-		autoReconnect: true,
+		autoReconnect: cfg.AutoReconnect,
 
 		emitter: emission.NewEmitter(),
 	}
@@ -86,12 +88,33 @@ func NewUserDataStreamClient(ctx context.Context, cfg *OptionsUserDataStreamCfg)
 		cli.logger = slog.Default()
 	}
 
-	err := cli.start()
-	if err != nil {
-		return nil, err
+	return cli, nil
+}
+
+func (o *OptionsUserDataStreamClient) Open() error {
+	if o.stopCtx != nil {
+		return fmt.Errorf("%s: ws is already open", logPrefix)
 	}
 
-	return cli, nil
+	o.stopCtx, o.cancel = context.WithCancel(context.Background())
+
+	err := o.start()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *OptionsUserDataStreamClient) Close() error {
+	if o.stopCtx == nil {
+		return fmt.Errorf("%s: ws is not open", logPrefix)
+	}
+
+	o.cancel()
+	o.stopCtx = nil
+
+	return nil
 }
 
 func (o *OptionsUserDataStreamClient) start() error {
@@ -103,7 +126,7 @@ func (o *OptionsUserDataStreamClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := o.connect()
 		if err != nil {
-			o.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
+			o.logger.Info(fmt.Sprintf("%s: connect error, times(%v), error: %s", logPrefix, i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -114,6 +137,8 @@ func (o *OptionsUserDataStreamClient) start() error {
 	if o.conn == nil {
 		return errors.New("connect failed")
 	}
+
+	o.logger.Info(fmt.Sprintf("%s: connect success, base_url: %s", logPrefix, o.baseURL))
 
 	o.setIsConnected(true)
 
@@ -198,17 +223,16 @@ func (o *OptionsUserDataStreamClient) reconnect() {
 
 	o.setIsConnected(false)
 
-	o.logger.Info("disconnect, then reconnect...")
-
 	close(o.heartCancel)
 
 	time.Sleep(1 * time.Second)
 
 	select {
-	case <-o.ctx.Done():
-		o.logger.Info(fmt.Sprintf("never reconnect, %s", o.ctx.Err()))
+	case <-o.stopCtx.Done():
+		o.logger.Info(fmt.Sprintf("%s: reconnection exits", logPrefix))
 		return
 	default:
+		o.logger.Info(fmt.Sprintf("%s: try to reconnect...", logPrefix))
 		o.start()
 	}
 }
@@ -248,7 +272,7 @@ func (o *OptionsUserDataStreamClient) heartbeat() {
 		case <-t.C:
 			err := o.updateListenKey()
 			if err != nil {
-				o.logger.Info(fmt.Sprintf("websocket update listen-key error, %s", err.Error()))
+				o.logger.Info(fmt.Sprintf("%s: update listen-key error, %s", logPrefix, err.Error()))
 			}
 		case <-o.heartCancel:
 			return
@@ -259,13 +283,15 @@ func (o *OptionsUserDataStreamClient) heartbeat() {
 func (o *OptionsUserDataStreamClient) readMessages() {
 	for {
 		select {
-		case <-o.ctx.Done():
-			o.logger.Info(fmt.Sprintf("context done, error: %s", o.ctx.Err().Error()))
+		case <-o.stopCtx.Done():
+			o.logger.Info(fmt.Sprintf("%s: ready to close...", logPrefix))
 
 			if err := o.close(); err != nil {
-				o.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+				o.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+				return
 			}
 
+			o.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 			return
 		default:
 			_, bytes, err := o.conn.ReadMessage()
@@ -273,15 +299,17 @@ func (o *OptionsUserDataStreamClient) readMessages() {
 				o.logger.Info(fmt.Sprintf("read message error, %s", err))
 
 				if err := o.close(); err != nil {
-					o.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+					o.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+					return
 				}
 
+				o.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 				return
 			}
 
 			err = o.handle(bytes)
 			if err != nil {
-				o.logger.Info(fmt.Sprintf("handle message error: %s", err.Error()))
+				o.logger.Info(fmt.Sprintf("%s: handle message error: %s", logPrefix, err.Error()))
 			}
 		}
 	}

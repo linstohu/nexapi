@@ -41,7 +41,9 @@ type OptionsMarketStreamClient struct {
 	// logger
 	logger *slog.Logger
 
-	ctx         context.Context
+	stopCtx context.Context
+	cancel  context.CancelFunc
+
 	conn        *websocket.Conn
 	mu          sync.RWMutex
 	isConnected bool
@@ -56,13 +58,14 @@ type OptionsMarketStreamClient struct {
 }
 
 type OptionsMarketStreamCfg struct {
-	BaseURL string `validate:"required"`
-	Debug   bool
-	// Logger
+	Debug         bool
+	BaseURL       string `validate:"required"`
+	AutoReconnect bool   `validate:"required"`
+
 	Logger *slog.Logger
 }
 
-func NewMarketStreamClient(ctx context.Context, cfg *OptionsMarketStreamCfg) (*OptionsMarketStreamClient, error) {
+func NewMarketStreamClient(cfg *OptionsMarketStreamCfg) (*OptionsMarketStreamClient, error) {
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
 	}
@@ -72,8 +75,7 @@ func NewMarketStreamClient(ctx context.Context, cfg *OptionsMarketStreamCfg) (*O
 		debug:   cfg.Debug,
 		logger:  cfg.Logger,
 
-		ctx:           ctx,
-		autoReconnect: true,
+		autoReconnect: cfg.AutoReconnect,
 
 		subscriptions: cmap.New[struct{}](),
 		emitter:       emission.NewEmitter(),
@@ -83,12 +85,33 @@ func NewMarketStreamClient(ctx context.Context, cfg *OptionsMarketStreamCfg) (*O
 		cli.logger = slog.Default()
 	}
 
-	err := cli.start()
-	if err != nil {
-		return nil, err
+	return cli, nil
+}
+
+func (o *OptionsMarketStreamClient) Open() error {
+	if o.stopCtx != nil {
+		return fmt.Errorf("%s: ws is already open", logPrefix)
 	}
 
-	return cli, nil
+	o.stopCtx, o.cancel = context.WithCancel(context.Background())
+
+	err := o.start()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *OptionsMarketStreamClient) Close() error {
+	if o.stopCtx == nil {
+		return fmt.Errorf("%s: ws is not open", logPrefix)
+	}
+
+	o.cancel()
+	o.stopCtx = nil
+
+	return nil
 }
 
 func (o *OptionsMarketStreamClient) start() error {
@@ -99,7 +122,7 @@ func (o *OptionsMarketStreamClient) start() error {
 	for i := 0; i < MaxTryTimes; i++ {
 		conn, _, err := o.connect()
 		if err != nil {
-			o.logger.Info(fmt.Sprintf("connect error, times(%v), error: %s", i, err.Error()))
+			o.logger.Info(fmt.Sprintf("%s: connect error, times(%v), error: %s", logPrefix, i, err.Error()))
 			tm := (i + 1) * 5
 			time.Sleep(time.Duration(tm) * time.Second)
 			continue
@@ -110,6 +133,8 @@ func (o *OptionsMarketStreamClient) start() error {
 	if o.conn == nil {
 		return errors.New("connect failed")
 	}
+
+	o.logger.Info(fmt.Sprintf("%s: connect success, base_url: %s", logPrefix, o.baseURL))
 
 	o.setIsConnected(true)
 
@@ -141,15 +166,14 @@ func (o *OptionsMarketStreamClient) reconnect() {
 
 	o.setIsConnected(false)
 
-	o.logger.Info("disconnect, then reconnect...")
-
 	time.Sleep(1 * time.Second)
 
 	select {
-	case <-o.ctx.Done():
-		o.logger.Info(fmt.Sprintf("never reconnect, %s", o.ctx.Err()))
+	case <-o.stopCtx.Done():
+		o.logger.Info(fmt.Sprintf("%s: reconnection exits", logPrefix))
 		return
 	default:
+		o.logger.Info(fmt.Sprintf("%s: try to reconnect...", logPrefix))
 		o.start()
 	}
 }
@@ -185,24 +209,28 @@ func (o *OptionsMarketStreamClient) IsConnected() bool {
 func (o *OptionsMarketStreamClient) readMessages() {
 	for {
 		select {
-		case <-o.ctx.Done():
-			o.logger.Info(fmt.Sprintf("context done, error: %s", o.ctx.Err().Error()))
+		case <-o.stopCtx.Done():
+			o.logger.Info(fmt.Sprintf("%s: ready to close...", logPrefix))
 
 			if err := o.close(); err != nil {
-				o.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+				o.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+				return
 			}
 
+			o.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 			return
 		default:
 			var msg utils.AnyMessage
 			err := o.conn.ReadJSON(&msg)
 			if err != nil {
-				o.logger.Info(fmt.Sprintf("read object error, %s", err))
+				o.logger.Info(fmt.Sprintf("read message error, %s", err))
 
 				if err := o.close(); err != nil {
-					o.logger.Info(fmt.Sprintf("websocket connection closed error, %s", err.Error()))
+					o.logger.Error(fmt.Sprintf("%s: connection closed error, %s", logPrefix, err.Error()))
+					return
 				}
 
+				o.logger.Info(fmt.Sprintf("%s: connection closed success", logPrefix))
 				return
 			}
 
@@ -212,7 +240,7 @@ func (o *OptionsMarketStreamClient) readMessages() {
 			case msg.SubscribedMessage != nil:
 				err := o.handle(msg.SubscribedMessage)
 				if err != nil {
-					o.logger.Info(fmt.Sprintf("handle message error: %s", err.Error()))
+					o.logger.Info(fmt.Sprintf("%s: handle message error: %s", logPrefix, err.Error()))
 				}
 			}
 		}
