@@ -109,7 +109,6 @@ func (u *USDMarginedMarketStreamClient) Close() error {
 	}
 
 	u.cancel()
-	u.stopCtx = nil
 
 	return nil
 }

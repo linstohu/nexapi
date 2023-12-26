@@ -112,7 +112,6 @@ func (o *OptionsUserDataStreamClient) Close() error {
 	}
 
 	o.cancel()
-	o.stopCtx = nil
 
 	return nil
 }

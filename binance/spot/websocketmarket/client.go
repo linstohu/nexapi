@@ -109,7 +109,6 @@ func (m *SpotMarketStreamClient) Close() error {
 	}
 
 	m.cancel()
-	m.stopCtx = nil
 
 	return nil
 }

@@ -132,7 +132,6 @@ func (m *AccountWsClient) Close() error {
 	}
 
 	m.cancel()
-	m.stopCtx = nil
 
 	return nil
 }

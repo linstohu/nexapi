@@ -121,7 +121,6 @@ func (w *WooXWebsocketClient) Close() error {
 	}
 
 	w.cancel()
-	w.stopCtx = nil
 
 	return nil
 }

@@ -109,7 +109,6 @@ func (o *OptionsMarketStreamClient) Close() error {
 	}
 
 	o.cancel()
-	o.stopCtx = nil
 
 	return nil
 }
