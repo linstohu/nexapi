@@ -17,6 +17,8 @@
 
 package types
 
+import htxutils "github.com/linstohu/nexapi/htx/utils"
+
 type KlineInterval string
 
 var (
@@ -31,3 +33,26 @@ var (
 	Week1    KlineInterval = "1week"
 	Year1    KlineInterval = "1year"
 )
+
+type GetKlineParam struct {
+	Symbol string        `url:"symbol" validate:"required"`
+	Period KlineInterval `url:"period" validate:"required"`
+	Size   int64         `url:"size,omitempty" validate:"omitempty"`
+}
+
+type GetKlineResp struct {
+	htxutils.V1Response
+	Ts   int64   `json:"ts"`
+	Data []Kline `json:"data,omitempty"`
+}
+
+type Kline struct {
+	ID     int64   `json:"id"`
+	Open   float64 `json:"open"`
+	Close  float64 `json:"close"`
+	Low    float64 `json:"low"`
+	High   float64 `json:"high"`
+	Amount float64 `json:"amount"`
+	Vol    float64 `json:"vol"`
+	Count  int     `json:"count"`
+}

@@ -44,3 +44,67 @@ type Tick struct {
 	Bid     []float64 `json:"bid,omitempty"`
 	Ask     []float64 `json:"ask,omitempty"`
 }
+
+type GetMarketDepthParam struct {
+	Symbol string `url:"symbol" validate:"required"`
+	Depth  int    `url:"depth,omitempty" validate:"omitempty"`
+	Type   string `url:"type" validate:"required"`
+}
+
+type GetMarketDepthResp struct {
+	htxutils.V1Response
+	Ts   int64       `json:"ts"`
+	Tick MarketDepth `json:"tick,omitempty"`
+}
+
+type MarketDepth struct {
+	Ts      int64       `json:"ts,omitempty"`
+	Version int64       `json:"version,omitempty"`
+	Bids    [][]float64 `json:"bids,omitempty"`
+	Asks    [][]float64 `json:"asks,omitempty"`
+}
+
+type GetMarketTickerParam struct {
+	Symbol string `url:"symbol" validate:"required"`
+}
+
+type GetMarketTickerResp struct {
+	htxutils.V1Response
+	Ts   int64              `json:"ts"`
+	Tick MarketTickerMerged `json:"tick,omitempty"`
+}
+
+type MarketTickerMerged struct {
+	ID      int64     `json:"id"`
+	Version int64     `json:"version"`
+	Open    float64   `json:"open"`
+	Close   float64   `json:"close"`
+	Low     float64   `json:"low"`
+	High    float64   `json:"high"`
+	Amount  float64   `json:"amount"`
+	Vol     float64   `json:"vol"`
+	Count   int       `json:"count"`
+	Bid     []float64 `json:"bid"`
+	Ask     []float64 `json:"ask"`
+}
+
+type GetMarketTickersResp struct {
+	htxutils.V1Response
+	Ts   int64          `json:"ts"`
+	Data []MarketTicker `json:"data,omitempty"`
+}
+
+type MarketTicker struct {
+	Symbol  string  `json:"symbol"`  // 交易对，例如 btcusdt, ethbtc
+	Open    float64 `json:"open"`    // 开盘价（以新加坡时间自然日计）
+	High    float64 `json:"high"`    // 最高价（以新加坡时间自然日计）
+	Low     float64 `json:"low"`     // 最低价（以新加坡时间自然日计）
+	Close   float64 `json:"close"`   // 最新价（以新加坡时间自然日计）
+	Amount  float64 `json:"amount"`  // 以基础币种计量的交易量（以滚动24小时计）
+	Vol     float64 `json:"vol"`     // 以报价币种计量的交易量（以滚动24小时计）
+	Count   int     `json:"count"`   // 交易笔数（以滚动24小时计）
+	Bid     float64 `json:"bid"`     // 买一价
+	BidSize float64 `json:"bidSize"` // 买一量
+	Ask     float64 `json:"ask"`     // 卖一价
+	AskSize float64 `json:"askSize"` // 卖一量
+}

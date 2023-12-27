@@ -59,3 +59,43 @@ type Symbol struct {
 	Elr         any    `json:"elr,omitempty"`
 	P           any    `json:"p,omitempty"`
 }
+
+type GetSymbolInfoResp struct {
+	htxutils.V1Response
+	Ts   string       `json:"ts"`
+	Data []SymbolInfo `json:"data,omitempty"`
+}
+
+type SymbolInfo struct {
+	Symbol  string  `json:"symbol"`
+	State   string  `json:"state"`
+	Bc      string  `json:"bc"`
+	Qc      string  `json:"qc"`
+	Pp      int     `json:"pp"`
+	Ap      int     `json:"ap"`
+	Sp      string  `json:"sp"`
+	Vp      int     `json:"vp"`
+	Minoa   float64 `json:"minoa"`
+	Maxoa   float64 `json:"maxoa"`
+	Minov   float64 `json:"minov"`
+	Lominoa float64 `json:"lominoa"`
+	Lomaxoa float64 `json:"lomaxoa"`
+	Lomaxba float64 `json:"lomaxba"`
+	Lomaxsa float64 `json:"lomaxsa"`
+	Smminoa float64 `json:"smminoa"`
+	Blmlt   float64 `json:"blmlt"`
+	Slmgt   float64 `json:"slmgt"`
+	Smmaxoa float64 `json:"smmaxoa"`
+	Bmmaxov float64 `json:"bmmaxov"`
+	Msormlt float64 `json:"msormlt"`
+	Mbormlt float64 `json:"mbormlt"`
+	Maxov   float64 `json:"maxov"`
+	U       string  `json:"u"`
+	Mfr     float64 `json:"mfr"`
+	Ct      string  `json:"ct"`
+	Rt      string  `json:"rt"`
+	Rthr    float64 `json:"rthr"`
+	In      float64 `json:"in"`
+	At      string  `json:"at"`
+	Tags    string  `json:"tags"`
+}

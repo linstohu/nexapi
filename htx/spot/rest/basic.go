@@ -54,3 +54,116 @@ func (scli *SpotClient) GetSymbols(ctx context.Context, param types.GetSymbolsPa
 
 	return &ret, nil
 }
+
+func (scli *SpotClient) GetSymbolInfo(ctx context.Context) (*types.GetSymbolInfoResp, error) {
+	req := utils.HTTPRequest{
+		BaseURL: scli.cli.GetBaseURL(),
+		Path:    "/v1/settings/common/market-symbols",
+		Method:  http.MethodGet,
+	}
+
+	{
+		headers, err := scli.cli.GetHeaders()
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	resp, err := scli.cli.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetSymbolInfoResp
+	if err := resp.ReadJsonBody(&ret); err != nil {
+		return nil, errors.New(resp.Error())
+	}
+
+	return &ret, nil
+}
+
+func (scli *SpotClient) GetMarketDepth(ctx context.Context, param types.GetMarketDepthParam) (*types.GetMarketDepthResp, error) {
+	req := utils.HTTPRequest{
+		BaseURL: scli.cli.GetBaseURL(),
+		Path:    "/market/depth",
+		Method:  http.MethodGet,
+		Query:   param,
+	}
+
+	{
+		headers, err := scli.cli.GetHeaders()
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	resp, err := scli.cli.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	var ret types.GetMarketDepthResp
+	if err := resp.ReadJsonBody(&ret); err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	return &ret, nil
+}
+
+func (scli *SpotClient) GetKline(ctx context.Context, param types.GetKlineParam) (*types.GetKlineResp, error) {
+	req := utils.HTTPRequest{
+		BaseURL: scli.cli.GetBaseURL(),
+		Path:    "/market/history/kline",
+		Method:  http.MethodGet,
+		Query:   param,
+	}
+
+	{
+		headers, err := scli.cli.GetHeaders()
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	resp, err := scli.cli.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetKlineResp
+	if err := resp.ReadJsonBody(&ret); err != nil {
+		return nil, errors.New(resp.Error())
+	}
+
+	return &ret, nil
+}
+
+func (scli *SpotClient) GetAllMarketTickers(ctx context.Context) (*types.GetMarketTickersResp, error) {
+	req := utils.HTTPRequest{
+		BaseURL: scli.cli.GetBaseURL(),
+		Path:    "/market/tickers",
+		Method:  http.MethodGet,
+	}
+
+	{
+		headers, err := scli.cli.GetHeaders()
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	resp, err := scli.cli.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetMarketTickersResp
+	if err := resp.ReadJsonBody(&ret); err != nil {
+		return nil, errors.New(resp.Error())
+	}
+
+	return &ret, nil
+}

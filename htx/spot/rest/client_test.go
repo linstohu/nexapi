@@ -91,3 +91,43 @@ func TestNewOrder(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestCancelOrder(t *testing.T) {
+	cli := testNewSpotClient(t)
+
+	_, err := cli.CancelOrder(context.TODO(), types.CancelOrderParams{
+		OrderID: "",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestGetOpenOrders(t *testing.T) {
+	cli := testNewSpotClient(t)
+
+	_, err := cli.GetOpenOrders(context.TODO(), types.GetOpenOrdersParam{
+		AccountID: "",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestCancelOrders(t *testing.T) {
+	cli := testNewSpotClient(t)
+
+	_, err := cli.CancelOrders(context.TODO(), types.CancelOrdersParam{
+		AccountID: "",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestSearchMatchResults(t *testing.T) {
+	cli := testNewSpotClient(t)
+
+	_, err := cli.SearchMatchResults(context.TODO(), types.SearchMatchResultsParam{
+		Symbol: "usdcusdt",
+	})
+
+	assert.Nil(t, err)
+}

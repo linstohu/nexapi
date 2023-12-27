@@ -81,3 +81,171 @@ func (ucli *UsdmClient) GetAssetValuation(ctx context.Context, param types.GetAs
 
 	return &ret, nil
 }
+
+func (ucli *UsdmClient) GetIsolatedAccounts(ctx context.Context, param types.GetIsolatedAccountsParam) (*types.GetIsolatedAccountsResp, error) {
+	if err := ucli.cli.CheckAuth(); err != nil {
+		return nil, err
+	}
+
+	err := ucli.validate.Struct(param)
+	if err != nil {
+		return nil, err
+	}
+
+	req := utils.HTTPRequest{
+		BaseURL: ucli.cli.GetBaseURL(),
+		Path:    "/linear-swap-api/v1/swap_account_info",
+		Method:  http.MethodPost,
+		Body:    param,
+	}
+
+	{
+		headers, err := ucli.cli.GetHeaders()
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	{
+		query := ucli.cli.GenAuthParams()
+
+		signStr, err := ucli.cli.NormalizeRequestContent(req, query)
+		if err != nil {
+			return nil, err
+		}
+
+		h := ucli.cli.Sign([]byte(signStr))
+		if err != nil {
+			return nil, err
+		}
+
+		query.Signature = h
+
+		req.Query = query
+	}
+
+	resp, err := ucli.cli.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetIsolatedAccountsResp
+	if err := resp.ReadJsonBody(&ret); err != nil {
+		return nil, errors.New(resp.Error())
+	}
+
+	return &ret, nil
+}
+
+func (ucli *UsdmClient) GetCrossAccounts(ctx context.Context, param types.GetCrossAccountsParam) (*types.GetCrossAccountsResp, error) {
+	if err := ucli.cli.CheckAuth(); err != nil {
+		return nil, err
+	}
+
+	err := ucli.validate.Struct(param)
+	if err != nil {
+		return nil, err
+	}
+
+	req := utils.HTTPRequest{
+		BaseURL: ucli.cli.GetBaseURL(),
+		Path:    "/linear-swap-api/v1/swap_cross_account_info",
+		Method:  http.MethodPost,
+		Body:    param,
+	}
+
+	{
+		headers, err := ucli.cli.GetHeaders()
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	{
+		query := ucli.cli.GenAuthParams()
+
+		signStr, err := ucli.cli.NormalizeRequestContent(req, query)
+		if err != nil {
+			return nil, err
+		}
+
+		h := ucli.cli.Sign([]byte(signStr))
+		if err != nil {
+			return nil, err
+		}
+
+		query.Signature = h
+
+		req.Query = query
+	}
+
+	resp, err := ucli.cli.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetCrossAccountsResp
+	if err := resp.ReadJsonBody(&ret); err != nil {
+		return nil, errors.New(resp.Error())
+	}
+
+	return &ret, nil
+}
+
+func (ucli *UsdmClient) GetUnifiedAccounts(ctx context.Context, param types.GetUnifiedAccountsParam) (*types.GetUnifiedAccountsResp, error) {
+	if err := ucli.cli.CheckAuth(); err != nil {
+		return nil, err
+	}
+
+	err := ucli.validate.Struct(param)
+	if err != nil {
+		return nil, err
+	}
+
+	req := utils.HTTPRequest{
+		BaseURL: ucli.cli.GetBaseURL(),
+		Path:    "/linear-swap-api/v3/unified_account_info",
+		Method:  http.MethodGet,
+		Body:    param,
+	}
+
+	{
+		headers, err := ucli.cli.GetHeaders()
+		if err != nil {
+			return nil, err
+		}
+		req.Headers = headers
+	}
+
+	{
+		query := ucli.cli.GenAuthParams()
+
+		signStr, err := ucli.cli.NormalizeRequestContent(req, query)
+		if err != nil {
+			return nil, err
+		}
+
+		h := ucli.cli.Sign([]byte(signStr))
+		if err != nil {
+			return nil, err
+		}
+
+		query.Signature = h
+
+		req.Query = query
+	}
+
+	resp, err := ucli.cli.SendHTTPRequest(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret types.GetUnifiedAccountsResp
+	if err := resp.ReadJsonBody(&ret); err != nil {
+		return nil, errors.New(resp.Error())
+	}
+
+	return &ret, nil
+}

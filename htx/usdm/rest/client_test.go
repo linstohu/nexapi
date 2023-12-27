@@ -59,3 +59,114 @@ func TestGetAssetValuation(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestPlaceIsolatedOrder(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.PlaceIsolatedOrder(context.TODO(), types.PlaceIsolatedOrderParam{
+		ContractCode:   "XRP-USDT",
+		Price:          0.5,
+		Volume:         1,
+		Direction:      "buy",
+		LeverRate:      1,
+		OrderPriceType: "limit",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestPlaceCrossOrder(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.PlaceCrossOrder(context.TODO(), types.PlaceCrossOrderParam{
+		ContractCode:   "XRP-USDT",
+		Price:          0.5,
+		Volume:         1,
+		Direction:      "buy",
+		LeverRate:      1,
+		OrderPriceType: "limit",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestCancelIsolatedOrder(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.CancelIsolatedOrder(context.TODO(), types.CancelIsolatedOrderParam{
+		OrderID:      "",
+		ContractCode: "XRP-USDT",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestCancelCrossOrder(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.CancelCrossOrder(context.TODO(), types.CancelCrossOrderParam{
+		OrderID: "",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestCancelAllIsolatedOrders(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.CancelAllIsolatedOrders(context.TODO(), types.CancelAllIsolatedOrdersParam{
+		ContractCode: "XRP-USDT",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestCancelAllCrossOrders(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.CancelAllCrossOrders(context.TODO(), types.CancelAllCrossOrdersParam{
+		ContractCode: "XRP-USDT",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestGetIsolatedOpenOrders(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.GetIsolatedOpenOrders(context.TODO(), types.GetIsolatedOpenOrdersParam{
+		ContractCode: "XRP-USDT",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestGetCrossOpenOrders(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.GetCrossOpenOrders(context.TODO(), types.GetCrossOpenOrdersParam{
+		ContractCode: "XRP-USDT",
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestGetIsolatedHistoryMatchResults(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.GetIsolatedHistoryMatchResults(context.TODO(), types.GetIsolatedHistoryMatchResultsParam{
+		TradeType: 0,
+	})
+
+	assert.Nil(t, err)
+}
+
+func TestGetCrossHistoryMatchResults(t *testing.T) {
+	cli := testNewUsdmClient(t)
+
+	_, err := cli.GetCrossHistoryMatchResults(context.TODO(), types.GetCrossHistoryMatchResultsParam{
+		Contract: "XRP-USDT",
+	})
+
+	assert.Nil(t, err)
+}
