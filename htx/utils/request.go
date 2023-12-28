@@ -69,8 +69,10 @@ func (h *HTTPRequest) RequestBody() (string, error) {
 }
 
 type V1Response struct {
-	Status string `json:"messsage"`
-	Ch     string `json:"ch"`
+	Status  string `json:"status"`
+	Ch      string `json:"ch"`
+	ErrCode string `json:"err-code,omitempty"`
+	ErrMsg  string `json:"err-msg,omitempty"`
 }
 
 type V2Response struct {
