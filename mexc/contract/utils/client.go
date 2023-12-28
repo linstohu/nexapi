@@ -143,13 +143,12 @@ func (c *ContractClient) GenAuthHeaders(req HTTPRequest) (map[string]string, err
 
 	timestamp := fmt.Sprintf("%d", time.Now().UnixMilli())
 
-	if signString != "" {
-		sign := fmt.Sprintf("%s%s%s", c.key, timestamp, signString)
-		h := hmac.New(sha256.New, []byte(c.secret))
-		h.Write([]byte(sign))
-		signature := hex.EncodeToString(h.Sum(nil))
-		headers["Signature"] = signature
-	}
+	sign := fmt.Sprintf("%s%s%s", c.key, timestamp, signString)
+	h := hmac.New(sha256.New, []byte(c.secret))
+	h.Write([]byte(sign))
+
+	signature := hex.EncodeToString(h.Sum(nil))
+	headers["Signature"] = signature
 
 	headers["ApiKey"] = c.key
 	headers["Request-Time"] = timestamp
