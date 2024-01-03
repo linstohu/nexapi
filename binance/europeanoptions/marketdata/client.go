@@ -59,7 +59,7 @@ func (o *OptionsMarketDataClient) Ping(ctx context.Context) error {
 		Method:  http.MethodGet,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (o *OptionsMarketDataClient) GetServerTime(ctx context.Context) (*spottypes
 		Method:  http.MethodGet,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (o *OptionsMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.G
 		Method:  http.MethodGet,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,6 @@ func (o *OptionsMarketDataClient) GetExchangeInfo(ctx context.Context) (*types.G
 	}
 
 	var body types.ExchangeInfo
-
 	if err := resp.ReadJsonBody(&body); err != nil {
 		return nil, err
 	}
@@ -152,7 +151,7 @@ func (o *OptionsMarketDataClient) GetOrderbook(ctx context.Context, param types.
 		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +190,7 @@ func (o *OptionsMarketDataClient) GetRecentTradesList(ctx context.Context, param
 		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +228,7 @@ func (o *OptionsMarketDataClient) GetKlines(ctx context.Context, param usdmtypes
 		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +266,7 @@ func (o *OptionsMarketDataClient) GetMarkPrice(ctx context.Context, param types.
 		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +304,7 @@ func (o *OptionsMarketDataClient) GetTickerPrice(ctx context.Context, param type
 		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +342,7 @@ func (o *OptionsMarketDataClient) GetUnderlyingIndexPrice(ctx context.Context, p
 		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +380,7 @@ func (o *OptionsMarketDataClient) GetOpenInterest(ctx context.Context, param typ
 		Query:   param,
 	}
 
-	headers, err := o.GenHeaders(usdmutils.NONE)
+	headers, err := o.GenGetHeaders(usdmutils.NONE)
 	if err != nil {
 		return nil, err
 	}

@@ -90,7 +90,7 @@ func (o *OptionsAccountClient) GetAccountInfo(ctx context.Context) (*types.GetAc
 	securityType := usdmutils.TRADE
 
 	{
-		headers, err := o.GenHeaders(securityType)
+		headers, err := o.GenGetHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -233,7 +233,7 @@ func (o *OptionsAccountClient) GetSingleOrder(ctx context.Context, param types.G
 	securityType := usdmutils.TRADE
 
 	{
-		headers, err := o.GenHeaders(securityType)
+		headers, err := o.GenGetHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -501,7 +501,7 @@ func (o *OptionsAccountClient) GetOpenOrders(ctx context.Context, param types.Ge
 	securityType := usdmutils.TRADE
 
 	{
-		headers, err := o.GenHeaders(securityType)
+		headers, err := o.GenGetHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -572,7 +572,7 @@ func (o *OptionsAccountClient) GetOrderHistory(ctx context.Context, param types.
 	securityType := usdmutils.TRADE
 
 	{
-		headers, err := o.GenHeaders(securityType)
+		headers, err := o.GenGetHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -643,7 +643,7 @@ func (o *OptionsAccountClient) GetPositionInfo(ctx context.Context, param types.
 	securityType := usdmutils.TRADE
 
 	{
-		headers, err := o.GenHeaders(securityType)
+		headers, err := o.GenGetHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -714,7 +714,7 @@ func (o *OptionsAccountClient) GetTradeList(ctx context.Context, param types.Get
 	securityType := usdmutils.TRADE
 
 	{
-		headers, err := o.GenHeaders(securityType)
+		headers, err := o.GenGetHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -785,7 +785,7 @@ func (o *OptionsAccountClient) GetExerciseRecord(ctx context.Context, param type
 	securityType := usdmutils.TRADE
 
 	{
-		headers, err := o.GenHeaders(securityType)
+		headers, err := o.GenGetHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}
@@ -856,7 +856,7 @@ func (o *OptionsAccountClient) GetFundingFlow(ctx context.Context, param types.G
 	securityType := usdmutils.TRADE
 
 	{
-		headers, err := o.GenHeaders(securityType)
+		headers, err := o.GenGetHeaders(securityType)
 		if err != nil {
 			return nil, err
 		}

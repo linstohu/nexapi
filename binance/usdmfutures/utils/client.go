@@ -18,7 +18,6 @@
 package utils
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -185,13 +184,6 @@ func (u *USDMarginedClient) SendHTTPRequest(ctx context.Context, req utils.HTTPR
 			return nil, err
 		}
 		u.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
-	}
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned a non-200 status code: [%d] - [%s]", resp.StatusCode, buf.String())
 	}
 
 	return utils.NewApiResponse(&req, resp), nil

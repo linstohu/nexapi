@@ -46,22 +46,22 @@ type GetIsolatedAccountsResp struct {
 
 type IsolatedAccount struct {
 	Symbol            string  `json:"symbol,omitempty"`
+	ContractCode      string  `json:"contract_code,omitempty"`
+	MarginAsset       string  `json:"margin_asset,omitempty"`
 	MarginBalance     float64 `json:"margin_balance,omitempty"`
+	MarginStatic      float64 `json:"margin_static,omitempty"`
 	MarginPosition    float64 `json:"margin_position,omitempty"`
 	MarginFrozen      float64 `json:"margin_frozen,omitempty"`
 	MarginAvailable   float64 `json:"margin_available,omitempty"`
-	ProfitReal        float64 `json:"profit_real,omitempty"`
 	ProfitUnreal      float64 `json:"profit_unreal,omitempty"`
 	RiskRate          float64 `json:"risk_rate,omitempty"`
-	NewRiskRate       string  `json:"new_risk_rate,omitempty"`
+	NewRiskRate       float64 `json:"new_risk_rate,omitempty"`
+	ProfitReal        float64 `json:"profit_real,omitempty"`
 	TradePartition    string  `json:"trade_partition,omitempty"`
-	WithdrawAvailable float64 `json:"withdraw_available,omitempty"`
 	LiquidationPrice  float64 `json:"liquidation_price,omitempty"`
+	WithdrawAvailable float64 `json:"withdraw_available,omitempty"`
 	LeverRate         float64 `json:"lever_rate,omitempty"`
 	AdjustFactor      float64 `json:"adjust_factor,omitempty"`
-	MarginStatic      float64 `json:"margin_static,omitempty"`
-	ContractCode      string  `json:"contract_code,omitempty"`
-	MarginAsset       string  `json:"margin_asset,omitempty"`
 	MarginMode        string  `json:"margin_mode,omitempty"`
 	MarginAccount     string  `json:"margin_account,omitempty"`
 	PositionMode      string  `json:"position_mode,omitempty"`
@@ -88,9 +88,9 @@ type CrossAccount struct {
 	ProfitUnreal          float64                 `json:"profit_unreal,omitempty"`
 	WithdrawAvailable     float64                 `json:"withdraw_available,omitempty"`
 	RiskRate              float64                 `json:"risk_rate,omitempty"`
-	MoneyIn               string                  `json:"money_in,omitempty"`
-	MoneyOut              string                  `json:"money_out,omitempty"`
-	NewRiskRate           string                  `json:"new_risk_rate,omitempty"`
+	MoneyIn               float64                 `json:"money_in,omitempty"`
+	MoneyOut              float64                 `json:"money_out,omitempty"`
+	NewRiskRate           float64                 `json:"new_risk_rate,omitempty"`
 	PositionMode          string                  `json:"position_mode,omitempty"`
 	ContractDetail        []ContractDetail        `json:"contract_detail,omitempty"`
 }
@@ -106,7 +106,7 @@ type FuturesContractDetail struct {
 	LeverRate         float64 `json:"lever_rate,omitempty"`
 	AdjustFactor      float64 `json:"adjust_factor,omitempty"`
 	ContractType      string  `json:"contract_type,omitempty"`
-	CrossMaxAvailable string  `json:"cross_max_available,omitempty"`
+	CrossMaxAvailable float64 `json:"cross_max_available,omitempty"`
 	TradePartition    string  `json:"trade_partition,omitempty"`
 	Pair              string  `json:"pair,omitempty"`
 	BusinessType      string  `json:"business_type,omitempty"`
@@ -123,7 +123,7 @@ type ContractDetail struct {
 	LeverRate         float64 `json:"lever_rate,omitempty"`
 	AdjustFactor      float64 `json:"adjust_factor,omitempty"`
 	ContractType      string  `json:"contract_type,omitempty"`
-	CrossMaxAvailable string  `json:"cross_max_available,omitempty"`
+	CrossMaxAvailable float64 `json:"cross_max_available,omitempty"`
 	TradePartition    string  `json:"trade_partition,omitempty"`
 	Pair              string  `json:"pair,omitempty"`
 	BusinessType      string  `json:"business_type,omitempty"`

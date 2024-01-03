@@ -18,7 +18,6 @@
 package utils
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -123,6 +122,28 @@ func (o *OptionsClient) GenHeaders(t usdmutils.SecurityType) (map[string]string,
 	return headers, nil
 }
 
+// For GET endpoints, parameters must be sent as a query string without setting content type in the http headers.
+// doc: https://binance-docs.github.io/apidocs/voptions/en/#general-api-information
+func (o *OptionsClient) GenGetHeaders(t usdmutils.SecurityType) (map[string]string, error) {
+	headers := map[string]string{
+		"Accept": "application/json",
+	}
+
+	// SecurityType each endpoint has a security type that determines how you will interact with it
+	// docs: https://binance-docs.github.io/apidocs/voptions/en/#endpoint-security-type
+	switch t {
+	case usdmutils.TRADE, usdmutils.USER_DATA, usdmutils.USER_STREAM, usdmutils.MARKET_DATA:
+		key := o.GetKey()
+		if key == "" {
+			return nil, fmt.Errorf("a valid API-Key required")
+		}
+
+		headers["X-MBX-APIKEY"] = o.GetKey()
+	}
+
+	return headers, nil
+}
+
 func (o *OptionsClient) NeedSignature(t usdmutils.SecurityType) bool {
 	switch t {
 	case usdmutils.TRADE, usdmutils.USER_DATA:
@@ -186,13 +207,6 @@ func (o *OptionsClient) SendHTTPRequest(ctx context.Context, req utils.HTTPReque
 			return nil, err
 		}
 		o.logger.Info(fmt.Sprintf("\n%s\n", string(dump)))
-	}
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned a non-200 status code: [%d] - [%s]", resp.StatusCode, buf.String())
 	}
 
 	return utils.NewApiResponse(&req, resp), nil
